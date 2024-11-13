@@ -10,9 +10,15 @@ import {
   addTagToPlate,
   removeTagFromPlate,
   getPlateHistory,
-  getPlateReads
+  getPlateReads,
+  getAllPlates,
+  getPlateInsights,
+  getKnownPlates,
+  togglePlateFlag,
+  getMetrics
 } from '@/lib/db';
-
+import fs from 'fs/promises'
+import yaml from 'js-yaml'
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -24,6 +30,10 @@ export async function handleCreateTag(tagName, color) {
 
 export async function handleDeleteTag(tagName) {
   return await dbDeleteTag(tagName);
+}
+
+export async function getDashboardMetrics() {
+  return await getMetrics();
 }
 
 
@@ -198,5 +208,99 @@ export async function getLatestPlateReads() {
   } catch (error) {
     console.error('Error getting plate reads:', error);
     return { success: false, error: 'Failed to get plate reads' };
+  }
+}
+
+export async function getPlates() {
+  try {
+    return { success: true, data: await getAllPlates() };
+  } catch (error) {
+    console.error('Error getting plates database:', error);
+    return { success: false, error: 'Failed to get plates database' };
+  }
+}
+
+
+export async function fetchPlateInsights(formDataOrPlateNumber) {
+  try {
+    let plateNumber;
+    
+    if (formDataOrPlateNumber instanceof FormData) {
+      plateNumber = formDataOrPlateNumber.get('plateNumber');
+    } else {
+      plateNumber = formDataOrPlateNumber;
+    }
+    
+    if (!plateNumber) {
+      return { success: false, error: 'Plate number is required' };
+    }
+
+    const insights = await getPlateInsights(plateNumber);
+    
+    return {
+      success: true,
+      data: {
+        plateNumber: insights.plate_number,
+        knownName: insights.known_name,
+        notes: insights.notes,
+        summary: {
+          firstSeen: insights.first_seen_at,
+          lastSeen: insights.last_seen_at,
+          totalOccurrences: insights.total_occurrences
+        },
+        tags: insights.tags || [],
+        timeDistribution: insights.time_distribution || [],
+        recentReads: insights.recent_reads || []
+      }
+    };
+  } catch (error) {
+    console.error('Failed to get plate insights:', error);
+    return { 
+      success: false, 
+      error: 'Failed to get plate insights' 
+    };
+  }
+}
+
+export async function alterPlateFlag(formData) {
+  try {
+    const plateNumber = formData.get('plateNumber');
+    const flagged = formData.get('flagged') === 'true';
+    
+    const result = await togglePlateFlag(plateNumber, flagged);
+    
+    return {
+      success: true,
+      data: result
+    };
+  } catch (error) {
+    console.error('Failed to toggle plate flag:', error);
+    return {
+      success: false,
+      error: 'Failed to toggle plate flag'
+    };
+  }
+}
+
+const CONFIG_FILE = './config.yaml'
+
+export async function getConfig() {
+  try {
+    const fileContents = await fs.readFile(CONFIG_FILE, 'utf8')
+    return yaml.load(fileContents)
+  } catch (error) {
+    console.error('Error reading config file:', error)
+    return {}
+  }
+}
+
+export async function saveConfig(config) {
+  try {
+    const yamlString = yaml.dump(config)
+    await fs.writeFile(CONFIG_FILE, yamlString, 'utf8')
+    return { success: true }
+  } catch (error) {
+    console.error('Error writing config file:', error)
+    return { success: false, error: error.message }
   }
 }

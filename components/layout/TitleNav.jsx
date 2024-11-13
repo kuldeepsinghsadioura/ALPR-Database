@@ -10,7 +10,7 @@ export default function Component({
     { title: "Database", href: "/database" },
     { title: "Tags", href: "/database/tags" },
     { title: "Analyze", href: "/database/analyze" },
-    { title: "Something Else", href: "/database/#" }
+    { title: "Download", href: "/database/#" }
   ],
   children 
 }) {

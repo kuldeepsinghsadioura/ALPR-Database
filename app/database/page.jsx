@@ -4,6 +4,7 @@ import PlateTable from '@/components/PlateTable';
 import { ThemeToggle } from "@/components/ThemeToggle";
 import DashboardLayout from '@/components/layout/MainLayout';
 import TitleNavbar from '@/components/layout/TitleNav';
+import PlateDbTable from '@/components/plateDbTable';
 
 export default async function Database() {
   // Initialize MQTT client on server
@@ -16,7 +17,8 @@ export default async function Database() {
 
     <DashboardLayout>
         <TitleNavbar title="Plate Database">
-            <PlateTable initialData={plateReads} />
+            {/* <PlateTable initialData={plateReads} /> */}
+            <PlateDbTable initialData={plateReads} />
         </TitleNavbar>
     </DashboardLayout>
   );

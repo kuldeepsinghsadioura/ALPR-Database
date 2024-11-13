@@ -144,6 +144,43 @@ export default function PlateTable({ initialData }) {
     }
   }
 
+  const getImageUrl = (base64Data) => {
+    if (!base64Data) {
+      return '/placeholder-image.jpg'; // You can replace this with your preferred placeholder image
+    }
+    // Check if the string already includes the data URL prefix
+    if (base64Data.startsWith('data:image/jpeg;base64,')) {
+      return base64Data;
+    }
+    // If not, add the prefix
+    return `data:image/jpeg;base64,${base64Data}`;
+  };
+
+  const handleImageClick = (e, plate) => {
+    e.preventDefault();
+    
+    // Don't open window if there's no image data
+    if (!plate.image_data) {
+      return;
+    }
+
+    const win = window.open();
+    if (win) {
+      win.document.write(`
+        <html>
+          <head>
+            <title>License Plate Image - ${plate.plate_number}</title>
+          </head>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000;">
+            <img src="${getImageUrl(plate.image_data)}" 
+                 style="max-width: 100%; max-height: 100vh; object-fit: contain;" 
+                 alt="${plate.plate_number}" />
+          </body>
+        </html>
+      `);
+    }
+  };
+
   return (
     <Card>
       <CardContent className="py-4">
@@ -194,18 +231,26 @@ export default function PlateTable({ initialData }) {
               {filteredData.map((plate) => (
                 <TableRow key={plate.id}>
                   <TableCell>
-                    <Image
-                      src={`data:image/jpeg;base64,${plate.image_data}`}
-                      alt={plate.plate_number}
-                      width={100}
-                      height={75}
-                      className="rounded"
-                    />
+                    <a 
+                      href={getImageUrl(plate.image_data)}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="cursor-pointer"
+                      onClick={(e) => handleImageClick(e, plate)}
+                    >
+                      <Image
+                        src={`data:image/jpeg;base64,${plate.image_data}`}
+                        alt={plate.plate_number}
+                        width={100}
+                        height={75}
+                        className="rounded hover:opacity-80 transition-opacity"
+                      />
+                    </a>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className={`font-medium font-mono ${plate.flagged && 'text-[#F31260]'} `}>
                     {plate.plate_number}
-                    {plate.known_name && ( // Changed from is_known and name
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{plate.known_name}</div>
+                    {plate.known_name && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400 font-sans">{plate.known_name}</div>
                     )}
                   </TableCell>
                   <TableCell>{plate.vehicle_description}</TableCell>
@@ -253,7 +298,7 @@ export default function PlateTable({ initialData }) {
                           {availableTags.map(tag => (
                           <DropdownMenuItem 
                             key={tag.name} 
-                            onClick={() => handleAddTag(plate.plate_number, tag.name)} // Changed from onSelect to onClick
+                            onClick={() => handleAddTag(plate.plate_number, tag.name)}
                           >
                             <div className="flex items-center">
                               <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tag.color }} />

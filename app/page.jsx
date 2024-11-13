@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/layout/MainLayout';
 
 export default async function Home() {
   // Initialize MQTT client on server
-  initMqtt();
+  //initMqtt();
   
   // Get initial data
   const plateReads = await getPlateReads();
@@ -28,14 +28,16 @@ export default async function Home() {
 
 // todo: 
 //use flag icon for watchlist and camera icon for live feed.
+//either tooltip or modal to click on camera image and view jpeg
+//download csv functionality
+//push notif and email
+//code audit
 //Plate reads vs plate database. Reads show live activity. does not show frequency etc. Db has on entry per plate, shows other info etc.
 // show frequency in dashboard as state danger colors sliding bar. and rename to frequency
 //db section has all the advanced sorting features
-//add action buttons to the end of the table rows.
 //allow set mode in settings for mqtt or http
 //set rules to reject non plate ocr reads
 //Consider doing the nice dribble style sub title nav in the db page with options to create/manage tags, do similarity matching/partial reading. The content of the nav should be *features* not settings or config.
-//Open individual plate and get comprehensive analysis of it including which times they most often travel at. Frequency level. First seen date. .
 //add some metrics at the top like number of plates today, week, etc. Traffic: medium. 10 cars / hour. Many unfamiliar cars...
 //         Add ability to give a plate a Name with "known plates"
 //         change tag to "flag"
