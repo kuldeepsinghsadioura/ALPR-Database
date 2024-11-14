@@ -1,73 +1,73 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { X, Plus } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from "react";
+import { X, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { getTags, addTag, removeTag } from '@/app/actions'
-import DashboardLayout from '@/components/layout/MainLayout'
-import TitleNavbar from '@/components/layout/TitleNav'
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getTags, addTag, removeTag } from "@/app/actions";
+import DashboardLayout from "@/components/layout/MainLayout";
+import TitleNavbar from "@/components/layout/TitleNav";
 
 const ElegantTagManagement = () => {
-  const [tags, setTags] = useState([])
-  const [newTagName, setNewTagName] = useState('')
-  const [newTagColor, setNewTagColor] = useState('#22c55e')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [tags, setTags] = useState([]);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState("#22c55e");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadTags = async () => {
-      const result = await getTags()
+      const result = await getTags();
       if (result.success) {
-        setTags(result.data)
+        setTags(result.data);
       }
-    }
-    loadTags()
-  }, [])
+    };
+    loadTags();
+  }, []);
 
   const onCreateTag = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (newTagName.trim()) {
       try {
-        const formData = new FormData()
-        formData.append('name', newTagName.trim())
-        formData.append('color', newTagColor)
-        
-        const result = await addTag(formData)
+        const formData = new FormData();
+        formData.append("name", newTagName.trim());
+        formData.append("color", newTagColor);
+
+        const result = await addTag(formData);
         if (result.success) {
-          setTags([...tags, result.data])
-          setNewTagName('')
-          setNewTagColor('#22c55e')
-          setIsDialogOpen(false)
+          setTags([...tags, result.data]);
+          setNewTagName("");
+          setNewTagColor("#22c55e");
+          setIsDialogOpen(false);
         }
       } catch (error) {
-        console.error('Failed to create tag:', error)
+        console.error("Failed to create tag:", error);
       }
     }
-  }
+  };
 
   const onDeleteTag = async (tagName) => {
     try {
-      const formData = new FormData()
-      formData.append('name', tagName)
-      
-      const result = await removeTag(formData)
+      const formData = new FormData();
+      formData.append("name", tagName);
+
+      const result = await removeTag(formData);
       if (result.success) {
-        setTags(tags.filter(tag => tag.name !== tagName))
+        setTags(tags.filter((tag) => tag.name !== tagName));
       }
     } catch (error) {
-      console.error('Failed to delete tag:', error)
+      console.error("Failed to delete tag:", error);
     }
-  }
+  };
 
   return (
     <DashboardLayout>
@@ -129,7 +129,10 @@ const ElegantTagManagement = () => {
                   variant="secondary"
                   className="text-sm py-1 px-3 flex items-center space-x-2"
                 >
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: tag.color }}
+                  />
                   <span>{tag.name}</span>
                   <Button
                     variant="ghost"
@@ -147,7 +150,7 @@ const ElegantTagManagement = () => {
         </div>
       </TitleNavbar>
     </DashboardLayout>
-  )
-}
+  );
+};
 
-export default ElegantTagManagement
+export default ElegantTagManagement;

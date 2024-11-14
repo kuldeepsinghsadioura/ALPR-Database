@@ -1,6 +1,8 @@
-'use server'
+"use server";
 
-import { 
+//This is extremely sloppy. Should really clean up the actions.
+
+import {
   getAvailableTags,
   createTag,
   updateTagColor,
@@ -17,25 +19,29 @@ import {
   togglePlateFlag,
   getMetrics,
   getFlaggedPlates,
-  removePlate
-} from '@/lib/db';
-import { 
+  removePlate,
+  removePlateRead,
+} from "@/lib/db";
+import {
   getNotificationPlates as getNotificationPlatesDB,
   addNotificationPlate as addNotificationPlateDB,
   toggleNotification as toggleNotificationDB,
-  deleteNotification as deleteNotificationDB
-} from '@/lib/db';
+  deleteNotification as deleteNotificationDB,
+} from "@/lib/db";
 
-
-import { revalidatePath } from 'next/cache'
-import fs from 'fs/promises'
-import yaml from 'js-yaml'
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import crypto from 'crypto';
-import { getConfig, saveConfig } from '@/lib/settings'
-import { getAuthConfig, updateAuthConfig, hashPassword, createSession } from '@/lib/auth'
-
+import { revalidatePath } from "next/cache";
+import fs from "fs/promises";
+import yaml from "js-yaml";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import crypto from "crypto";
+import { getConfig, saveConfig } from "@/lib/settings";
+import {
+  getAuthConfig,
+  updateAuthConfig,
+  hashPassword,
+  createSession,
+} from "@/lib/auth";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -53,219 +59,176 @@ export async function getDashboardMetrics() {
   return await getMetrics();
 }
 
-
-// Tag Management Actions
-// export async function getTags() {
-//   try {
-//     return { success: true, data: await getAvailableTags() };
-//   } catch (error) {
-//     console.error('Error getting tags:', error);
-//     return { success: false, error: 'Failed to get tags' };
-//   }
-// }
-
-// export async function addTag(formData) {
-//   try {
-//     const name = formData.get('name');
-//     const color = formData.get('color') || '#808080';
-//     const tag = await createTag(name, color);
-//     return { success: true, data: tag };
-//   } catch (error) {
-//     console.error('Error creating tag:', error);
-//     return { success: false, error: 'Failed to create tag' };
-//   }
-// }
-
-// export async function removeTag(formData) {
-//   try {
-//     const name = formData.get('name');
-//     await deleteTag(name);
-//     return { success: true };
-//   } catch (error) {
-//     console.error('Error deleting tag:', error);
-//     return { success: false, error: 'Failed to delete tag' };
-//   }
-// }
-
 export async function updateTag(formData) {
   try {
-    const name = formData.get('name');
-    const color = formData.get('color');
+    const name = formData.get("name");
+    const color = formData.get("color");
     const tag = await updateTagColor(name, color);
     return { success: true, data: tag };
   } catch (error) {
-    console.error('Error updating tag:', error);
-    return { success: false, error: 'Failed to update tag color' };
+    console.error("Error updating tag:", error);
+    return { success: false, error: "Failed to update tag color" };
   }
 }
 
 export async function deleteTagFromPlate(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
-    const tagName = formData.get('tagName');
+    const plateNumber = formData.get("plateNumber");
+    const tagName = formData.get("tagName");
     await removeTagFromPlate(plateNumber, tagName);
     return { success: true };
   } catch (error) {
-    console.error('Error removing tag from plate:', error);
-    return { success: false, error: 'Failed to remove tag from plate' };
+    console.error("Error removing tag from plate:", error);
+    return { success: false, error: "Failed to remove tag from plate" };
   }
 }
 
 export async function deletePlate(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
+    const plateNumber = formData.get("plateNumber");
     await removeKnownPlate(plateNumber);
     return { success: true };
   } catch (error) {
-    console.error('Error removing known plate:', error);
-    return { success: false, error: 'Failed to remove plate' };
+    console.error("Error removing known plate:", error);
+    return { success: false, error: "Failed to remove plate" };
   }
 }
 
 export async function deletePlateFromDB(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
+    const plateNumber = formData.get("plateNumber");
     await removePlate(plateNumber);
     return { success: true };
   } catch (error) {
-    console.error('Error removing known plate:', error);
-    return { success: false, error: 'Failed to remove plate' };
+    console.error("Error removing known plate:", error);
+    return { success: false, error: "Failed to remove plate" };
   }
-
 }
 
+export async function deletePlateRead(formData) {
+  try {
+    const plateNumber = formData.get("plateNumber");
+    await removePlateRead(plateNumber);
+    return { success: true };
+  } catch (error) {
+    console.error("Error removing known plate:", error);
+    return { success: false, error: "Failed to remove plate" };
+  }
+}
 
-// Data Fetching Actions
 export async function getKnownPlatesList() {
   try {
     return { success: true, data: await getKnownPlates() };
   } catch (error) {
-    console.error('Error getting known plates:', error);
-    return { success: false, error: 'Failed to get known plates' };
+    console.error("Error getting known plates:", error);
+    return { success: false, error: "Failed to get known plates" };
   }
 }
 
-
-
-// Tag Management
 export async function getTags() {
   try {
     return { success: true, data: await getAvailableTags() };
   } catch (error) {
-    console.error('Error getting tags:', error);
-    return { success: false, error: 'Failed to get tags' };
+    console.error("Error getting tags:", error);
+    return { success: false, error: "Failed to get tags" };
   }
 }
 
 export async function addTag(formData) {
   try {
-    const name = formData.get('name');
-    const color = formData.get('color') || '#808080';
+    const name = formData.get("name");
+    const color = formData.get("color") || "#808080";
     const tag = await createTag(name, color);
     return { success: true, data: tag };
   } catch (error) {
-    console.error('Error creating tag:', error);
-    return { success: false, error: 'Failed to create tag' };
+    console.error("Error creating tag:", error);
+    return { success: false, error: "Failed to create tag" };
   }
 }
-
 
 export async function removeTag(formData) {
   try {
-    const name = formData.get('name');
+    const name = formData.get("name");
     await deleteTag(name);
     return { success: true };
   } catch (error) {
-    console.error('Error deleting tag:', error);
-    return { success: false, error: 'Failed to delete tag' };
+    console.error("Error deleting tag:", error);
+    return { success: false, error: "Failed to delete tag" };
   }
 }
 
-// Plate Management
 export async function addKnownPlate(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
-    const name = formData.get('name');
-    const notes = formData.get('notes') || null;
+    const plateNumber = formData.get("plateNumber");
+    const name = formData.get("name");
+    const notes = formData.get("notes") || null;
 
     const plate = await updateKnownPlate(plateNumber, { name, notes });
     return { success: true, data: plate };
   } catch (error) {
-    console.error('Error adding known plate:', error);
-    return { success: false, error: 'Failed to add known plate' };
+    console.error("Error adding known plate:", error);
+    return { success: false, error: "Failed to add known plate" };
   }
 }
 
-
-// Tag-Plate Management
 export async function tagPlate(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
-    const tagName = formData.get('tagName');
+    const plateNumber = formData.get("plateNumber");
+    const tagName = formData.get("tagName");
     await addTagToPlate(plateNumber, tagName);
     return { success: true };
   } catch (error) {
-    console.error('Error adding tag to plate:', error);
-    return { success: false, error: 'Failed to add tag to plate' };
+    console.error("Error adding tag to plate:", error);
+    return { success: false, error: "Failed to add tag to plate" };
   }
 }
 
 export async function untagPlate(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
-    const tagName = formData.get('tagName');
+    const plateNumber = formData.get("plateNumber");
+    const tagName = formData.get("tagName");
     await removeTagFromPlate(plateNumber, tagName);
     return { success: true };
   } catch (error) {
-    console.error('Error removing tag from plate:', error);
-    return { success: false, error: 'Failed to remove tag from plate' };
+    console.error("Error removing tag from plate:", error);
+    return { success: false, error: "Failed to remove tag from plate" };
   }
 }
 
-// Data Fetching
 export async function getPlateHistoryData(plateNumber) {
   try {
     return { success: true, data: await getPlateHistory(plateNumber) };
   } catch (error) {
-    console.error('Error getting plate history:', error);
-    return { success: false, error: 'Failed to get plate history' };
+    console.error("Error getting plate history:", error);
+    return { success: false, error: "Failed to get plate history" };
   }
 }
-
-// export async function getLatestPlateReads(page = 1, pageSize = 25) {
-//   const result = await getPlateReads({ page, pageSize });
-
-//   // Ensure we return just the data array to maintain compatibility
-//   return result.data;
-// }
-
-
 
 export async function getPlates() {
   try {
     return { success: true, data: await getAllPlates() };
   } catch (error) {
-    console.error('Error getting plates database:', error);
-    return { success: false, error: 'Failed to get plates database' };
+    console.error("Error getting plates database:", error);
+    return { success: false, error: "Failed to get plates database" };
   }
 }
 
 export async function getLatestPlateReads({
   page = 1,
   pageSize = 25,
-  search = '',
-  tag = 'all',
-  dateRange = null
+  search = "",
+  tag = "all",
+  dateRange = null,
 } = {}) {
   try {
-    const result = await getPlateReads({ 
-      page, 
+    const result = await getPlateReads({
+      page,
       pageSize,
       filters: {
         plateNumber: search,
-        tag: tag !== 'all' ? tag : undefined,
-        dateRange
-      }
+        tag: tag !== "all" ? tag : undefined,
+        dateRange,
+      },
     });
 
     return {
@@ -274,19 +237,19 @@ export async function getLatestPlateReads({
         page,
         pageSize,
         total: result.pagination.total,
-        pageCount: result.pagination.pageCount
-      }
+        pageCount: result.pagination.pageCount,
+      },
     };
   } catch (error) {
-    console.error('Error fetching plate reads:', error);
+    console.error("Error fetching plate reads:", error);
     return {
       data: [],
       pagination: {
         page,
         pageSize,
         total: 0,
-        pageCount: 0
-      }
+        pageCount: 0,
+      },
     };
   }
 }
@@ -294,19 +257,19 @@ export async function getLatestPlateReads({
 export async function fetchPlateInsights(formDataOrPlateNumber) {
   try {
     let plateNumber;
-    
+
     if (formDataOrPlateNumber instanceof FormData) {
-      plateNumber = formDataOrPlateNumber.get('plateNumber');
+      plateNumber = formDataOrPlateNumber.get("plateNumber");
     } else {
       plateNumber = formDataOrPlateNumber;
     }
-    
+
     if (!plateNumber) {
-      return { success: false, error: 'Plate number is required' };
+      return { success: false, error: "Plate number is required" };
     }
 
     const insights = await getPlateInsights(plateNumber);
-    
+
     return {
       success: true,
       data: {
@@ -316,38 +279,38 @@ export async function fetchPlateInsights(formDataOrPlateNumber) {
         summary: {
           firstSeen: insights.first_seen_at,
           lastSeen: insights.last_seen_at,
-          totalOccurrences: insights.total_occurrences
+          totalOccurrences: insights.total_occurrences,
         },
         tags: insights.tags || [],
         timeDistribution: insights.time_distribution || [],
-        recentReads: insights.recent_reads || []
-      }
+        recentReads: insights.recent_reads || [],
+      },
     };
   } catch (error) {
-    console.error('Failed to get plate insights:', error);
-    return { 
-      success: false, 
-      error: 'Failed to get plate insights' 
+    console.error("Failed to get plate insights:", error);
+    return {
+      success: false,
+      error: "Failed to get plate insights",
     };
   }
 }
 
 export async function alterPlateFlag(formData) {
   try {
-    const plateNumber = formData.get('plateNumber');
-    const flagged = formData.get('flagged') === 'true';
-    
+    const plateNumber = formData.get("plateNumber");
+    const flagged = formData.get("flagged") === "true";
+
     const result = await togglePlateFlag(plateNumber, flagged);
-    
+
     return {
       success: true,
-      data: result
+      data: result,
     };
   } catch (error) {
-    console.error('Failed to toggle plate flag:', error);
+    console.error("Failed to toggle plate flag:", error);
     return {
       success: false,
-      error: 'Failed to toggle plate flag'
+      error: "Failed to toggle plate flag",
     };
   }
 }
@@ -357,7 +320,7 @@ export async function getFlagged() {
     const plates = await getFlaggedPlates();
     return plates;
   } catch (error) {
-    console.error('Error fetching flagged plates:', error);
+    console.error("Error fetching flagged plates:", error);
     return [];
   }
 }
@@ -368,159 +331,124 @@ export async function getNotificationPlates() {
 }
 
 export async function addNotificationPlate(formData) {
-  const plateNumber = formData.get('plateNumber');
+  const plateNumber = formData.get("plateNumber");
   return await addNotificationPlateDB(plateNumber);
 }
 
 export async function toggleNotification(formData) {
-  const plateNumber = formData.get('plateNumber');
-  const enabled = formData.get('enabled') === 'true';
+  const plateNumber = formData.get("plateNumber");
+  const enabled = formData.get("enabled") === "true";
   return await toggleNotificationDB(plateNumber, enabled);
 }
 
 export async function deleteNotification(formData) {
-  const plateNumber = formData.get('plateNumber');
+  const plateNumber = formData.get("plateNumber");
   await deleteNotificationDB(plateNumber);
 }
 
-
-
 export async function loginAction(formData) {
-  const password = formData.get('password');
+  const password = formData.get("password");
   if (!password) {
-    return { error: 'Password is required' };
+    return { error: "Password is required" };
   }
 
   try {
     const config = await getAuthConfig();
     if (hashPassword(password) !== config.password) {
-      return { error: 'Invalid password' };
+      return { error: "Invalid password" };
     }
 
     const sessionId = await createSession();
 
-    // Set the session cookie using the cookies() function
-    const cookieStore = cookies(); // cookies() function for setting cookies in server actions
-    cookieStore.set('session', sessionId, {
+    const cookieStore = cookies();
+    cookieStore.set("session", sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
     });
 
     return { success: true };
   } catch (error) {
-    console.error('Login error:', error);
-    return { error: 'An error occurred during login' };
+    console.error("Login error:", error);
+    return { error: "An error occurred during login" };
   }
 }
-
-// export async function saveConfig(formData) {
-//   try {
-//     // Transform form data to match config structure
-//     const config = {
-//       general: {
-//         maxRecords: parseInt(formData.maxRecords),
-//         ignoreNonPlate: formData.ignoreNonPlate
-//       },
-//       mqtt: {
-//         broker: formData.mqttBroker,
-//         topic: formData.mqttTopic
-//       },
-//       database: {
-//         host: formData.dbHost,
-//         name: formData.dbName,
-//         user: formData.dbUser,
-//         password: formData.dbPassword
-//       },
-//       push: {
-//         server: formData.pushServer,
-//         credentials: formData.pushCredentials
-//       }
-//     }
-
-//     const result = await saveSettingsConfig(config)
-//     return result
-//   } catch (error) {
-//     console.error('Error saving config:', error)
-//     return { success: false, error: 'Failed to save configuration' }
-//   }
-// }
 
 export async function getSettings() {
   try {
-    const config = await getConfig()
-    return { success: true, data: config }
+    const config = await getConfig();
+    return { success: true, data: config };
   } catch (error) {
-    console.error('Error getting settings:', error)
-    return { success: false, error: 'Failed to get settings' }
+    console.error("Error getting settings:", error);
+    return { success: false, error: "Failed to get settings" };
   }
 }
 
-export async function saveSettings(formData) {  // renamed from saveConfig to avoid confusion
+export async function saveSettings(formData) {
   try {
     const config = {
       general: {
         maxRecords: parseInt(formData.maxRecords),
-        ignoreNonPlate: formData.ignoreNonPlate
+        ignoreNonPlate: formData.ignoreNonPlate,
       },
       mqtt: {
         broker: formData.mqttBroker,
-        topic: formData.mqttTopic
+        topic: formData.mqttTopic,
       },
       database: {
         host: formData.dbHost,
         name: formData.dbName,
         user: formData.dbUser,
-        password: formData.dbPassword
+        password: formData.dbPassword,
       },
       push: {
         server: formData.pushServer,
-        credentials: formData.pushCredentials
-      }
-    }
+        credentials: formData.pushCredentials,
+      },
+    };
 
-    const result = await saveConfig(config)
-    return result
+    const result = await saveConfig(config);
+    return result;
   } catch (error) {
-    console.error('Error saving config:', error)
-    return { success: false, error: 'Failed to save configuration' }
+    console.error("Error saving config:", error);
+    return { success: false, error: "Failed to save configuration" };
   }
 }
 
 export async function changePassword(currentPassword, newPassword) {
   try {
-    const config = await getAuthConfig()
-    
+    const config = await getAuthConfig();
+
     if (hashPassword(currentPassword) !== config.password) {
-      return { success: false, error: 'Current password is incorrect' }
+      return { success: false, error: "Current password is incorrect" };
     }
-    
+
     await updateAuthConfig({
       ...config,
-      password: hashPassword(newPassword)
-    })
-    
-    return { success: true }
+      password: hashPassword(newPassword),
+    });
+
+    return { success: true };
   } catch (error) {
-    console.error('Error changing password:', error)
-    return { success: false, error: 'Failed to change password' }
+    console.error("Error changing password:", error);
+    return { success: false, error: "Failed to change password" };
   }
 }
 
 export async function regenerateApiKey() {
   try {
-    const config = await getAuthConfig()
-    const newApiKey = crypto.randomBytes(32).toString('hex')
-    
+    const config = await getAuthConfig();
+    const newApiKey = crypto.randomBytes(32).toString("hex");
+
     await updateAuthConfig({
       ...config,
-      apiKey: newApiKey
-    })
-    
-    return { success: true, apiKey: newApiKey }
+      apiKey: newApiKey,
+    });
+
+    return { success: true, apiKey: newApiKey };
   } catch (error) {
-    console.error('Error regenerating API key:', error)
-    return { success: false, error: 'Failed to regenerate API key' }
+    console.error("Error regenerating API key:", error);
+    return { success: false, error: "Failed to regenerate API key" };
   }
 }

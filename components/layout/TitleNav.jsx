@@ -1,32 +1,31 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { ChevronDown } from "lucide-react"
-import { useRouter, usePathname } from "next/navigation"
+import React, { useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function Component({ 
+export default function Component({
   title = "Plate Database",
   navigation = [
     { title: "Database", href: "/database" },
     { title: "Tags", href: "/database/tags" },
-    { title: "Analyze", href: "/database/analyze" },
-    { title: "Download", href: "/database/#" }
+    { title: "Download", href: "/database/#" },
   ],
-  children 
+  children,
 }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const [activeIndex, setActiveIndex] = useState(0)
+  const router = useRouter();
+  const pathname = usePathname();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    const index = navigation.findIndex(item => item.href === pathname)
-    setActiveIndex(index !== -1 ? index : 0)
-  }, [pathname, navigation])
+    const index = navigation.findIndex((item) => item.href === pathname);
+    setActiveIndex(index !== -1 ? index : 0);
+  }, [pathname, navigation]);
 
   const handleNavClick = (href, index) => {
-    setActiveIndex(index)
-    router.push(href)
-  }
+    setActiveIndex(index);
+    router.push(href);
+  };
 
   return (
     <div className="flex min-h-screen flex-col py-4 px-6">
@@ -49,9 +48,9 @@ export default function Component({
                   {item.title}
                 </a>
                 {index === activeIndex && (
-                  <div 
+                  <div
                     className="absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-300 ease-in-out"
-                    style={{ width: '100%' }}
+                    style={{ width: "100%" }}
                   />
                 )}
               </div>
@@ -60,10 +59,8 @@ export default function Component({
         </nav>
       </header>
       <div className="flex-1">
-        <div className="py-6">
-          {children}
-        </div>
+        <div className="py-6">{children}</div>
       </div>
     </div>
-  )
+  );
 }

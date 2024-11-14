@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import PlateTable from './PlateTable';
-import { 
-  getLatestPlateReads, 
-  getTags, 
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import PlateTable from "./PlateTable";
+import {
+  getLatestPlateReads,
+  getTags,
   addKnownPlate as addKnownPlateAction,
   tagPlate as tagPlateAction,
   untagPlate as untagPlateAction,
-  deletePlate as deletePlateAction
-} from '@/app/actions';
+  deletePlate as deletePlateAction,
+  deletePlateFromDB,
+  deletePlateRead,
+} from "@/app/actions";
 
 export function PlateTableWrapper() {
   const router = useRouter();
@@ -22,12 +24,12 @@ export function PlateTableWrapper() {
   const [availableTags, setAvailableTags] = useState([]);
 
   // Get current query parameters
-  const page = searchParams.get('page') || '1';
-  const pageSize = searchParams.get('pageSize') || '25';
-  const search = searchParams.get('search') || '';
-  const tag = searchParams.get('tag') || 'all';
-  const dateFrom = searchParams.get('dateFrom');
-  const dateTo = searchParams.get('dateTo');
+  const page = searchParams.get("page") || "1";
+  const pageSize = searchParams.get("pageSize") || "25";
+  const search = searchParams.get("search") || "";
+  const tag = searchParams.get("tag") || "all";
+  const dateFrom = searchParams.get("dateFrom");
+  const dateTo = searchParams.get("dateTo");
 
   // Load tags
   useEffect(() => {
@@ -36,7 +38,7 @@ export function PlateTableWrapper() {
       if (result.success) {
         setAvailableTags(result.data);
       }
-    }
+    };
     loadTags();
   }, []);
 
@@ -45,7 +47,7 @@ export function PlateTableWrapper() {
     (params) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()));
       Object.entries(params).forEach(([key, value]) => {
-        if (value === null || value === undefined || value === '') {
+        if (value === null || value === undefined || value === "") {
           current.delete(key);
         } else {
           current.set(key, value);
@@ -56,31 +58,31 @@ export function PlateTableWrapper() {
     [searchParams]
   );
 
-//   // Update URL and fetch data
-//   const updateFilters = useCallback((newParams) => {
-//     const queryString = createQueryString({
-//       ...Object.fromEntries(searchParams.entries()),
-//       ...newParams,
-//       page: '1' // Reset to first page on filter change
-//     });
-//     router.push(`${pathname}?${queryString}`);
-//   }, [router, pathname, searchParams, createQueryString]);
+  //   // Update URL and fetch data
+  //   const updateFilters = useCallback((newParams) => {
+  //     const queryString = createQueryString({
+  //       ...Object.fromEntries(searchParams.entries()),
+  //       ...newParams,
+  //       page: '1' // Reset to first page on filter change
+  //     });
+  //     router.push(`${pathname}?${queryString}`);
+  //   }, [router, pathname, searchParams, createQueryString]);
 
   const handleAddTag = async (plateNumber, tagName) => {
     // Find the tag details from availableTags
-    const tagDetails = availableTags.find(t => t.name === tagName);
+    const tagDetails = availableTags.find((t) => t.name === tagName);
     if (!tagDetails) return;
 
     // Store the previous state for rollback
     const previousData = [...data];
 
     // Optimistically update the UI
-    setData(currentData => 
-      currentData.map(plate => 
+    setData((currentData) =>
+      currentData.map((plate) =>
         plate.plate_number === plateNumber
           ? {
               ...plate,
-              tags: [...(plate.tags || []), tagDetails]
+              tags: [...(plate.tags || []), tagDetails],
             }
           : plate
       )
@@ -88,15 +90,15 @@ export function PlateTableWrapper() {
 
     // Call the server action
     const formData = new FormData();
-    formData.append('plateNumber', plateNumber);
-    formData.append('tagName', tagName);
-    
+    formData.append("plateNumber", plateNumber);
+    formData.append("tagName", tagName);
+
     const result = await tagPlateAction(formData);
-    
+
     if (!result.success) {
       // Revert the optimistic update if the server call failed
       setData(previousData);
-      console.error('Failed to add tag:', result.error);
+      console.error("Failed to add tag:", result.error);
     }
   };
 
@@ -105,12 +107,12 @@ export function PlateTableWrapper() {
     const previousData = [...data];
 
     // Optimistically update the UI
-    setData(currentData => 
-      currentData.map(plate => 
+    setData((currentData) =>
+      currentData.map((plate) =>
         plate.plate_number === plateNumber
           ? {
               ...plate,
-              tags: (plate.tags || []).filter(tag => tag.name !== tagName)
+              tags: (plate.tags || []).filter((tag) => tag.name !== tagName),
             }
           : plate
       )
@@ -118,15 +120,15 @@ export function PlateTableWrapper() {
 
     // Call the server action
     const formData = new FormData();
-    formData.append('plateNumber', plateNumber);
-    formData.append('tagName', tagName);
-    
+    formData.append("plateNumber", plateNumber);
+    formData.append("tagName", tagName);
+
     const result = await untagPlateAction(formData);
-    
+
     if (!result.success) {
       // Revert the optimistic update if the server call failed
       setData(previousData);
-      console.error('Failed to remove tag:', result.error);
+      console.error("Failed to remove tag:", result.error);
     }
   };
 
@@ -135,13 +137,13 @@ export function PlateTableWrapper() {
     const previousData = [...data];
 
     // Optimistically update the UI
-    setData(currentData => 
-      currentData.map(plate => 
+    setData((currentData) =>
+      currentData.map((plate) =>
         plate.plate_number === plateNumber
           ? {
               ...plate,
               known_name: name,
-              known_notes: notes
+              known_notes: notes,
             }
           : plate
       )
@@ -149,16 +151,16 @@ export function PlateTableWrapper() {
 
     // Call the server action
     const formData = new FormData();
-    formData.append('plateNumber', plateNumber);
-    formData.append('name', name);
-    formData.append('notes', notes);
-    
+    formData.append("plateNumber", plateNumber);
+    formData.append("name", name);
+    formData.append("notes", notes);
+
     const result = await addKnownPlateAction(formData);
-    
+
     if (!result.success) {
       // Revert the optimistic update if the server call failed
       setData(previousData);
-      console.error('Failed to add known plate:', result.error);
+      console.error("Failed to add known plate:", result.error);
     }
   };
 
@@ -168,20 +170,22 @@ export function PlateTableWrapper() {
     const previousTotal = total;
 
     // Optimistically update the UI
-    setData(currentData => currentData.filter(plate => plate.plate_number !== plateNumber));
-    setTotal(prev => prev - 1);
+    setData((currentData) =>
+      currentData.filter((plate) => plate.plate_number !== plateNumber)
+    );
+    setTotal((prev) => prev - 1);
 
     // Call the server action
     const formData = new FormData();
-    formData.append('plateNumber', plateNumber);
-    
-    const result = await deletePlateAction(formData);
-    
+    formData.append("plateNumber", plateNumber);
+
+    const result = await deletePlateRead(formData);
+
     if (!result.success) {
       // Revert the optimistic update if the server call failed
       setData(previousData);
       setTotal(previousTotal);
-      console.error('Failed to delete record:', result.error);
+      console.error("Failed to delete record:", result.error);
     }
   };
 
@@ -195,16 +199,19 @@ export function PlateTableWrapper() {
           pageSize: parseInt(pageSize),
           search,
           tag,
-          dateRange: dateFrom && dateTo ? {
-            from: dateFrom,
-            to: dateTo
-          } : null
+          dateRange:
+            dateFrom && dateTo
+              ? {
+                  from: dateFrom,
+                  to: dateTo,
+                }
+              : null,
         });
-        
+
         setData(result.data);
         setTotal(result.pagination.total);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
       setLoading(false);
     };
@@ -214,30 +221,36 @@ export function PlateTableWrapper() {
 
   const handlePageChange = (direction) => {
     const currentPage = parseInt(page);
-    const newPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
-    
-    if (newPage < 1 || (direction === 'next' && currentPage * pagination.pageSize >= total)) {
+    const newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
+
+    if (
+      newPage < 1 ||
+      (direction === "next" && currentPage * pagination.pageSize >= total)
+    ) {
       return;
     }
 
     const queryString = createQueryString({
       ...Object.fromEntries(searchParams.entries()),
-      page: newPage.toString()
+      page: newPage.toString(),
     });
     router.push(`${pathname}?${queryString}`);
   };
 
-  const updateFilters = useCallback((newParams) => {
-    // Don't handle page changes here
-    if ('page' in newParams) return;
-    
-    const queryString = createQueryString({
-      ...Object.fromEntries(searchParams.entries()),
-      ...newParams,
-      page: '1' // Reset to first page on filter change
-    });
-    router.push(`${pathname}?${queryString}`);
-  }, [router, pathname, searchParams, createQueryString]);
+  const updateFilters = useCallback(
+    (newParams) => {
+      // Don't handle page changes here
+      if ("page" in newParams) return;
+
+      const queryString = createQueryString({
+        ...Object.fromEntries(searchParams.entries()),
+        ...newParams,
+        page: "1", // Reset to first page on filter change
+      });
+      router.push(`${pathname}?${queryString}`);
+    },
+    [router, pathname, searchParams, createQueryString]
+  );
 
   return (
     <PlateTable
@@ -248,16 +261,16 @@ export function PlateTableWrapper() {
         page: parseInt(page),
         pageSize: parseInt(pageSize),
         total,
-        onNextPage: () => handlePageChange('next'),
-        onPreviousPage: () => handlePageChange('prev')
+        onNextPage: () => handlePageChange("next"),
+        onPreviousPage: () => handlePageChange("prev"),
       }}
       filters={{
         search,
         tag,
         dateRange: {
           from: dateFrom ? new Date(dateFrom) : null,
-          to: dateTo ? new Date(dateTo) : null
-        }
+          to: dateTo ? new Date(dateTo) : null,
+        },
       }}
       onUpdateFilters={updateFilters}
       onAddTag={handleAddTag}

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { loginAction } from '@/app/actions';
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { loginAction } from "@/app/actions";
 
 export default function LoginPage() {
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError('');
+    setError("");
 
     const formData = new FormData(event.target);
 
@@ -21,30 +21,25 @@ export default function LoginPage() {
         if (result.error) {
           setError(result.error);
         } else if (result.success) {
-          router.push('/dashboard');
+          router.push("/dashboard");
         }
       } catch (e) {
-        setError('An error occurred during login');
-        console.error('Login error:', e);
+        setError("An error occurred during login");
+        console.error("Login error:", e);
       }
     });
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-sm space-y-8 p-8 rounded-lg shadow bg-muted">
         <div>
-          <h2 className="text-center text-2xl font-bold text-gray-900">
-            Admin Login
-          </h2>
+          <h2 className="text-center text-2xl font-bold">Admin Login</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium">
               Password
             </label>
             <div className="mt-1">
@@ -72,7 +67,7 @@ export default function LoginPage() {
             disabled={isPending}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending ? 'Signing in...' : 'Sign in'}
+            {isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>

@@ -1,35 +1,40 @@
 // components/PlateDialog.js
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { useRouter } from "next/navigation";
 
 export default function PlateDialog({ plate, history, open, onOpenChange }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const router = useRouter()
+  const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   async function handleSave(e) {
-    e.preventDefault()
-    const formData = new FormData(e.target)
-    
-    await fetch('/api/plates/known', {
-      method: 'POST',
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    await fetch("/api/plates/known", {
+      method: "POST",
       body: JSON.stringify({
         plateNumber: plate.plate_number,
-        name: formData.get('name'),
-        isFlagged: formData.get('flagged') === 'on',
-        notes: formData.get('notes')
-      })
-    })
+        name: formData.get("name"),
+        isFlagged: formData.get("flagged") === "on",
+        notes: formData.get("notes"),
+      }),
+    });
 
-    setIsEditing(false)
-    router.refresh()
+    setIsEditing(false);
+    router.refresh();
   }
 
   return (
@@ -54,11 +59,11 @@ export default function PlateDialog({ plate, history, open, onOpenChange }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {history.map(read => (
+                  {history.map((read) => (
                     <tr key={read.id}>
                       <td>{new Date(read.timestamp).toLocaleString()}</td>
-                      <td>{read.location || '-'}</td>
-                      <td>{read.camera_id || '-'}</td>
+                      <td>{read.location || "-"}</td>
+                      <td>{read.camera_id || "-"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -70,7 +75,7 @@ export default function PlateDialog({ plate, history, open, onOpenChange }) {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Known As</label>
-                  <Input 
+                  <Input
                     name="name"
                     defaultValue={plate.known_name}
                     disabled={!isEditing}
@@ -95,8 +100,8 @@ export default function PlateDialog({ plate, history, open, onOpenChange }) {
                 {isEditing ? (
                   <div className="flex gap-2">
                     <Button type="submit">Save</Button>
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       variant="outline"
                       onClick={() => setIsEditing(false)}
                     >
@@ -114,5 +119,5 @@ export default function PlateDialog({ plate, history, open, onOpenChange }) {
         </Tabs>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

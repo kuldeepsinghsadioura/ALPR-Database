@@ -1,14 +1,35 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { Search, Filter, Tag, Plus, Trash2, X, CalendarDays } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import Image from "next/image";
+import {
+  Search,
+  Filter,
+  Tag,
+  Plus,
+  Trash2,
+  X,
+  CalendarDays,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -16,22 +37,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { format } from 'date-fns'
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
 
 export default function PlateTable({
   data,
@@ -43,107 +64,114 @@ export default function PlateTable({
   onAddTag,
   onRemoveTag,
   onAddKnownPlate,
-  onDeleteRecord
+  onDeleteRecord,
 }) {
   // Only keep state for modals and temporary form data
-  const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false)
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
-  const [activePlate, setActivePlate] = useState(null)
-  const [newKnownPlate, setNewKnownPlate] = useState({ name: '', notes: '' })
+  const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [activePlate, setActivePlate] = useState(null);
+  const [newKnownPlate, setNewKnownPlate] = useState({ name: "", notes: "" });
 
   // Helper functions
   const getImageUrl = (base64Data) => {
-    if (!base64Data) return '/placeholder-image.jpg'
-    if (base64Data.startsWith('data:image/jpeg;base64,')) return base64Data
-    return `data:image/jpeg;base64,${base64Data}`
-  }
+    if (!base64Data) return "/placeholder-image.jpg";
+    if (base64Data.startsWith("data:image/jpeg;base64,")) return base64Data;
+    return `data:image/jpeg;base64,${base64Data}`;
+  };
 
   const handleImageClick = (e, plate) => {
-    e.preventDefault()
-    if (!plate.image_data) return
-    const win = window.open()
+    e.preventDefault();
+    if (!plate.image_data) return;
+    const win = window.open();
     if (win) {
       win.document.write(`
         <html>
-          <head><title>License Plate Image - ${plate.plate_number}</title></head>
+          <head><title>License Plate Image - ${
+            plate.plate_number
+          }</title></head>
           <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000;">
             <img src="${getImageUrl(plate.image_data)}" 
                  style="max-width: 100%; max-height: 100vh; object-fit: contain;" 
                  alt="${plate.plate_number}" />
           </body>
         </html>
-      `)
+      `);
     }
-  }
+  };
 
   // Handler functions
   const handleSearchChange = (e) => {
-    onUpdateFilters({ search: e.target.value })
-  }
+    onUpdateFilters({ search: e.target.value });
+  };
 
   const handleTagChange = (value) => {
-    onUpdateFilters({ tag: value })
-  }
+    onUpdateFilters({ tag: value });
+  };
 
   const handleDateRangeSelect = (range) => {
     onUpdateFilters({
-      dateFrom: range.from ? format(range.from, 'yyyy-MM-dd') : null,
-      dateTo: range.to ? format(range.to, 'yyyy-MM-dd') : null
-    })
-  }
+      dateFrom: range.from ? format(range.from, "yyyy-MM-dd") : null,
+      dateTo: range.to ? format(range.to, "yyyy-MM-dd") : null,
+    });
+  };
 
   const handlePageSizeChange = (value) => {
-    onUpdateFilters({ pageSize: value })
-  }
+    onUpdateFilters({ pageSize: value });
+  };
 
   const handleAddKnownPlateSubmit = async () => {
-    if (!activePlate) return
-    await onAddKnownPlate(activePlate.plate_number, newKnownPlate.name, newKnownPlate.notes)
-    setIsAddKnownPlateOpen(false)
-    setNewKnownPlate({ name: '', notes: '' })
-  }
+    if (!activePlate) return;
+    await onAddKnownPlate(
+      activePlate.plate_number,
+      newKnownPlate.name,
+      newKnownPlate.notes
+    );
+    setIsAddKnownPlateOpen(false);
+    setNewKnownPlate({ name: "", notes: "" });
+  };
 
   const handleDeleteSubmit = async () => {
-    if (!activePlate) return
-    await onDeleteRecord(activePlate.plate_number)
-    setIsDeleteConfirmOpen(false)
-  }
+    if (!activePlate) return;
+    await onDeleteRecord(activePlate.plate_number);
+    setIsDeleteConfirmOpen(false);
+  };
 
   const clearFilters = () => {
     onUpdateFilters({
-      search: '',
-      tag: 'all',
+      search: "",
+      tag: "all",
       dateFrom: null,
-      dateTo: null
-    })
-  }
+      dateTo: null,
+    });
+  };
 
   return (
     <Card>
       <CardContent className="py-4">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-          <div className="flex items-center space-x-2">
-            <Search className="text-gray-400 dark:text-gray-500" />
-            <Input
-              placeholder="Search plates..."
-              value={filters.search}
-              onChange={handleSearchChange}
-              className="w-64"
-            />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Filter className="text-gray-400 dark:text-gray-500" />
+          <div className="flex items-center justify-start space-x-2">
+            <div className="flex items-center space-x-2">
+              <Search className="text-gray-400 dark:text-gray-500" />
+              <Input
+                placeholder="Search plates..."
+                value={filters.search}
+                onChange={handleSearchChange}
+                className="w-64"
+              />
+            </div>
             <Select value={filters.tag} onValueChange={handleTagChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by tag" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All tags</SelectItem>
-                {availableTags.map(tag => (
+                {availableTags.map((tag) => (
                   <SelectItem key={tag.name} value={tag.name}>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tag.color }} />
+                      <div
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: tag.color }}
+                      />
                       {tag.name}
                     </div>
                   </SelectItem>
@@ -183,7 +211,9 @@ export default function PlateTable({
               </PopoverContent>
             </Popover>
 
-            {(filters.search || filters.tag !== 'all' || filters.dateRange.from) && (
+            {(filters.search ||
+              filters.tag !== "all" ||
+              filters.dateRange.from) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -247,9 +277,9 @@ export default function PlateTable({
                 data.map((plate) => (
                   <TableRow key={plate.id}>
                     <TableCell>
-                      <a 
+                      <a
                         href={getImageUrl(plate.image_data)}
-                        target="_blank" 
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="cursor-pointer"
                         onClick={(e) => handleImageClick(e, plate)}
@@ -263,7 +293,11 @@ export default function PlateTable({
                         />
                       </a>
                     </TableCell>
-                    <TableCell className={`font-medium font-mono ${plate.flagged && 'text-[#F31260]'}`}>
+                    <TableCell
+                      className={`font-medium font-mono ${
+                        plate.flagged && "text-[#F31260]"
+                      }`}
+                    >
                       {plate.plate_number}
                       {plate.known_name && (
                         <div className="text-sm text-gray-500 dark:text-gray-400 font-sans">
@@ -277,18 +311,23 @@ export default function PlateTable({
                       <div className="flex flex-wrap items-center gap-1.5">
                         {plate.tags?.length > 0 ? (
                           plate.tags.map((tag) => (
-                            <Badge 
-                              key={tag.name} 
+                            <Badge
+                              key={tag.name}
                               variant="secondary"
                               className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
-                              style={{ backgroundColor: tag.color, color: '#fff' }}
+                              style={{
+                                backgroundColor: tag.color,
+                                color: "#fff",
+                              }}
                             >
                               <span>{tag.name}</span>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
-                                onClick={() => onRemoveTag(plate.plate_number, tag.name)}
+                                onClick={() =>
+                                  onRemoveTag(plate.plate_number, tag.name)
+                                }
                               >
                                 <X className="h-3 w-3" />
                               </Button>
@@ -313,15 +352,17 @@ export default function PlateTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
-                            {availableTags.map(tag => (
-                              <DropdownMenuItem 
-                                key={tag.name} 
-                                onClick={() => onAddTag(plate.plate_number, tag.name)}
+                            {availableTags.map((tag) => (
+                              <DropdownMenuItem
+                                key={tag.name}
+                                onClick={() =>
+                                  onAddTag(plate.plate_number, tag.name)
+                                }
                               >
                                 <div className="flex items-center">
-                                  <div 
-                                    className="w-3 h-3 rounded-full mr-2" 
-                                    style={{ backgroundColor: tag.color }} 
+                                  <div
+                                    className="w-3 h-3 rounded-full mr-2"
+                                    style={{ backgroundColor: tag.color }}
                                   />
                                   {tag.name}
                                 </div>
@@ -333,8 +374,8 @@ export default function PlateTable({
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            setActivePlate(plate)
-                            setIsAddKnownPlateOpen(true)
+                            setActivePlate(plate);
+                            setIsAddKnownPlateOpen(true);
                           }}
                         >
                           <Plus className="h-4 w-4" />
@@ -344,8 +385,8 @@ export default function PlateTable({
                           size="icon"
                           className="text-red-500 hover:text-red-700"
                           onClick={() => {
-                            setActivePlate(plate)
-                            setIsDeleteConfirmOpen(true)
+                            setActivePlate(plate);
+                            setIsDeleteConfirmOpen(true);
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -361,9 +402,9 @@ export default function PlateTable({
 
         <div className="flex items-center justify-between pt-4">
           <div className="text-sm text-muted-foreground">
-            Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
-            {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{' '}
-            {pagination.total} results
+            Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+            {Math.min(pagination.page * pagination.pageSize, pagination.total)}{" "}
+            of {pagination.total} results
           </div>
           <div className="flex gap-2">
             <Button
@@ -378,7 +419,9 @@ export default function PlateTable({
               variant="outline"
               size="sm"
               onClick={pagination.onNextPage}
-              disabled={pagination.page * pagination.pageSize >= pagination.total}
+              disabled={
+                pagination.page * pagination.pageSize >= pagination.total
+              }
             >
               Next
             </Button>
@@ -402,7 +445,9 @@ export default function PlateTable({
               <Input
                 id="name"
                 value={newKnownPlate.name}
-                onChange={(e) => setNewKnownPlate({ ...newKnownPlate, name: e.target.value })}
+                onChange={(e) =>
+                  setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
@@ -413,13 +458,17 @@ export default function PlateTable({
               <Textarea
                 id="notes"
                 value={newKnownPlate.notes}
-                onChange={(e) => setNewKnownPlate({ ...newKnownPlate, notes: e.target.value })}
+                onChange={(e) =>
+                  setNewKnownPlate({ ...newKnownPlate, notes: e.target.value })
+                }
                 className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" onClick={handleAddKnownPlateSubmit}>Add to Known Plates</Button>
+            <Button type="submit" onClick={handleAddKnownPlateSubmit}>
+              Add to Known Plates
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -429,12 +478,20 @@ export default function PlateTable({
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this record? This will not delete the plate from the known plates table.
+              Are you sure you want to delete this record? This will not delete
+              the plate from the known plates table.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDeleteSubmit}>Delete</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteSubmit}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
