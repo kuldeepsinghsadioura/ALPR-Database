@@ -1,29 +1,11 @@
 import { getPlateReads } from '@/lib/db';
-import { initMqtt } from '@/lib/mqtt-client';
 import PlateTable from '@/components/PlateTable';
 import { ThemeToggle } from "@/components/ThemeToggle";
 import DashboardLayout from '@/components/layout/MainLayout';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
-  // Initialize MQTT client on server
-  //initMqtt();
-  
-  // Get initial data
-  const plateReads = await getPlateReads();
-  
-  return (
-
-    <DashboardLayout>
-      <div className="flex justify-between">    
-        <h1 className="text-3xl font-bold mb-8 ">🕵🏼 License Plate Reader Dashboard</h1>
-        <ThemeToggle />
-      </div>
-      <PlateTable initialData={plateReads} />
-      <div>
-        
-      </div>
-    </DashboardLayout>
-  );
+  redirect('/dashboard');
 }
 
 // todo: 

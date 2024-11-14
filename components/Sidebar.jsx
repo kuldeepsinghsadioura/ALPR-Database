@@ -8,6 +8,7 @@ import { LayoutDashboard, Database, Settings } from 'lucide-react'
 import { BookMarked } from 'lucide-react'
 import { Cctv } from 'lucide-react'
 import { Flag } from 'lucide-react'
+import { BellPlus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const topSidebarItems = [
@@ -16,6 +17,7 @@ const topSidebarItems = [
   { icon: Database, label: 'Database', href: '/database' },
   { icon: BookMarked, label: 'Known Plates', href: '/known_plates' },
   { icon: Flag, label: 'Watchlist', href: '/flagged' },
+  { icon: BellPlus, label: 'Notifications', href: '/notifications' },
 ]
 
 export function Sidebar() {

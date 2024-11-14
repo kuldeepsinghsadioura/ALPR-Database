@@ -33,7 +33,7 @@ export default function Component({
       <header className="border-b backdrop-blur">
         <div className="container flex h-14 items-center">
           <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-medium">{title}</h1>
+            <h1 className="text-2xl font-semibold">{title}</h1>
           </div>
         </div>
         <nav className="container">

@@ -234,8 +234,8 @@ export default function Dashboard() {
                 ) : (
                 <ul className="space-y-4">
                     {metrics.top_plates.map((plate, index) => (
-                    <li key={plate.plate} className="flex items-center justify-between p-2 rounded-lg bg-muted">
-                        <div className="flex items-center gap-3">
+                    <li key={plate.plate} className="flex items-center justify-between px-4 py-2 rounded-lg bg-zinc-900">
+                        <div className="flex items-center gap-4">
                         <span className="text-2xl font-bold text-primary">{index + 1}</span>
                         <div>
                             <p className="font-semibold">{plate.plate}</p>
@@ -250,27 +250,6 @@ export default function Dashboard() {
                 </ul>
                 )}
             </CardContent>
-            </Card>
-
-            <Card>
-            <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest license plate reads and events</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {loading ? (
-                <div className="space-y-2">
-                    {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="w-full h-12" />
-                    ))}
-                </div>
-                ) : (
-                <p className="text-muted-foreground">Recent activity table goes here</p>
-                )}
-            </CardContent>
-            <CardFooter>
-                <Button>View All Activity</Button>
-            </CardFooter>
             </Card>
         </div>
         </div>

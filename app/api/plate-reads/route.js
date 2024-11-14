@@ -1,19 +1,45 @@
 // src/app/api/plate-reads/route.ts
 import { NextRequest } from 'next/server';
 import { pool } from '@/lib/db';
+import { checkPlateForNotification } from '@/lib/db';
+import { sendPushoverNotification } from '@/lib/notifications';
+import { getAuthConfig } from '@/lib/auth';
 
-// We don't need force-dynamic since this is a POST endpoint
 export async function POST(req) {
+  const apiKey = req.headers.get('x-api-key');
+  if (!apiKey) {
+    return Response.json(
+      { error: 'API key is required' },
+      { status: 401 }
+    );
+  }
+
+  // Verify the API key against stored config
+  const authConfig = await getAuthConfig();
+  if (apiKey !== authConfig.apiKey) {
+    return Response.json(
+      { error: 'Invalid API key' },
+      { status: 401 }
+    );
+  }
+
+  if (!data?.plate_number) {
+    return Response.json(
+      { error: 'Plate number is required' },
+      { status: 400 }
+    );
+  }
+
+
   const dbClient = await pool.connect();
   
   try {
     const data = await req.json();
 
-    if (!data?.plate_number) {
-      return Response.json(
-        { error: 'Plate number is required' },
-        { status: 400 }
-      );
+    // Check if this plate should trigger a notification
+    const shouldNotify = await checkPlateForNotification(data.plate_number);
+    if (shouldNotify) {
+      await sendPushoverNotification(data.plate_number);
     }
 
     const timestamp = data.timestamp || new Date().toISOString();

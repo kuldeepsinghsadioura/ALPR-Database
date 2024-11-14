@@ -29,7 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getPlates, getTags, addKnownPlate, tagPlate, untagPlate, deletePlate, fetchPlateInsights, alterPlateFlag } from '@/app/actions'
+import { getPlates, getTags, addKnownPlate, tagPlate, untagPlate, deletePlate, fetchPlateInsights, alterPlateFlag, deletePlateFromDB } from '@/app/actions'
 import Image from 'next/image'
 
 const formatDaysAgo = (days) => {
@@ -61,12 +61,32 @@ const formatTimeRange = (timeRange) => {
     });
   };
 
+  const isWithinDateRange = (firstSeenDate, selectedDateRange) => {
+    if (!selectedDateRange || !Array.isArray(selectedDateRange) || selectedDateRange.length !== 2) {
+      console.log('No date range applied, returning true.');
+      return true; // No range filter applied
+    }
+  
+    const [startDate, endDate] = selectedDateRange.map(date => formatTimestamp(new Date(date)));
+    const formattedFirstSeenDate = formatTimestamp(firstSeenDate);
+  
+    // Print the formatted dates for debugging
+    console.log('Comparing dates...');
+    console.log('Formatted First Seen Date:', formattedFirstSeenDate);
+    console.log('Formatted Start Date:', startDate);
+    console.log('Formatted End Date:', endDate);
+  
+    // Compare formatted date strings lexicographically
+    return formattedFirstSeenDate >= startDate && formattedFirstSeenDate <= endDate;
+  };
+  
+
 export default function PlateTable() {
   const [data, setData] = useState([])
   const [filteredData, setFilteredData] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState('all')
-  const [selectedDate, setSelectedDate] = useState(null)
+  const [selectedDateRange, setSelectedDateRange] = useState(null)
   const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [activePlate, setActivePlate] = useState(null)
@@ -74,6 +94,8 @@ export default function PlateTable() {
   const [availableTags, setAvailableTags] = useState([])
   const [isInsightsOpen, setIsInsightsOpen] = useState(false)
   const [plateInsights, setPlateInsights] = useState(null)
+  const [date, setDate] = useState({ from: undefined, to: undefined });
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -97,15 +119,23 @@ export default function PlateTable() {
   }, [])
 
   useEffect(() => {
-    const filtered = data.filter(plate => 
-      (plate.plate_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       (plate.name && plate.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-       (plate.notes && plate.notes.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-      (selectedTag === 'all' || plate.tags?.some(tag => tag.name === selectedTag)) &&
-      (!selectedDate || new Date(plate.first_seen_at).toDateString() === selectedDate.toDateString())
-    )
-    setFilteredData(filtered)
-  }, [data, searchTerm, selectedTag, selectedDate])
+    console.log('Filtering data...');
+    const filtered = data.filter(plate => {
+      const firstSeenDate = new Date(plate.first_seen_at);
+      // Use the function
+      const withinDateRange = isWithinDateRange(firstSeenDate, selectedDateRange);
+      console.log('Is within date range:', withinDateRange);
+
+      // Other filtering conditions can follow
+      return (
+        withinDateRange &&
+        (searchTerm === '' || plate.plate_number.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (selectedTag === 'all' || plate.tags?.some(tag => tag.name === selectedTag))
+      );
+    });
+    setFilteredData(filtered);
+  }, [data, searchTerm, selectedTag, selectedDateRange]);
+  
 
   const handleAddTag = async (plateNumber, tagName) => {
     try {
@@ -183,7 +213,7 @@ export default function PlateTable() {
       const formData = new FormData();
       formData.append('plateNumber', activePlate.plate_number);
       
-      const result = await deletePlate(formData);
+      const result = await deletePlateFromDB(formData);
       if (result.success) {
         setData(prevData => prevData.filter(plate => plate.plate_number !== activePlate.plate_number));
         setIsDeleteConfirmOpen(false);
@@ -256,24 +286,37 @@ export default function PlateTable() {
           </Select>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
+            <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
                 <Calendar className="mr-2 h-4 w-4" />
-                {selectedDate ? selectedDate.toDateString() : <span>Filter by first seen date</span>}
-              </Button>
+                {selectedDateRange && selectedDateRange[0] && selectedDateRange[1]
+                    ? `${selectedDateRange[0].toDateString()} - ${selectedDateRange[1].toDateString()}`
+                    : <span>Filter by date range</span>
+                }
+            </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
+            <CalendarComponent
                 initialFocus
-              />
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={(range) => {
+                    if (range && range.from) {
+                    // Ensure range.to is optional and correctly handled
+                    setDate({ from: range.from, to: range.to || undefined });
+                    }
+                }}
+                numberOfMonths={2}
+                />
+
+
+
             </PopoverContent>
           </Popover>
-          {selectedDate && (
-            <Button variant="ghost" onClick={() => setSelectedDate(null)}>
-              <X className="h-4 w-4" />
-              <span className="sr-only">Clear date</span>
+          {selectedDateRange && selectedDateRange[0] && selectedDateRange[1] && (
+            <Button variant="ghost" onClick={() => setSelectedDateRange([null, null])}>
+                <X className="h-4 w-4" />
+                <span className="sr-only">Clear date range</span>
             </Button>
           )}
         </div>
@@ -283,7 +326,7 @@ export default function PlateTable() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[150px]">Plate Number</TableHead>
-              <TableHead className="w-[100px]">Occurrences</TableHead>
+              <TableHead className="w-[80px]">Seen</TableHead>
               <TableHead className="w-[150px]">Name</TableHead>
               <TableHead>Notes</TableHead>
               <TableHead className="w-[120px]">First Seen</TableHead>

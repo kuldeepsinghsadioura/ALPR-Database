@@ -15,10 +15,27 @@ import {
   getPlateInsights,
   getKnownPlates,
   togglePlateFlag,
-  getMetrics
+  getMetrics,
+  getFlaggedPlates,
+  removePlate
 } from '@/lib/db';
+import { 
+  getNotificationPlates as getNotificationPlatesDB,
+  addNotificationPlate as addNotificationPlateDB,
+  toggleNotification as toggleNotificationDB,
+  deleteNotification as deleteNotificationDB
+} from '@/lib/db';
+
+
+import { revalidatePath } from 'next/cache'
 import fs from 'fs/promises'
 import yaml from 'js-yaml'
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import crypto from 'crypto';
+import { getConfig, saveConfig } from '@/lib/settings'
+import { getAuthConfig, updateAuthConfig, hashPassword, createSession } from '@/lib/auth'
+
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -104,6 +121,19 @@ export async function deletePlate(formData) {
     return { success: false, error: 'Failed to remove plate' };
   }
 }
+
+export async function deletePlateFromDB(formData) {
+  try {
+    const plateNumber = formData.get('plateNumber');
+    await removePlate(plateNumber);
+    return { success: true };
+  } catch (error) {
+    console.error('Error removing known plate:', error);
+    return { success: false, error: 'Failed to remove plate' };
+  }
+
+}
+
 
 // Data Fetching Actions
 export async function getKnownPlatesList() {
@@ -202,14 +232,14 @@ export async function getPlateHistoryData(plateNumber) {
   }
 }
 
-export async function getLatestPlateReads() {
-  try {
-    return { success: true, data: await getPlateReads() };
-  } catch (error) {
-    console.error('Error getting plate reads:', error);
-    return { success: false, error: 'Failed to get plate reads' };
-  }
-}
+// export async function getLatestPlateReads(page = 1, pageSize = 25) {
+//   const result = await getPlateReads({ page, pageSize });
+
+//   // Ensure we return just the data array to maintain compatibility
+//   return result.data;
+// }
+
+
 
 export async function getPlates() {
   try {
@@ -220,6 +250,46 @@ export async function getPlates() {
   }
 }
 
+export async function getLatestPlateReads({
+  page = 1,
+  pageSize = 25,
+  search = '',
+  tag = 'all',
+  dateRange = null
+} = {}) {
+  try {
+    const result = await getPlateReads({ 
+      page, 
+      pageSize,
+      filters: {
+        plateNumber: search,
+        tag: tag !== 'all' ? tag : undefined,
+        dateRange
+      }
+    });
+
+    return {
+      data: result.data,
+      pagination: {
+        page,
+        pageSize,
+        total: result.pagination.total,
+        pageCount: result.pagination.pageCount
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching plate reads:', error);
+    return {
+      data: [],
+      pagination: {
+        page,
+        pageSize,
+        total: 0,
+        pageCount: 0
+      }
+    };
+  }
+}
 
 export async function fetchPlateInsights(formDataOrPlateNumber) {
   try {
@@ -282,25 +352,175 @@ export async function alterPlateFlag(formData) {
   }
 }
 
-const CONFIG_FILE = './config.yaml'
-
-export async function getConfig() {
+export async function getFlagged() {
   try {
-    const fileContents = await fs.readFile(CONFIG_FILE, 'utf8')
-    return yaml.load(fileContents)
+    const plates = await getFlaggedPlates();
+    return plates;
   } catch (error) {
-    console.error('Error reading config file:', error)
-    return {}
+    console.error('Error fetching flagged plates:', error);
+    return [];
   }
 }
 
-export async function saveConfig(config) {
+export async function getNotificationPlates() {
+  const plates = await getNotificationPlatesDB();
+  return plates;
+}
+
+export async function addNotificationPlate(formData) {
+  const plateNumber = formData.get('plateNumber');
+  return await addNotificationPlateDB(plateNumber);
+}
+
+export async function toggleNotification(formData) {
+  const plateNumber = formData.get('plateNumber');
+  const enabled = formData.get('enabled') === 'true';
+  return await toggleNotificationDB(plateNumber, enabled);
+}
+
+export async function deleteNotification(formData) {
+  const plateNumber = formData.get('plateNumber');
+  await deleteNotificationDB(plateNumber);
+}
+
+
+
+export async function loginAction(formData) {
+  const password = formData.get('password');
+  if (!password) {
+    return { error: 'Password is required' };
+  }
+
   try {
-    const yamlString = yaml.dump(config)
-    await fs.writeFile(CONFIG_FILE, yamlString, 'utf8')
+    const config = await getAuthConfig();
+    if (hashPassword(password) !== config.password) {
+      return { error: 'Invalid password' };
+    }
+
+    const sessionId = await createSession();
+
+    // Set the session cookie using the cookies() function
+    const cookieStore = cookies(); // cookies() function for setting cookies in server actions
+    cookieStore.set('session', sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { error: 'An error occurred during login' };
+  }
+}
+
+// export async function saveConfig(formData) {
+//   try {
+//     // Transform form data to match config structure
+//     const config = {
+//       general: {
+//         maxRecords: parseInt(formData.maxRecords),
+//         ignoreNonPlate: formData.ignoreNonPlate
+//       },
+//       mqtt: {
+//         broker: formData.mqttBroker,
+//         topic: formData.mqttTopic
+//       },
+//       database: {
+//         host: formData.dbHost,
+//         name: formData.dbName,
+//         user: formData.dbUser,
+//         password: formData.dbPassword
+//       },
+//       push: {
+//         server: formData.pushServer,
+//         credentials: formData.pushCredentials
+//       }
+//     }
+
+//     const result = await saveSettingsConfig(config)
+//     return result
+//   } catch (error) {
+//     console.error('Error saving config:', error)
+//     return { success: false, error: 'Failed to save configuration' }
+//   }
+// }
+
+export async function getSettings() {
+  try {
+    const config = await getConfig()
+    return { success: true, data: config }
+  } catch (error) {
+    console.error('Error getting settings:', error)
+    return { success: false, error: 'Failed to get settings' }
+  }
+}
+
+export async function saveSettings(formData) {  // renamed from saveConfig to avoid confusion
+  try {
+    const config = {
+      general: {
+        maxRecords: parseInt(formData.maxRecords),
+        ignoreNonPlate: formData.ignoreNonPlate
+      },
+      mqtt: {
+        broker: formData.mqttBroker,
+        topic: formData.mqttTopic
+      },
+      database: {
+        host: formData.dbHost,
+        name: formData.dbName,
+        user: formData.dbUser,
+        password: formData.dbPassword
+      },
+      push: {
+        server: formData.pushServer,
+        credentials: formData.pushCredentials
+      }
+    }
+
+    const result = await saveConfig(config)
+    return result
+  } catch (error) {
+    console.error('Error saving config:', error)
+    return { success: false, error: 'Failed to save configuration' }
+  }
+}
+
+export async function changePassword(currentPassword, newPassword) {
+  try {
+    const config = await getAuthConfig()
+    
+    if (hashPassword(currentPassword) !== config.password) {
+      return { success: false, error: 'Current password is incorrect' }
+    }
+    
+    await updateAuthConfig({
+      ...config,
+      password: hashPassword(newPassword)
+    })
+    
     return { success: true }
   } catch (error) {
-    console.error('Error writing config file:', error)
-    return { success: false, error: error.message }
+    console.error('Error changing password:', error)
+    return { success: false, error: 'Failed to change password' }
+  }
+}
+
+export async function regenerateApiKey() {
+  try {
+    const config = await getAuthConfig()
+    const newApiKey = crypto.randomBytes(32).toString('hex')
+    
+    await updateAuthConfig({
+      ...config,
+      apiKey: newApiKey
+    })
+    
+    return { success: true, apiKey: newApiKey }
+  } catch (error) {
+    console.error('Error regenerating API key:', error)
+    return { success: false, error: 'Failed to regenerate API key' }
   }
 }

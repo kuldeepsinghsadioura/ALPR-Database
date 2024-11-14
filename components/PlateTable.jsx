@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
-import { Search, Filter, Tag, Plus, Trash2, X } from 'lucide-react'
+import { Search, Filter, Tag, Plus, Trash2, X, CalendarDays } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,180 +23,118 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { getTags, addKnownPlate, tagPlate, untagPlate, deletePlate } from '@/app/actions'
+import { format } from 'date-fns'
 
-
-export default function PlateTable({ initialData }) {
-  const [data, setData] = useState(initialData)
-  const [filteredData, setFilteredData] = useState(initialData)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTag, setSelectedTag] = useState('all')
+export default function PlateTable({
+  data,
+  loading,
+  availableTags,
+  pagination,
+  filters,
+  onUpdateFilters,
+  onAddTag,
+  onRemoveTag,
+  onAddKnownPlate,
+  onDeleteRecord
+}) {
+  // Only keep state for modals and temporary form data
   const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false)
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
   const [activePlate, setActivePlate] = useState(null)
   const [newKnownPlate, setNewKnownPlate] = useState({ name: '', notes: '' })
-  const [availableTags, setAvailableTags] = useState([])
 
-  useEffect(() => {
-    const loadTags = async () => {
-      const result = await getTags();
-      if (result.success) {
-        setAvailableTags(result.data);
-      }
-    }
-    loadTags();
-  }, [])
-
-  useEffect(() => {
-    const filtered = data.filter(plate => 
-      plate.plate_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedTag === 'all' || plate.tags?.some(tag => tag.name === selectedTag))
-    )
-    setFilteredData(filtered)
-  }, [data, searchTerm, selectedTag])
-
-  const handleAddTag = async (plateNumber, tagName) => {
-    try {
-      const formData = new FormData();
-      formData.append('plateNumber', plateNumber);
-      formData.append('tagName', tagName);
-      
-      const result = await tagPlate(formData);
-      if (result.success) {
-        // Update local state to reflect the new tag
-        setData(prevData => prevData.map(plate => {
-          if (plate.plate_number === plateNumber) {
-            const newTag = availableTags.find(t => t.name === tagName);
-            return {
-              ...plate,
-              tags: [...(plate.tags || []), newTag]
-            };
-          }
-          return plate;
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to add tag:', error);
-    }
-  }
-
-  const handleRemoveTag = async (plateNumber, tagName) => {
-    try {
-      const formData = new FormData();
-      formData.append('plateNumber', plateNumber);
-      formData.append('tagName', tagName);
-      
-      const result = await untagPlate(formData);
-      if (result.success) {
-        setData(prevData => prevData.map(plate => {
-          if (plate.plate_number === plateNumber) {
-            return {
-              ...plate,
-              tags: (plate.tags || []).filter(tag => tag.name !== tagName)
-            };
-          }
-          return plate;
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to remove tag:', error);
-    }
-  }
-
-  const handleAddKnownPlate = async () => {
-    if (!activePlate) return;
-    try {
-      const formData = new FormData();
-      formData.append('plateNumber', activePlate.plate_number);
-      formData.append('name', newKnownPlate.name);
-      formData.append('notes', newKnownPlate.notes);
-      
-      const result = await addKnownPlate(formData);
-      if (result.success) {
-        setData(prevData => prevData.map(plate => 
-          plate.plate_number === activePlate.plate_number 
-            ? { ...plate, known_name: newKnownPlate.name, notes: newKnownPlate.notes }
-            : plate
-        ));
-        setIsAddKnownPlateOpen(false);
-        setNewKnownPlate({ name: '', notes: '' });
-      }
-    } catch (error) {
-      console.error('Failed to add known plate:', error);
-    }
-  }
-
-  const handleDeleteRecord = async () => {
-    if (!activePlate) return;
-    try {
-      const formData = new FormData();
-      formData.append('plateNumber', activePlate.plate_number);
-      
-      const result = await deletePlate(formData);
-      if (result.success) {
-        setData(prevData => prevData.filter(plate => plate.id !== activePlate.id));
-        setIsDeleteConfirmOpen(false);
-      }
-    } catch (error) {
-      console.error('Failed to delete record:', error);
-    }
-  }
-
+  // Helper functions
   const getImageUrl = (base64Data) => {
-    if (!base64Data) {
-      return '/placeholder-image.jpg'; // You can replace this with your preferred placeholder image
-    }
-    // Check if the string already includes the data URL prefix
-    if (base64Data.startsWith('data:image/jpeg;base64,')) {
-      return base64Data;
-    }
-    // If not, add the prefix
-    return `data:image/jpeg;base64,${base64Data}`;
-  };
+    if (!base64Data) return '/placeholder-image.jpg'
+    if (base64Data.startsWith('data:image/jpeg;base64,')) return base64Data
+    return `data:image/jpeg;base64,${base64Data}`
+  }
 
   const handleImageClick = (e, plate) => {
-    e.preventDefault();
-    
-    // Don't open window if there's no image data
-    if (!plate.image_data) {
-      return;
-    }
-
-    const win = window.open();
+    e.preventDefault()
+    if (!plate.image_data) return
+    const win = window.open()
     if (win) {
       win.document.write(`
         <html>
-          <head>
-            <title>License Plate Image - ${plate.plate_number}</title>
-          </head>
+          <head><title>License Plate Image - ${plate.plate_number}</title></head>
           <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000;">
             <img src="${getImageUrl(plate.image_data)}" 
                  style="max-width: 100%; max-height: 100vh; object-fit: contain;" 
                  alt="${plate.plate_number}" />
           </body>
         </html>
-      `);
+      `)
     }
-  };
+  }
+
+  // Handler functions
+  const handleSearchChange = (e) => {
+    onUpdateFilters({ search: e.target.value })
+  }
+
+  const handleTagChange = (value) => {
+    onUpdateFilters({ tag: value })
+  }
+
+  const handleDateRangeSelect = (range) => {
+    onUpdateFilters({
+      dateFrom: range.from ? format(range.from, 'yyyy-MM-dd') : null,
+      dateTo: range.to ? format(range.to, 'yyyy-MM-dd') : null
+    })
+  }
+
+  const handlePageSizeChange = (value) => {
+    onUpdateFilters({ pageSize: value })
+  }
+
+  const handleAddKnownPlateSubmit = async () => {
+    if (!activePlate) return
+    await onAddKnownPlate(activePlate.plate_number, newKnownPlate.name, newKnownPlate.notes)
+    setIsAddKnownPlateOpen(false)
+    setNewKnownPlate({ name: '', notes: '' })
+  }
+
+  const handleDeleteSubmit = async () => {
+    if (!activePlate) return
+    await onDeleteRecord(activePlate.plate_number)
+    setIsDeleteConfirmOpen(false)
+  }
+
+  const clearFilters = () => {
+    onUpdateFilters({
+      search: '',
+      tag: 'all',
+      dateFrom: null,
+      dateTo: null
+    })
+  }
 
   return (
     <Card>
       <CardContent className="py-4">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
           <div className="flex items-center space-x-2">
             <Search className="text-gray-400 dark:text-gray-500" />
             <Input
               placeholder="Search plates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.search}
+              onChange={handleSearchChange}
               className="w-64"
             />
           </div>
+
           <div className="flex items-center space-x-2">
             <Filter className="text-gray-400 dark:text-gray-500" />
-            <Select value={selectedTag} onValueChange={setSelectedTag}>
+            <Select value={filters.tag} onValueChange={handleTagChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by tag" />
               </SelectTrigger>
@@ -212,8 +150,73 @@ export default function PlateTable({ initialData }) {
                 ))}
               </SelectContent>
             </Select>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  {filters.dateRange.from ? (
+                    filters.dateRange.to ? (
+                      <>
+                        {format(filters.dateRange.from, "LLL dd")} -{" "}
+                        {format(filters.dateRange.to, "LLL dd")}
+                      </>
+                    ) : (
+                      format(filters.dateRange.from, "LLL dd")
+                    )
+                  ) : (
+                    "Date Range"
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  selected={{
+                    from: filters.dateRange.from,
+                    to: filters.dateRange.to,
+                  }}
+                  onSelect={handleDateRangeSelect}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+
+            {(filters.search || filters.tag !== 'all' || filters.dateRange.from) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show</span>
+            <Select
+              value={pagination.pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue>{pagination.pageSize}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 25, 50, 100].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground">per page</span>
           </div>
         </div>
+
         <div className="rounded-md border dark:border-gray-700">
           <Table>
             <TableHeader>
@@ -228,115 +231,158 @@ export default function PlateTable({ initialData }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((plate) => (
-                <TableRow key={plate.id}>
-                  <TableCell>
-                    <a 
-                      href={getImageUrl(plate.image_data)}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="cursor-pointer"
-                      onClick={(e) => handleImageClick(e, plate)}
-                    >
-                      <Image
-                        src={`data:image/jpeg;base64,${plate.image_data}`}
-                        alt={plate.plate_number}
-                        width={100}
-                        height={75}
-                        className="rounded hover:opacity-80 transition-opacity"
-                      />
-                    </a>
-                  </TableCell>
-                  <TableCell className={`font-medium font-mono ${plate.flagged && 'text-[#F31260]'} `}>
-                    {plate.plate_number}
-                    {plate.known_name && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-sans">{plate.known_name}</div>
-                    )}
-                  </TableCell>
-                  <TableCell>{plate.vehicle_description}</TableCell>
-                  <TableCell>{plate.occurrence_count}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {plate.tags?.length > 0 ? (
-                        plate.tags.map((tag) => (
-                          <Badge 
-                            key={tag.name} 
-                            variant="secondary"
-                            className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
-                            style={{ backgroundColor: tag.color, color: '#fff' }}
-                          >
-                            <span>{tag.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
-                              onClick={() => handleRemoveTag(plate.plate_number, tag.name)}
-                            >
-                              <X className="h-3 w-3" />
-                              <span className="sr-only">Remove {tag.name} tag</span>
-                            </Button>
-                          </Badge>
-                        ))
-                      ) : (
-                        <div className="text-sm text-gray-500 dark:text-gray-400 italic">No tags</div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(plate.timestamp).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Tag className="h-4 w-4" />
-                            <span className="sr-only">Add tag</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          {availableTags.map(tag => (
-                          <DropdownMenuItem 
-                            key={tag.name} 
-                            onClick={() => handleAddTag(plate.plate_number, tag.name)}
-                          >
-                            <div className="flex items-center">
-                              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: tag.color }} />
-                              {tag.name}
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                      </DropdownMenu>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setActivePlate(plate)
-                          setIsAddKnownPlateOpen(true)
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span className="sr-only">Add to known plates</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => {
-                          setActivePlate(plate)
-                          setIsDeleteConfirmOpen(true)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete record</span>
-                      </Button>
-                    </div>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    Loading...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    No results found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((plate) => (
+                  <TableRow key={plate.id}>
+                    <TableCell>
+                      <a 
+                        href={getImageUrl(plate.image_data)}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="cursor-pointer"
+                        onClick={(e) => handleImageClick(e, plate)}
+                      >
+                        <Image
+                          src={getImageUrl(plate.image_data)}
+                          alt={plate.plate_number}
+                          width={100}
+                          height={75}
+                          className="rounded hover:opacity-80 transition-opacity"
+                        />
+                      </a>
+                    </TableCell>
+                    <TableCell className={`font-medium font-mono ${plate.flagged && 'text-[#F31260]'}`}>
+                      {plate.plate_number}
+                      {plate.known_name && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400 font-sans">
+                          {plate.known_name}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{plate.vehicle_description}</TableCell>
+                    <TableCell>{plate.occurrence_count}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {plate.tags?.length > 0 ? (
+                          plate.tags.map((tag) => (
+                            <Badge 
+                              key={tag.name} 
+                              variant="secondary"
+                              className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
+                              style={{ backgroundColor: tag.color, color: '#fff' }}
+                            >
+                              <span>{tag.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                                onClick={() => onRemoveTag(plate.plate_number, tag.name)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </Badge>
+                          ))
+                        ) : (
+                          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                            No tags
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(plate.timestamp).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Tag className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {availableTags.map(tag => (
+                              <DropdownMenuItem 
+                                key={tag.name} 
+                                onClick={() => onAddTag(plate.plate_number, tag.name)}
+                              >
+                                <div className="flex items-center">
+                                  <div 
+                                    className="w-3 h-3 rounded-full mr-2" 
+                                    style={{ backgroundColor: tag.color }} 
+                                  />
+                                  {tag.name}
+                                </div>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setActivePlate(plate)
+                            setIsAddKnownPlateOpen(true)
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => {
+                            setActivePlate(plate)
+                            setIsDeleteConfirmOpen(true)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
+        </div>
+
+        <div className="flex items-center justify-between pt-4">
+          <div className="text-sm text-muted-foreground">
+            Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
+            {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{' '}
+            {pagination.total} results
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={pagination.onPreviousPage}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={pagination.onNextPage}
+              disabled={pagination.page * pagination.pageSize >= pagination.total}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </CardContent>
 
@@ -373,7 +419,7 @@ export default function PlateTable({ initialData }) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" onClick={handleAddKnownPlate}>Add to Known Plates</Button>
+            <Button type="submit" onClick={handleAddKnownPlateSubmit}>Add to Known Plates</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -388,10 +434,10 @@ export default function PlateTable({ initialData }) {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDeleteRecord}>Delete</Button>
+            <Button variant="destructive" onClick={handleDeleteSubmit}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
-  )
+  );
 }

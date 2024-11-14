@@ -5,13 +5,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import DashboardLayout from '@/components/layout/MainLayout';
 import TitleNavbar from '@/components/layout/TitleNav';
 import PlateDbTable from '@/components/plateDbTable';
+import { getPlates } from '@/app/actions';
 
 export default async function Database() {
-  // Initialize MQTT client on server
-  initMqtt();
   
   // Get initial data
-  const plateReads = await getPlateReads();
+  const plateReads = await getPlates();
   
   return (
 

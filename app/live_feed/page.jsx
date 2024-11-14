@@ -1,20 +1,17 @@
-import { getKnownPlates, getPlateReads } from '@/lib/db';
-import { KnownPlatesTable } from '@/components/KnownPlatesTable';
+import { Suspense } from 'react';
+import { PlateTableWrapper } from '@/components/PlateTableWrapper';
 import DashboardLayout from '@/components/layout/MainLayout';
-
-import { ThemeToggle } from '@/components/ThemeToggle';
 import BasicTitle from '@/components/layout/BasicTitle';
-import PlateTable from '@/components/PlateTable';
+import { getLatestPlateReads } from '../actions';
 
-export default async function KnownPlatesPage() {
-  // Get initial data
-  const plateReads = await getPlateReads();
-  
+export default function LivePlates() {
   return (
     <DashboardLayout>
-        <BasicTitle title="Live ALPR Feed" recording={true}>
-            <PlateTable initialData={plateReads} />
-        </BasicTitle>
+      <BasicTitle title="Live ALPR Feed" recording={true}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <PlateTableWrapper />
+        </Suspense>
+      </BasicTitle>
     </DashboardLayout>
   );
 }

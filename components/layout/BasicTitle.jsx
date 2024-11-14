@@ -6,7 +6,7 @@ export default function BasicTitle({ title, recording, children }) {
         <header className="border-b backdrop-blur">
           <div className="container flex h-14 items-center">
             <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-medium">
+              <h1 className="text-2xl font-semibold">
                 <span className="flex items-center gap-2">
                   {title}
                   {recording && <Radio className="text-red-500"/>}
