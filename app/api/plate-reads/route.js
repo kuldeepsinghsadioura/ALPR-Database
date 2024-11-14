@@ -6,6 +6,8 @@ import { sendPushoverNotification } from '@/lib/notifications';
 import { getAuthConfig } from '@/lib/auth';
 
 export async function POST(req) {
+  const data = await req.json(); 
+  console.log('Received plate read:', req.body);
   const apiKey = req.headers.get('x-api-key');
   if (!apiKey) {
     return Response.json(
@@ -34,7 +36,6 @@ export async function POST(req) {
   const dbClient = await pool.connect();
   
   try {
-    const data = await req.json();
 
     // Check if this plate should trigger a notification
     const shouldNotify = await checkPlateForNotification(data.plate_number);
