@@ -1,4 +1,4 @@
-import { pool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
@@ -24,6 +24,8 @@ export async function POST(req) {
     );
   }
 
+  // const dbClient = await pool.connect();
+  const pool = await getPool(); // Get pool instance
   const dbClient = await pool.connect();
 
   try {

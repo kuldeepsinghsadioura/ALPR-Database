@@ -5,7 +5,7 @@ mqtt:
   broker: ''
   topic: alpr/plates
 database:
-  host: localhost:32769
+  host: localhost:32768
   name: postgres
   user: postgres
   password: password

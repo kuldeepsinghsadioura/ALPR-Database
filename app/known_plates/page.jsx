@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/layout/MainLayout";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 import BasicTitle from "@/components/layout/BasicTitle";
+export const dynamic = "force-dynamic";
 
 export default async function KnownPlatesPage() {
   const knownPlates = await getKnownPlates();
