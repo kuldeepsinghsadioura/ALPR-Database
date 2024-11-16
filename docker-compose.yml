@@ -1,11 +1,9 @@
 version: "3.8"
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: algertc/alpr-dashboard:latest
     ports:
-      - "3000:3000"
+      - "3000:3000" # Change the first port to the port you want to expose
     environment:
       - NODE_ENV=production
       - ADMIN_PASSWORD=password # Change this to a secure password
