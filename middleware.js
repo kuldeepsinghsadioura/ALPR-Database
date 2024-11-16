@@ -17,6 +17,7 @@ export async function middleware(request) {
     "/favicon.ico",
     "/api/plate-reads", // API auth handled in the route itself
     "/api/verify-session",
+    "api/health-check",
   ];
 
   if (publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {

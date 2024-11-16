@@ -26,6 +26,7 @@ import {
 import { useForm } from "react-hook-form";
 import { saveSettings, regenerateApiKey, changePassword } from "@/app/actions";
 import DashboardLayout from "@/components/layout/MainLayout";
+import { SecuritySettings } from "./SecuritySettings";
 
 const navigation = [
   { title: "General", id: "general" },
@@ -43,6 +44,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
   const [apiKey, setApiKey] = useState(initialApiKey);
   const [showApiKey, setShowApiKey] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -69,52 +72,36 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     setSaveError("");
     setSaveSuccess(false);
 
-    const result = await saveSettings(data);
+    try {
+      const result = await saveSettings(data);
 
-    setIsSaving(false);
-    if (result.success) {
-      setSaveSuccess(true);
-      // Reset success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } else {
-      setSaveError(result.error);
-    }
-  };
+      if (result.success) {
+        setSaveSuccess(true);
+        // Try to load some data to test the new connection
+        try {
+          setTestingConnection(true);
+          const testResult = await fetch("/api/health-check");
+          if (!testResult.ok) {
+            throw new Error("Database connection failed with new settings");
+          }
+        } catch (error) {
+          setSaveError(
+            "Settings saved but database connection failed. Please check your database settings."
+          );
+          return;
+        } finally {
+          setTestingConnection(false);
+        }
 
-  const handlePasswordChange = async () => {
-    const formData = getValues();
-
-    // Validate password fields
-    if (
-      !formData.currentPassword ||
-      !formData.newPassword ||
-      !formData.confirmPassword
-    ) {
-      alert("All password fields are required");
-      return;
-    }
-
-    if (formData.newPassword !== formData.confirmPassword) {
-      alert("New passwords do not match");
-      return;
-    }
-
-    if (formData.newPassword.length < 8) {
-      alert("New password must be at least 8 characters long");
-      return;
-    }
-
-    const result = await changePassword(
-      formData.currentPassword,
-      formData.newPassword
-    );
-    if (result.success) {
-      alert("Password changed successfully");
-      setValue("currentPassword", "");
-      setValue("newPassword", "");
-      setValue("confirmPassword", "");
-    } else {
-      alert(result.error);
+        // Reset success message after 3 seconds
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setSaveError(result.error);
+      }
+    } catch (error) {
+      setSaveError(error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -154,6 +141,9 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             </div>
           </div>
         );
+
+      case "security":
+        return <SecuritySettings initialApiKey={initialApiKey} />;
 
       case "mqtt":
         return (

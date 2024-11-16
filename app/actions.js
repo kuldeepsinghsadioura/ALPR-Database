@@ -21,6 +21,8 @@ import {
   getFlaggedPlates,
   removePlate,
   removePlateRead,
+  getPool,
+  resetPool,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -56,7 +58,21 @@ export async function handleDeleteTag(tagName) {
 }
 
 export async function getDashboardMetrics() {
-  return await getMetrics();
+  try {
+    const metrics = await getMetrics();
+    return metrics;
+  } catch (error) {
+    console.error("Error fetching dashboard metrics:", error);
+    return {
+      time_distribution: [],
+      total_plates_count: 0,
+      total_reads: 0,
+      unique_plates: 0,
+      weekly_unique: 0,
+      suspicious_count: 0,
+      top_plates: [],
+    };
+  }
 }
 
 export async function updateTag(formData) {
@@ -405,10 +421,11 @@ export async function getSettings() {
 
 export async function saveSettings(formData) {
   try {
-    const config = {
+    // Transform form data to config structure
+    const newConfig = {
       general: {
-        maxRecords: parseInt(formData.maxRecords),
-        ignoreNonPlate: formData.ignoreNonPlate === true,
+        maxRecords: formData.maxRecords,
+        ignoreNonPlate: formData.ignoreNonPlate,
       },
       mqtt: {
         broker: formData.mqttBroker,
@@ -426,10 +443,29 @@ export async function saveSettings(formData) {
       },
     };
 
-    return await saveConfig(config);
+    // First save the config file
+    const saveResult = await saveConfig(newConfig);
+    if (!saveResult.success) {
+      return saveResult;
+    }
+
+    // Reset the pool to force new connection with new settings
+    await resetPool();
+
+    // Test the new connection
+    try {
+      await getPool();
+      return { success: true };
+    } catch (error) {
+      // If connection fails, return error but config file is already updated
+      return {
+        success: false,
+        error: `Settings saved but database connection failed: ${error.message}. Please check your database settings.`,
+      };
+    }
   } catch (error) {
-    console.error("Error saving config:", error);
-    return { success: false, error: "Failed to save configuration" };
+    console.error("Error saving settings:", error);
+    return { success: false, error: error.message };
   }
 }
 

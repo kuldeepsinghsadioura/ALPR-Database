@@ -1,7 +1,3 @@
-import { getPlateReads } from "@/lib/db";
-import { initMqtt } from "@/lib/mqtt-client";
-import PlateTable from "@/components/PlateTable";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import DashboardLayout from "@/components/layout/MainLayout";
 import TitleNavbar from "@/components/layout/TitleNav";
 import PlateDbTable from "@/components/plateDbTable";
