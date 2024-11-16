@@ -1,0 +1,14 @@
+general:
+  maxRecords: ''
+  ignoreNonPlate: ''
+mqtt:
+  broker: ''
+  topic: ''
+database:
+  host: ''
+  name: ''
+  user: ''
+  password: ''
+push:
+  server: ''
+  credentials: ''
