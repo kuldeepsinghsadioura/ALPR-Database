@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/Hero.jpg)
 
-## Getting Started
+## Overview
 
-First, run the development server:
+I've been using [CodeProject AI](https://github.com/codeproject/CodeProject.AI-Server) with [Mike Lud's](https://github.com/MikeLud) license plate model on [Blue Iris](https://blueirissoftware.com/) for a couple years now, but in this setup, the ALPR doesn't really do a whole lot. Really, you have more of a license plate camera with some AI as a bonus, and no nice way to take advantage the data other than parsing Blue Iris logs or paying $600+/year for PlateMinder or Rekor ALPR.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This project serves as a complement to a CodeProject Blue Iris setup, giving you a full-featured database to store and _actually use_ your ALPR data, **completely for free.** Complete with the following it has a very solid initial feature set and is a huge upgrade over the standard setup.
+
+#### Features:
+
+- Searchable Database
+- Live recognition feed with images
+- Add vehicles you know to a known plates table
+- Custom tags
+- Configurable retention
+- Set up push notifications for specific plates
+
+## Install
+
+Docker is the easiest and fastest way to deploy. Below is a docker-compose.yml file that will create a stack with both the application and a database. Just run the compose and you will have everything you need. If you prefer to use a separate database, you can either just spin up the container on its own from the image or use the docker-compose-without-database.yml in the repository.
+
+##### Quick Start:
+
+1. Ensure you have Docker installed on your system.
+
+2. In a new directory, create a file named `docker-compose.yml` and paste in the content below, changing the variables to the passwords you would like to use.
+
+3. Download the required database schema:
+   `curl -O https://raw.githubusercontent.com/algertc/alpr-dashboard/main/schema.sql `
+   Or download `schema.sql` from this repository and place it in the same directory.
+
+4. Start the application: `bash docker compose up -d `
+
+5. Access the application at `http://localhost:3000`
+
+### Docker Compose
+
+```yaml
+version: "3.8"
+services:
+  app:
+    image: algertc/alpr-dashboard:latest
+    restart: unless-stopped
+	ports:
+	- "3000:3000"  # Change the first port to the port you want to expose
+	environment:
+      - NODE_ENV=production
+      - ADMIN_PASSWORD=password  # Change this to a secure password
+      - DB_PASSWORD=password  # Change this to match your postgres password
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password  # Change this to a secure password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+There is currently support for both API Posts and MQTT, however, the API is significantly more reliable. Ingestion via MQTT is not recommended.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Get Your API Key
 
-## Learn More
+To start sending data, spin up the docker containers and log in to the application. **Navigate to settings -> security** in the bottom left hand corner. At the bottom of the page you should see an API key. Click the eye to reveal the key and copy it down for use on Blue Iris.
 
-To learn more about Next.js, take a look at the following resources:
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/apikey.png)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Set up an alert action within Blue Iris:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ALPR recognitions are sent to the `api/plate-reads` endpoint.
 
-## Deploy on Vercel
+We can make use of the built-in macros to dynamically get the alert data and send it as our payload. It should look like this:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    { "plate_number":"&PLATE", "Image":"&ALERT_JPEG", "timestamp":"&ALERT_TIME" }
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Set your API key with the x-api-key header as seen below.**
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/blueiris.png)
+
+#### Thats it! You're now collecting and storing your ALPR data.
+
+## Future Considerations
+
+- Better image storage instead of giant base64 in database.
+- Ability to share your plate database with others
+
+## Screenshots
+
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/4.png)
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/3.png)
+![enter image description here](https://github.com/algertc/ALPR-Database/blob/main/Images/2.png?raw=true)
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/1.png)
+![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/5.png)
+
+## Disclaimer
+
+This is meant to be a helpful project. It is not an official release. It is not secure and should not be exposed outside your network.
