@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+
+console.log("middleware is identified");
 
 export async function middleware(request) {
+  // console.log("\n--- Middleware Start ---");
+  // console.log("URL:", request.nextUrl.pathname);
+  // console.log("Method:", request.method);
+  // console.log("All Cookies:", request.cookies.getAll());
+  // console.log("Session Cookie:", request.cookies.get("session"));
+  // console.log("Headers:", Object.fromEntries(request.headers));
+
   // Allow public paths
   const publicPaths = [
     "/login",
     "/_next",
     "/favicon.ico",
-    "/api/plate-reads", // api auth handled in the route itself
+    "/api/plate-reads", // API auth handled in the route itself
+    "/api/verify-session",
   ];
 
   if (publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
@@ -46,36 +55,45 @@ export async function middleware(request) {
   // Check session cookie for authenticated routes
   const session = request.cookies.get("session");
   if (!session) {
+    console.log("No session cookie block run");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   try {
-    // Verify session
-    const response = await fetch(
-      new URL("/api/auth/verify-session", request.url),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ session: session.value }),
-      }
-    );
+    console.log("Verifying session", session.value);
+
+    const response = await fetch(new URL("/api/verify-session", request.url), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId: session.value,
+      }),
+    });
 
     if (!response.ok) {
-      // Clear invalid session
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.delete("session");
-      return response;
+      throw new Error(`Failed to verify session. Status: ${response.status}`);
     }
+
+    const result = await response.json();
+    console.log("Response JSON:", result);
+
+    if (!result.valid) {
+      console.log("Invalid session, clearing cookie");
+      const res = NextResponse.redirect(new URL("/login", request.url));
+      res.cookies.delete("session");
+      return res;
+    }
+
+    return NextResponse.next();
   } catch (error) {
     console.error("Session verification error:", error);
     return NextResponse.redirect(new URL("/login", request.url));
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  runtime: "nodejs",
 };

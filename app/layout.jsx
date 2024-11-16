@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { initializeAuth } from "@/lib/auth";
+import { Suspense } from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,14 +22,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   initializeAuth().catch(console.error);
+
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-neutral-950`}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
-        </ThemeProvider>
+        <Suspense fallback={<>Loading...</>}>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            {children}
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );

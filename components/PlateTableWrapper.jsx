@@ -221,11 +221,12 @@ export function PlateTableWrapper() {
 
   const handlePageChange = (direction) => {
     const currentPage = parseInt(page);
+    const currentPageSize = parseInt(pageSize);
     const newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
 
     if (
       newPage < 1 ||
-      (direction === "next" && currentPage * pagination.pageSize >= total)
+      (direction === "next" && currentPage * currentPageSize >= total)
     ) {
       return;
     }

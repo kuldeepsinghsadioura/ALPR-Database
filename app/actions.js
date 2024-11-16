@@ -32,7 +32,7 @@ import {
 import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import yaml from "js-yaml";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
 import { getConfig, saveConfig } from "@/lib/settings";
@@ -118,6 +118,7 @@ export async function deletePlateRead(formData) {
 
 export async function getKnownPlatesList() {
   try {
+    console.log("known plates action run");
     return { success: true, data: await getKnownPlates() };
   } catch (error) {
     console.error("Error getting known plates:", error);
@@ -326,8 +327,13 @@ export async function getFlagged() {
 }
 
 export async function getNotificationPlates() {
-  const plates = await getNotificationPlatesDB();
-  return plates;
+  try {
+    const plates = await getNotificationPlatesDB();
+    return { success: true, data: plates };
+  } catch (error) {
+    console.error("Error in getNotificationPlates action:", error);
+    return { success: false, error: "Failed to fetch notification plates" };
+  }
 }
 
 export async function addNotificationPlate(formData) {
@@ -342,8 +348,15 @@ export async function toggleNotification(formData) {
 }
 
 export async function deleteNotification(formData) {
-  const plateNumber = formData.get("plateNumber");
-  await deleteNotificationDB(plateNumber);
+  try {
+    const plateNumber = formData.get("plateNumber");
+    console.log("Server action received plateNumber:", plateNumber);
+    await deleteNotificationDB(plateNumber);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    return { success: false, error: "Failed to delete notification" };
+  }
 }
 
 export async function loginAction(formData) {
@@ -359,14 +372,19 @@ export async function loginAction(formData) {
     }
 
     const sessionId = await createSession();
+    console.log("Created session ID:", sessionId);
 
     const cookieStore = cookies();
     cookieStore.set("session", sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
     });
+
+    // Let's check if we can read the cookie right after setting it
+    const checkCookie = cookieStore.get("session");
+    console.log("Cookie after setting:", checkCookie);
 
     return { success: true };
   } catch (error) {
@@ -390,7 +408,7 @@ export async function saveSettings(formData) {
     const config = {
       general: {
         maxRecords: parseInt(formData.maxRecords),
-        ignoreNonPlate: formData.ignoreNonPlate,
+        ignoreNonPlate: formData.ignoreNonPlate === true,
       },
       mqtt: {
         broker: formData.mqttBroker,
@@ -408,8 +426,7 @@ export async function saveSettings(formData) {
       },
     };
 
-    const result = await saveConfig(config);
-    return result;
+    return await saveConfig(config);
   } catch (error) {
     console.error("Error saving config:", error);
     return { success: false, error: "Failed to save configuration" };

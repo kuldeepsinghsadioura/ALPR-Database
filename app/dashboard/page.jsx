@@ -42,8 +42,10 @@ const formatTimeRange = (hourBlock) => {
   const startHour = hourBlock;
   const endHour = hourBlock + 2;
   const formatHour = (hour) => {
-    const period = hour >= 12 ? "PM" : "AM";
-    const adjustedHour = hour % 12 || 12;
+    // Handle 24-hour wraparound for end time
+    const actualHour = hour >= 24 ? hour - 24 : hour;
+    const period = actualHour >= 12 ? "PM" : "AM";
+    const adjustedHour = actualHour % 12 || 12;
     return `${adjustedHour}${period}`;
   };
   return `${formatHour(startHour)}-${formatHour(endHour)}`;
@@ -181,12 +183,12 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle>Time Distribution</CardTitle>
               <CardDescription>
-                Frequency of plate sightings by time of day
+                Frequency of plate sightings by time of day (last 7 days)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-[400px]">
               {loading ? (
-                <Skeleton className="w-full h-[300px]" />
+                <Skeleton className="w-full h-full" />
               ) : (
                 <ChartContainer
                   config={{
@@ -195,13 +197,13 @@ export default function Dashboard() {
                       color: "hsl(var(--chart-1))",
                     },
                   }}
-                  className="h-[300px]"
+                  className="w-full h-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={metrics.time_distribution.map((item) => ({
                         timeRange: formatTimeRange(item.hour_block),
-                        frequency: parseInt(item.frequency) || 0,
+                        frequency: Math.round(parseFloat(item.frequency)) || 0,
                       }))}
                       margin={{
                         top: 20,
@@ -243,8 +245,8 @@ export default function Dashboard() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
               <div className="flex gap-2 font-medium leading-none">
-                Most active time:{" "}
-                {formatTimeRange(
+                Most active time:{mostActiveTime}
+                {/* {formatTimeRange(
                   metrics.time_distribution.reduce(
                     (max, current) =>
                       current.frequency > max.frequency ? current : max,
@@ -253,11 +255,11 @@ export default function Dashboard() {
                       timeRange: "0-0",
                     }
                   ).timeRange
-                )}
+                )} */}
                 <TrendingUp className="h-4 w-4" />
               </div>
               <div className="leading-none text-muted-foreground">
-                Showing frequency of sightings across 24 hours
+                Showing average daily frequency over the last 7 days
               </div>
             </CardFooter>
           </Card>
@@ -289,15 +291,12 @@ export default function Dashboard() {
                         </span>
                         <div>
                           <p className="font-semibold">{plate.plate}</p>
-                          <p className="text-sm text-muted-foreground">
+                          {/* <p className="text-sm text-muted-foreground">
                             Last seen: {formatTimestamp(plate.lastSeen)}
-                          </p>
+                          </p> */}
                         </div>
                       </div>
-                      <Badge
-                        variant={index === 0 ? "destructive" : "secondary"}
-                        className="ml-2"
-                      >
+                      <Badge variant={"secondary"} className="ml-2">
                         {plate.count} reads
                       </Badge>
                     </li>

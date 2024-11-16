@@ -8,7 +8,12 @@ import PlateDbTable from "@/components/plateDbTable";
 import { getPlates } from "@/app/actions";
 
 export default async function Database() {
-  const plateReads = await getPlates();
+  let plateReads = [];
+
+  if (typeof window !== "undefined") {
+    // Stop this from trying to connect during build
+    plateReads = await getPlates();
+  }
 
   return (
     <DashboardLayout>

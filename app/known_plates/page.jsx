@@ -1,18 +1,22 @@
-import { getKnownPlates } from "@/lib/db";
+import { getKnownPlatesList } from "@/app/actions";
 import { KnownPlatesTable } from "@/components/KnownPlatesTable";
 import DashboardLayout from "@/components/layout/MainLayout";
-
-import { ThemeToggle } from "@/components/ThemeToggle";
 import BasicTitle from "@/components/layout/BasicTitle";
+
 export const dynamic = "force-dynamic";
 
 export default async function KnownPlatesPage() {
-  const knownPlates = await getKnownPlates();
+  const response = await getKnownPlatesList();
+  const knownPlates = response.success ? response.data : [];
 
   return (
     <DashboardLayout>
       <BasicTitle title="Known Plates">
-        <KnownPlatesTable initialData={knownPlates} />
+        {knownPlates.length > 0 ? (
+          <KnownPlatesTable initialData={knownPlates} />
+        ) : (
+          <p>No known plates found in the database.</p>
+        )}
       </BasicTitle>
     </DashboardLayout>
   );

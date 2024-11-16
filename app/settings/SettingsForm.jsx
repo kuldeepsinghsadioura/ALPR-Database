@@ -38,6 +38,8 @@ const navigation = [
 export default function SettingsForm({ initialSettings, initialApiKey }) {
   const [activeSection, setActiveSection] = useState("general");
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [apiKey, setApiKey] = useState(initialApiKey);
   const [showApiKey, setShowApiKey] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -64,11 +66,18 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
 
   const onSubmit = async (data) => {
     setIsSaving(true);
+    setSaveError("");
+    setSaveSuccess(false);
+
     const result = await saveSettings(data);
+
     setIsSaving(false);
     if (result.success) {
+      setSaveSuccess(true);
+      // Reset success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } else {
-      alert("Error saving settings: " + result.error);
+      setSaveError(result.error);
     }
   };
 
@@ -149,7 +158,9 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
       case "mqtt":
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">MQTT Configuration</h3>
+            <h3 className="text-lg font-semibold">
+              MQTT Configuration (Not Recommended)
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="mqttBroker">MQTT Broker URL/IP</Label>
@@ -398,9 +409,19 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
                 <CardContent>{renderSection()}</CardContent>
                 {activeSection !== "security" && (
                   <CardFooter>
-                    <Button type="submit" disabled={isSaving}>
-                      {isSaving ? "Saving..." : "Save Settings"}
-                    </Button>
+                    <div className="w-full flex items-center gap-4">
+                      <Button type="submit" disabled={isSaving}>
+                        {isSaving ? "Saving..." : "Save Settings"}
+                      </Button>
+                      {saveSuccess && (
+                        <span className="text-green-600">
+                          Settings saved successfully!
+                        </span>
+                      )}
+                      {saveError && (
+                        <span className="text-red-600">Error: {saveError}</span>
+                      )}
+                    </div>
                   </CardFooter>
                 )}
               </Card>

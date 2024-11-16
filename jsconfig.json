@@ -8,6 +8,14 @@
     "module": "CommonJS",
     "target": "ES6"
   },
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "next.config.cjs", "auth.json"],
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "auth.json",
+    "next.config.js",
+    "middleware.js"
+  ],
   "exclude": ["node_modules"]
 }

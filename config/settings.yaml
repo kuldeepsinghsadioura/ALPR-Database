@@ -2,13 +2,13 @@ general:
   maxRecords: 5000
   ignoreNonPlate: false
 mqtt:
-  broker: ''
+  broker: ""
   topic: alpr/plates
 database:
-  host: localhost:32768
+  host: localhost:5432
   name: postgres
   user: postgres
   password: password
 push:
   server: https://api.pushover.net/1/messages.json
-  credentials: ud3ue323chmg3z33vqhghpuz7jqivi
+  credentials:
