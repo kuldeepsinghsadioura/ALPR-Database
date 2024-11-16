@@ -1,11 +1,11 @@
 general:
-  maxRecords: 5000
+  maxRecords: 2000
   ignoreNonPlate: false
 mqtt:
-  broker: ''
+  broker: ""
   topic: alpr/plates
 database:
-  host: 192.168.1.116:32768
+  host: localhost:5432
   name: postgres
   user: postgres
   password: password
