@@ -38,17 +38,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/layout/MainLayout";
 
-const formatTimeRange = (hourBlock) => {
-  const startHour = hourBlock;
-  const endHour = hourBlock + 2;
-  const formatHour = (hour) => {
-    // Handle 24-hour wraparound for end time
-    const actualHour = hour >= 24 ? hour - 24 : hour;
-    const period = actualHour >= 12 ? "PM" : "AM";
-    const adjustedHour = actualHour % 12 || 12;
+const formatTimeRange = (hour) => {
+  const formatHour = (h) => {
+    const period = h >= 12 ? "PM" : "AM";
+    const adjustedHour = h % 12 || 12;
     return `${adjustedHour}${period}`;
   };
-  return `${formatHour(startHour)}-${formatHour(endHour)}`;
+  return formatHour(hour);
 };
 
 const formatTimestamp = (timestamp) => {
@@ -121,12 +117,13 @@ export default function DashboardMetrics() {
 
   //Transform time distribution data
   const timeDistributionData = metrics.time_distribution
-    .filter((item) => item && item.timeRange) // Filter out invalid items
+    .filter((item) => item && typeof item.hour_block === "number")
     .map((item) => ({
-      ...item,
-      timeRange: formatTimeRange(item.timeRange),
-      frequency: parseInt(item.frequency) || 0, // Ensure frequency is a number
-    }));
+      timeRange: formatTimeRange(item.hour_block),
+      frequency: parseInt(item.frequency) || 0,
+      hour: item.hour_block, // Keep original hour for sorting
+    }))
+    .sort((a, b) => a.hour - b.hour);
 
   const mostActiveTime =
     timeDistributionData.length > 0
@@ -201,12 +198,15 @@ export default function DashboardMetrics() {
                     data={metrics.time_distribution.map((item) => ({
                       timeRange: formatTimeRange(item.hour_block),
                       frequency: Math.round(parseFloat(item.frequency)) || 0,
+                      fullLabel: `${formatTimeRange(
+                        item.hour_block
+                      )} - ${Math.round(parseFloat(item.frequency))} reads`,
                     }))}
                     margin={{
                       top: 20,
                       right: 30,
                       left: 20,
-                      bottom: 30,
+                      bottom: 50,
                     }}
                   >
                     <CartesianGrid vertical={false} />
@@ -217,11 +217,61 @@ export default function DashboardMetrics() {
                       axisLine={false}
                       angle={-45}
                       textAnchor="end"
-                      height={70}
+                      height={80}
+                      interval="preserveStartEnd"
+                      tick={(props) => {
+                        const { x, y, payload } = props;
+                        return (
+                          <g transform={`translate(${x},${y})`}>
+                            <text
+                              x={0}
+                              y={0}
+                              dy={16}
+                              textAnchor="end"
+                              fill="currentColor"
+                              transform="rotate(-45)"
+                              className="text-xs md:text-sm"
+                            >
+                              {payload.value}
+                            </text>
+                          </g>
+                        );
+                      }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => Math.round(value)}
                     />
                     <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
+                      cursor={{ fill: "rgba(0, 0, 0, 0.1)" }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="flex flex-col">
+                                  <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                    Time
+                                  </span>
+                                  <span className="font-bold">
+                                    {payload[0].payload.timeRange}
+                                  </span>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                    Reads
+                                  </span>
+                                  <span className="font-bold">
+                                    {payload[0].payload.frequency}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
                     />
                     <Bar
                       dataKey="frequency"
@@ -231,8 +281,8 @@ export default function DashboardMetrics() {
                       <LabelList
                         dataKey="frequency"
                         position="top"
-                        className="fill-foreground"
-                        fontSize={12}
+                        className="fill-foreground text-[10px] md:text-xs"
+                        formatter={(value) => Math.round(value)}
                       />
                     </Bar>
                   </BarChart>
@@ -242,21 +292,11 @@ export default function DashboardMetrics() {
           </CardContent>
           <CardFooter className="flex-col items-start gap-2 text-sm">
             <div className="flex gap-2 font-medium leading-none">
-              Most active time:{mostActiveTime}
-              {/* {formatTimeRange(
-                  metrics.time_distribution.reduce(
-                    (max, current) =>
-                      current.frequency > max.frequency ? current : max,
-                    metrics.time_distribution[0] || {
-                      frequency: 0,
-                      timeRange: "0-0",
-                    }
-                  ).timeRange
-                )} */}
+              Most active time: {mostActiveTime}
               <TrendingUp className="h-4 w-4" />
             </div>
             <div className="leading-none text-muted-foreground">
-              Showing average daily frequency over the last 7 days
+              Total plate reads by hour over the last 7 days
             </div>
           </CardFooter>
         </Card>
