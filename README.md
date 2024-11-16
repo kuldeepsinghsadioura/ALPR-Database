@@ -43,9 +43,9 @@ services:
   app:
     image: algertc/alpr-dashboard:latest
     restart: unless-stopped
-	ports:
-	- "3000:3000"  # Change the first port to the port you want to expose
-	environment:
+    ports:
+      - "3000:3000"  # Change the first port to the port you want to expose
+    environment:
       - NODE_ENV=production
       - ADMIN_PASSWORD=password  # Change this to a secure password
       - DB_PASSWORD=password  # Change this to match your postgres password
