@@ -2,6 +2,7 @@ version: "3.8"
 services:
   app:
     image: algertc/alpr-dashboard:latest
+    restart: unless-stopped
     ports:
       - "3000:3000" # Change the first port to the port you want to expose
     environment:
