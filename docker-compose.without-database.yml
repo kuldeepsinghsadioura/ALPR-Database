@@ -2,15 +2,16 @@ version: "3.8"
 services:
   app:
     build:
-      context: ./
-      target: production
+      context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - ADMIN_PASSWORD=password
+      - ADMIN_PASSWORD=password # Change this to a secure password
+      - DB_PASSWORD=password # Change this to your postgres password
+      - DB_HOST=db:5432 #host:port of your postgres database
+      - DB_NAME=postgres
+      - DB_USER=postgres
+    depends_on:
+      - db

@@ -4,32 +4,36 @@ import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 
 export async function POST(req) {
-  const data = await req.json();
-  console.log("Received plate read:", req.body);
-  const apiKey = req.headers.get("x-api-key");
-  if (!apiKey) {
-    return Response.json({ error: "API key is required" }, { status: 401 });
-  }
-
-  // Verify the API key against stored config
-  const authConfig = await getAuthConfig();
-  if (apiKey !== authConfig.apiKey) {
-    return Response.json({ error: "Invalid API key" }, { status: 401 });
-  }
-
-  if (!data?.plate_number) {
-    return Response.json(
-      { error: "Plate number is required" },
-      { status: 400 }
-    );
-  }
-
-  // const dbClient = await pool.connect();
-  const pool = await getPool(); // Get pool instance
-  const dbClient = await pool.connect();
+  let dbClient = null;
 
   try {
-    // Check if this plate should trigger a notification
+    const data = await req.json();
+    console.log("Received plate read data:", data);
+
+    // API key validation
+    const apiKey = req.headers.get("x-api-key");
+    if (!apiKey) {
+      return Response.json({ error: "API key is required" }, { status: 401 });
+    }
+
+    const authConfig = await getAuthConfig();
+    if (apiKey !== authConfig.apiKey) {
+      return Response.json({ error: "Invalid API key" }, { status: 401 });
+    }
+
+    if (!data?.plate_number) {
+      return Response.json(
+        { error: "Plate number is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get database connection with retries
+    const pool = await getPool();
+    dbClient = await pool.connect();
+    console.log("Database connection established");
+
+    // Check notifications
     const shouldNotify = await checkPlateForNotification(data.plate_number);
     if (shouldNotify) {
       await sendPushoverNotification(data.plate_number);
@@ -73,8 +77,16 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("Error processing request:", error);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json(
+      {
+        error: "Internal server error",
+        details: error.message,
+      },
+      { status: 500 }
+    );
   } finally {
-    dbClient.release();
+    if (dbClient) {
+      dbClient.release();
+    }
   }
 }

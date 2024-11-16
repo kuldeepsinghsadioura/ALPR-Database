@@ -5,7 +5,7 @@ mqtt:
   broker: ""
   topic: alpr/plates
 database:
-  host: localhost:5432
+  host: db:5432 #db is the name of the database container in docker and is used as the hostname
   name: postgres
   user: postgres
   password: password
