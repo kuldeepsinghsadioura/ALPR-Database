@@ -8,6 +8,7 @@ I've been using [CodeProject AI](https://github.com/codeproject/CodeProject.AI-S
 
 This project serves as a complement to a CodeProject Blue Iris setup, giving you a full-featured database to store and _actually use_ your ALPR data, **completely for free.** Complete with the following it has a very solid initial feature set and is a huge upgrade over the standard setup.
 
+Please star and share the project :)
 #### Features:
 
 - Searchable Database
