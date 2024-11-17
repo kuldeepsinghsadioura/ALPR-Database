@@ -80,7 +80,11 @@ export default function DashboardMetrics() {
   useEffect(() => {
     async function fetchMetrics() {
       try {
-        const data = await getDashboardMetrics();
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 7);
+        const data = await getDashboardMetrics(timeZone, startDate, endDate);
         // Ensure time_distribution is an array before processing
         const sanitizedData = {
           ...data,

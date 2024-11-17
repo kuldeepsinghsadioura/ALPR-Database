@@ -305,7 +305,8 @@ export default function PlateTable() {
 
   const handleOpenInsights = async (plateNumber) => {
     try {
-      const result = await fetchPlateInsights(plateNumber);
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const result = await fetchPlateInsights(plateNumber, timeZone);
       if (result.success) {
         setPlateInsights(result.data);
         setIsInsightsOpen(true);

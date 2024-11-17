@@ -57,10 +57,39 @@ export async function handleDeleteTag(tagName) {
   return await dbDeleteTag(tagName);
 }
 
-export async function getDashboardMetrics() {
+export async function getDashboardMetrics(timeZone, startDate, endDate) {
   try {
-    const metrics = await getMetrics();
-    return metrics;
+    const metrics = await getMetrics(startDate, endDate);
+
+    // Create an array with all 24 hour blocks
+    const allHourBlocks = Array.from({ length: 24 }, (_, i) => i);
+
+    // Format the time distribution data in the specified timezone
+    const timeDistribution = allHourBlocks.map((hourBlock) => {
+      const matchingReads = metrics.time_data.filter((read) => {
+        const timestamp = new Date(read.timestamp);
+        const localTimestamp = new Date(
+          timestamp.toLocaleString("en-US", { timeZone })
+        );
+        const localHour = localTimestamp.getHours();
+        return localHour === hourBlock;
+      });
+
+      const frequency = matchingReads.reduce(
+        (sum, read) => sum + read.frequency,
+        0
+      );
+
+      return {
+        hour_block: hourBlock,
+        frequency: frequency,
+      };
+    });
+
+    return {
+      ...metrics,
+      time_distribution: timeDistribution,
+    };
   } catch (error) {
     console.error("Error fetching dashboard metrics:", error);
     return {
@@ -271,10 +300,9 @@ export async function getLatestPlateReads({
   }
 }
 
-export async function fetchPlateInsights(formDataOrPlateNumber) {
+export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
   try {
     let plateNumber;
-
     if (formDataOrPlateNumber instanceof FormData) {
       plateNumber = formDataOrPlateNumber.get("plateNumber");
     } else {
@@ -286,6 +314,35 @@ export async function fetchPlateInsights(formDataOrPlateNumber) {
     }
 
     const insights = await getPlateInsights(plateNumber);
+
+    // Create an array with all 24 hour blocks
+    const allHourBlocks = Array.from({ length: 12 }, (_, i) => i * 2);
+
+    // Format the time distribution data in the specified timezone
+    const timeDistribution = allHourBlocks.map((hourBlock) => {
+      const timeRange = `${String(hourBlock).padStart(2, "0")}:00-${String(
+        (hourBlock + 2) % 24
+      ).padStart(2, "0")}:00`;
+      const matchingReads = insights.time_data.filter((read) => {
+        const timestamp = new Date(read.timestamp);
+        const localTimestamp = new Date(
+          timestamp.toLocaleString("en-US", { timeZone })
+        );
+        const readHourBlock = Math.floor(localTimestamp.getHours() / 2) * 2;
+        return readHourBlock === hourBlock;
+      });
+
+      const frequency = matchingReads.reduce(
+        (sum, read) => sum + read.frequency,
+        0
+      );
+
+      return {
+        timeBlock: hourBlock,
+        frequency: frequency,
+        timeRange: timeRange,
+      };
+    });
 
     return {
       success: true,
@@ -299,16 +356,13 @@ export async function fetchPlateInsights(formDataOrPlateNumber) {
           totalOccurrences: insights.total_occurrences,
         },
         tags: insights.tags || [],
-        timeDistribution: insights.time_distribution || [],
+        timeDistribution: timeDistribution,
         recentReads: insights.recent_reads || [],
       },
     };
   } catch (error) {
     console.error("Failed to get plate insights:", error);
-    return {
-      success: false,
-      error: "Failed to get plate insights",
-    };
+    return { success: false, error: "Failed to get plate insights" };
   }
 }
 
