@@ -39,6 +39,7 @@ import {
   deletePlate,
   fetchPlateInsights,
   getKnownPlatesList,
+  deletePlateFromDB,
 } from "@/app/actions";
 
 export function KnownPlatesTable({ initialData }) {
@@ -158,7 +159,7 @@ export function KnownPlatesTable({ initialData }) {
       const formData = new FormData();
       formData.append("plateNumber", activePlate.plate_number);
 
-      const result = await removeFromKnownPlates(formData);
+      const result = await deletePlate(formData);
       if (result.success) {
         setData((prevData) =>
           prevData.filter(
