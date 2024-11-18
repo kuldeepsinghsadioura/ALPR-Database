@@ -52,6 +52,10 @@ services:
       - DB_PASSWORD=password  # Change this to match your postgres password
     depends_on:
       - db
+    volumes:
+      - app-auth:/auth
+      - app-config:/config
+
   db:
     image: postgres:13
     environment:
@@ -71,6 +75,19 @@ services:
 
 volumes:
   db-data:
+  app-auth:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./auth
+  app-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./config
+
 ```
 
 ## Setup
@@ -93,6 +110,11 @@ We can make use of the built-in macros to dynamically get the alert data and sen
 
 **Set your API key with the x-api-key header as seen below.**
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/blueiris.png)
+
+Note: The &PLATE macro will only send one plate number per alert. If you need to detect multiple plates in a single alert/image, you can optionally use the memo instead of the plate number. Your payload should look like this:
+
+    { "memo":"&MEMO", "Image":"&ALERT_JPEG", "timestamp":"&ALERT_TIME" }
+
 
 #### Thats it! You're now collecting and storing your ALPR data.
 
