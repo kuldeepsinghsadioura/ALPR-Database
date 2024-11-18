@@ -10,6 +10,7 @@ import {
   Trash2,
   X,
   CalendarDays,
+  HelpCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import { Switch } from "@/components/ui/switch";
 
 export default function PlateTable({
   data,
@@ -99,9 +107,19 @@ export default function PlateTable({
     }
   };
 
-  // Handler functions
   const handleSearchChange = (e) => {
-    onUpdateFilters({ search: e.target.value });
+    const value = e.target.value.toUpperCase();
+    // Get the cursor position before updating
+    const cursorPosition = e.target.selectionStart;
+    onUpdateFilters({ search: value });
+    // After state update, restore cursor position
+    setTimeout(() => {
+      e.target.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+  };
+
+  const handleFuzzySearchToggle = (checked) => {
+    onUpdateFilters({ fuzzySearch: checked });
   };
 
   const handleTagChange = (value) => {
@@ -158,6 +176,36 @@ export default function PlateTable({
                 onChange={handleSearchChange}
                 className="w-64"
               />
+              <div className="flex items-center border rounded-md px-3 py-2 bg-background">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={filters.fuzzySearch}
+                    onCheckedChange={handleFuzzySearchToggle}
+                    id="fuzzy-search"
+                  />
+                  <label
+                    htmlFor="fuzzy-search"
+                    className="text-sm text-muted-foreground cursor-pointer"
+                  >
+                    Fuzzy Search
+                  </label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          Fuzzy search helps find plates with potential OCR
+                          misreads. For example, searching for
+                          &ldquo;7MLG803&rdquo; will also find similar plates
+                          like &ldquo;7NLG803&rdquo; or &ldquo;7ML6803&rdquo;.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </div>
             </div>
             <Select value={filters.tag} onValueChange={handleTagChange}>
               <SelectTrigger className="w-[180px]">

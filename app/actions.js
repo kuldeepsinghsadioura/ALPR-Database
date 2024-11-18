@@ -263,6 +263,7 @@ export async function getLatestPlateReads({
   page = 1,
   pageSize = 25,
   search = "",
+  fuzzySearch = false, // Add this parameter
   tag = "all",
   dateRange = null,
 } = {}) {
@@ -272,6 +273,7 @@ export async function getLatestPlateReads({
       pageSize,
       filters: {
         plateNumber: search,
+        fuzzySearch, // Pass it to the database query
         tag: tag !== "all" ? tag : undefined,
         dateRange,
       },

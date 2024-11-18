@@ -336,6 +336,8 @@ ALTER TABLE ONLY public.plate_tags
     ADD CONSTRAINT plate_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
 
 
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 --
 -- PostgreSQL database dump complete
 --

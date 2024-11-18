@@ -27,6 +27,7 @@ export function PlateTableWrapper() {
   const page = searchParams.get("page") || "1";
   const pageSize = searchParams.get("pageSize") || "25";
   const search = searchParams.get("search") || "";
+  const fuzzySearch = searchParams.get("fuzzySearch") === "true";
   const tag = searchParams.get("tag") || "all";
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
@@ -198,6 +199,7 @@ export function PlateTableWrapper() {
           page: parseInt(page),
           pageSize: parseInt(pageSize),
           search,
+          fuzzySearch,
           tag,
           dateRange:
             dateFrom && dateTo
@@ -217,7 +219,7 @@ export function PlateTableWrapper() {
     };
 
     fetchData();
-  }, [page, pageSize, search, tag, dateFrom, dateTo]);
+  }, [page, pageSize, search, fuzzySearch, tag, dateFrom, dateTo]);
 
   const handlePageChange = (direction) => {
     const currentPage = parseInt(page);
@@ -267,6 +269,7 @@ export function PlateTableWrapper() {
       }}
       filters={{
         search,
+        fuzzySearch,
         tag,
         dateRange: {
           from: dateFrom ? new Date(dateFrom) : null,
