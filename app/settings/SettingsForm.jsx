@@ -265,7 +265,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             <Input
               id="pushoverAppToken"
               name="pushoverAppToken"
-              type="password"
+              type="token"
               defaultValue={initialSettings.notifications?.pushover?.app_token}
               placeholder="Your Pushover application token"
               autoComplete="off"
@@ -282,7 +282,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             <Input
               id="pushoverUserKey"
               name="pushoverUserKey"
-              type="password"
+              type="token"
               defaultValue={initialSettings.notifications?.pushover?.user_key}
               placeholder="Your Pushover user key"
               autoComplete="off"

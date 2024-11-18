@@ -23,6 +23,8 @@ import {
   removePlateRead,
   getPool,
   resetPool,
+  updateNotificationPriorityDB,
+  getTagsForPlate,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -221,6 +223,16 @@ export async function tagPlate(formData) {
   try {
     const plateNumber = formData.get("plateNumber");
     const tagName = formData.get("tagName");
+
+    // Check if tag already exists on plate
+    const existingTags = await getTagsForPlate(plateNumber);
+    if (existingTags.includes(tagName)) {
+      return {
+        success: false,
+        error: `Tag "${tagName}" is already added to this plate`,
+      };
+    }
+
     await addTagToPlate(plateNumber, tagName);
     return { success: true };
   } catch (error) {
@@ -431,6 +443,28 @@ export async function deleteNotification(formData) {
   }
 }
 
+export async function updateNotificationPriority(formData) {
+  try {
+    // When using Select component, the values come directly as arguments
+    // not as FormData
+    const plateNumber = formData.plateNumber;
+    const priority = parseInt(formData.priority);
+
+    if (isNaN(priority) || priority < -2 || priority > 2) {
+      return { success: false, error: "Invalid priority value" };
+    }
+
+    const result = await updateNotificationPriorityDB(plateNumber, priority);
+    if (!result) {
+      return { success: false, error: "Notification not found" };
+    }
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Error updating notification priority:", error);
+    return { success: false, error: "Failed to update notification priority" };
+  }
+}
+
 export async function loginAction(formData) {
   const password = formData.get("password");
   if (!password) {
@@ -454,7 +488,7 @@ export async function loginAction(formData) {
     const cookieStore = cookies();
     cookieStore.set("session", sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
     });

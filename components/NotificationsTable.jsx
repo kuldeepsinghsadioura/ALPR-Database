@@ -4,6 +4,7 @@ import {
   addNotificationPlate,
   toggleNotification,
   deleteNotification,
+  updateNotificationPriority,
 } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,8 +27,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2, Bell } from "lucide-react";
+
+const priorityOptions = [
+  { value: -2, label: "Lowest", description: "No notification or alert" },
+  { value: -1, label: "Low", description: "Quiet notification" },
+  { value: 0, label: "Normal", description: "Normal notification" },
+  { value: 1, label: "High", description: "High-priority notification" },
+  { value: 2, label: "Emergency", description: "Require confirmation" },
+];
 
 export function NotificationsTable({ initialData }) {
   const [data, setData] = useState(initialData);
@@ -60,6 +76,23 @@ export function NotificationsTable({ initialData }) {
       setData((prev) =>
         prev.map((p) =>
           p.plate_number === plateNumber ? { ...p, enabled: !enabled } : p
+        )
+      );
+    }
+  };
+
+  const handlePriorityChange = async (plateNumber, priority) => {
+    const result = await updateNotificationPriority({
+      plateNumber,
+      priority,
+    });
+
+    if (result.success) {
+      setData((prev) =>
+        prev.map((p) =>
+          p.plate_number === plateNumber
+            ? { ...p, priority: parseInt(priority) }
+            : p
         )
       );
     }
@@ -189,6 +222,33 @@ export function NotificationsTable({ initialData }) {
                           </div>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={String(plate.priority ?? 1)}
+                        onValueChange={(value) =>
+                          handlePriorityChange(plate.plate_number, value)
+                        }
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={String(option.value)}
+                            >
+                              <div>
+                                <div>{option.label}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {option.description}
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       <Switch

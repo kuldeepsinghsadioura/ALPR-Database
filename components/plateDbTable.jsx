@@ -123,7 +123,6 @@ const isWithinDateRange = (firstSeenDate, selectedDateRange) => {
     !Array.isArray(selectedDateRange) ||
     selectedDateRange.length !== 2
   ) {
-    console.log("No date range applied, returning true.");
     return true; // No range filter applied
   }
 
@@ -133,10 +132,10 @@ const isWithinDateRange = (firstSeenDate, selectedDateRange) => {
   const formattedFirstSeenDate = formatTimestamp(firstSeenDate);
 
   // Print the formatted dates for debugging
-  console.log("Comparing dates...");
-  console.log("Formatted First Seen Date:", formattedFirstSeenDate);
-  console.log("Formatted Start Date:", startDate);
-  console.log("Formatted End Date:", endDate);
+  // console.log("Comparing dates...");
+  // console.log("Formatted First Seen Date:", formattedFirstSeenDate);
+  // console.log("Formatted Start Date:", startDate);
+  // console.log("Formatted End Date:", endDate);
 
   // Compare formatted date strings lexicographically
   return (
@@ -181,7 +180,7 @@ export default function PlateTable() {
   }, []);
 
   useEffect(() => {
-    console.log("Filtering data...");
+    // console.log("Filtering data...");
     const filtered = data.filter((plate) => {
       const firstSeenDate = new Date(plate.first_seen_at);
       // Use the function
@@ -189,7 +188,7 @@ export default function PlateTable() {
         firstSeenDate,
         selectedDateRange
       );
-      console.log("Is within date range:", withinDateRange);
+      // console.log("Is within date range:", withinDateRange);
 
       // Other filtering conditions can follow
       return (

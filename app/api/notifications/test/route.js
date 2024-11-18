@@ -5,7 +5,6 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const plateNumber = formData.get("plateNumber");
-    const message = formData.get("message");
 
     if (!plateNumber) {
       return NextResponse.json(
@@ -14,19 +13,36 @@ export async function POST(request) {
       );
     }
 
-    const result = await sendPushoverNotification(plateNumber, message);
+    // Create a test message that makes it clear this is a test
+    const testMessage = `🔔 TEST NOTIFICATION:\nPlate number ${plateNumber} detected\n\nThis is a test notification sent from the ALPR Database settings panel.`;
+
+    const result = await sendPushoverNotification(plateNumber, testMessage);
 
     if (result.success) {
-      return NextResponse.json({ success: true, data: result.data });
+      return NextResponse.json({
+        success: true,
+        message: "Test notification sent successfully",
+        data: result.data,
+      });
     } else {
+      // If there's a specific error from Pushover, pass it through
       return NextResponse.json(
-        { success: false, error: result.error },
+        {
+          success: false,
+          error: result.error || "Failed to send test notification",
+          details: result.data,
+        },
         { status: 500 }
       );
     }
   } catch (error) {
+    console.error("Test notification error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error: "Failed to send test notification",
+        details: error.message,
+      },
       { status: 500 }
     );
   }

@@ -3,6 +3,40 @@ import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 
+// Helper function to extract plates from memo string
+function extractPlatesFromMemo(memo) {
+  if (!memo) return [];
+
+  // Split by comma to handle multiple detections
+  const detections = memo.split(",").map((d) => d.trim());
+
+  // Process each detection
+  const plates = detections
+    .map((detection) => {
+      // Split by colon to separate plate from confidence
+      const [plate] = detection.split(":");
+
+      // Basic plate validation
+      // Most plates are 5-8 characters
+      // Usually contains at least one letter and one number
+      // Allows for special characters like hyphens
+      if (
+        plate &&
+        plate.length >= 4 &&
+        plate.length <= 8 &&
+        /^[A-Z0-9-]+$/i.test(plate) && // Only alphanumeric and hyphen
+        /[A-Z]/i.test(plate) && // At least one letter
+        /[0-9]/.test(plate) // At least one number
+      ) {
+        return plate.toUpperCase();
+      }
+      return null;
+    })
+    .filter((plate) => plate !== null);
+
+  return [...new Set(plates)]; // Remove duplicates
+}
+
 export async function POST(req) {
   let dbClient = null;
 
@@ -21,9 +55,16 @@ export async function POST(req) {
       return Response.json({ error: "Invalid API key" }, { status: 401 });
     }
 
-    if (!data?.plate_number) {
+    // Extract plates either from memo or plate_number
+    const plates = data.memo
+      ? extractPlatesFromMemo(data.memo)
+      : data.plate_number
+      ? [data.plate_number]
+      : [];
+
+    if (plates.length === 0) {
       return Response.json(
-        { error: "Plate number is required" },
+        { error: "No valid plates found in request" },
         { status: 400 }
       );
     }
@@ -33,48 +74,56 @@ export async function POST(req) {
     dbClient = await pool.connect();
     console.log("Database connection established");
 
-    // Check notifications
-    const shouldNotify = await checkPlateForNotification(data.plate_number);
-    if (shouldNotify) {
-      await sendPushoverNotification(data.plate_number);
-    }
-
     const timestamp = data.timestamp || new Date().toISOString();
-    const result = await dbClient.query(
-      `WITH new_plate AS (
-        INSERT INTO plates (plate_number)
-        VALUES ($1)
-        ON CONFLICT (plate_number) DO NOTHING
-      ),
-      new_read AS (
-        INSERT INTO plate_reads (plate_number, image_data, timestamp)
-        SELECT $1, $2, $3
-        WHERE NOT EXISTS (
-          SELECT 1 FROM plate_reads 
-          WHERE plate_number = $1 AND timestamp = $3
-        )
-        RETURNING id
-      )
-      SELECT id FROM new_read`,
-      [data.plate_number, data.Image || null, timestamp]
-    );
+    const processedPlates = [];
+    const duplicatePlates = [];
 
-    if (result.rows.length === 0) {
-      return Response.json(
-        {
-          message: `Duplicate read: ${data.plate_number} at ${timestamp}`,
-        },
-        { status: 409 }
+    // Process each plate
+    for (const plate of plates) {
+      // Check notifications
+      const shouldNotify = await checkPlateForNotification(plate);
+      if (shouldNotify) {
+        await sendPushoverNotification(plate, null, data.Image);
+      }
+
+      const result = await dbClient.query(
+        `WITH new_plate AS (
+          INSERT INTO plates (plate_number)
+          VALUES ($1)
+          ON CONFLICT (plate_number) DO NOTHING
+        ),
+        new_read AS (
+          INSERT INTO plate_reads (plate_number, image_data, timestamp)
+          SELECT $1, $2, $3
+          WHERE NOT EXISTS (
+            SELECT 1 FROM plate_reads 
+            WHERE plate_number = $1 AND timestamp = $3
+          )
+          RETURNING id
+        )
+        SELECT id FROM new_read`,
+        [plate, data.Image || null, timestamp]
       );
+
+      if (result.rows.length === 0) {
+        duplicatePlates.push(plate);
+      } else {
+        processedPlates.push({
+          plate,
+          id: result.rows[0].id,
+        });
+      }
     }
 
-    return Response.json(
-      {
-        message: `Processed new plate read: ${data.plate_number} at ${timestamp}`,
-        id: result.rows[0].id,
-      },
-      { status: 201 }
-    );
+    // Prepare response based on results
+    const response = {
+      processed: processedPlates,
+      duplicates: duplicatePlates,
+      message: `Processed ${processedPlates.length} plates, ${duplicatePlates.length} duplicates`,
+    };
+
+    const status = processedPlates.length > 0 ? 201 : 409;
+    return Response.json(response, { status });
   } catch (error) {
     console.error("Error processing request:", error);
     return Response.json(
