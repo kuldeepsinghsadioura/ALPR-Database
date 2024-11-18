@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { useTransition, useOptimistic } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,10 +24,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
-import { saveSettings, regenerateApiKey, changePassword } from "@/app/actions";
 import DashboardLayout from "@/components/layout/MainLayout";
-import { SecuritySettings } from "./SecuritySettings";
+import {
+  updateSettings,
+  updatePassword,
+  regenerateApiKey,
+} from "@/app/actions";
 
 const navigation = [
   { title: "General", id: "general" },
@@ -37,320 +40,335 @@ const navigation = [
 ];
 
 export default function SettingsForm({ initialSettings, initialApiKey }) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [activeSection, setActiveSection] = useState("general");
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState("");
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [apiKey, setApiKey] = useState(initialApiKey);
   const [showApiKey, setShowApiKey] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [testingConnection, setTestingConnection] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      maxRecords: initialSettings.general.maxRecords,
-      ignoreNonPlate: initialSettings.general.ignoreNonPlate,
-      mqttBroker: initialSettings.mqtt.broker,
-      mqttTopic: initialSettings.mqtt.topic,
-      dbHost: initialSettings.database.host,
-      dbName: initialSettings.database.name,
-      dbUser: initialSettings.database.user,
-      dbPassword: initialSettings.database.password,
-      pushServer: initialSettings.push.server,
-      pushCredentials: initialSettings.push.credentials,
-    },
-  });
+  const handleSettingsSubmit = async (formData) => {
+    setError("");
+    setSuccess(false);
 
-  const onSubmit = async (data) => {
-    setIsSaving(true);
-    setSaveError("");
-    setSaveSuccess(false);
+    // Only include the fields from the current section in the form data
+    const newFormData = new FormData();
 
-    try {
-      const result = await saveSettings(data);
-
-      if (result.success) {
-        setSaveSuccess(true);
-        // Try to load some data to test the new connection
-        try {
-          setTestingConnection(true);
-          const testResult = await fetch("/api/health-check");
-          if (!testResult.ok) {
-            throw new Error("Database connection failed with new settings");
-          }
-        } catch (error) {
-          setSaveError(
-            "Settings saved but database connection failed. Please check your database settings."
-          );
-          return;
-        } finally {
-          setTestingConnection(false);
-        }
-
-        // Reset success message after 3 seconds
-        setTimeout(() => setSaveSuccess(false), 3000);
-      } else {
-        setSaveError(result.error);
-      }
-    } catch (error) {
-      setSaveError(error.message);
-    } finally {
-      setIsSaving(false);
+    switch (activeSection) {
+      case "general":
+        newFormData.append("maxRecords", formData.get("maxRecords"));
+        newFormData.append("ignoreNonPlate", formData.get("ignoreNonPlate"));
+        break;
+      case "mqtt":
+        newFormData.append("mqttBroker", formData.get("mqttBroker"));
+        newFormData.append("mqttTopic", formData.get("mqttTopic"));
+        break;
+      case "database":
+        newFormData.append("dbHost", formData.get("dbHost"));
+        newFormData.append("dbName", formData.get("dbName"));
+        newFormData.append("dbUser", formData.get("dbUser"));
+        newFormData.append("dbPassword", formData.get("dbPassword"));
+        break;
+      case "push":
+        newFormData.append("pushServer", formData.get("pushServer"));
+        newFormData.append("pushCredentials", formData.get("pushCredentials"));
+        break;
     }
+
+    startTransition(async () => {
+      const result = await updateSettings(newFormData);
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        setError(result.error);
+      }
+    });
+  };
+
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    const formData = new FormData(event.target);
+
+    if (formData.get("newPassword") !== formData.get("confirmPassword")) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updatePassword(formData.get("newPassword"));
+      if (result.success) {
+        setSuccess(true);
+        event.target.reset();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const handleRegenerateApiKey = async () => {
-    const result = await regenerateApiKey();
-    if (result.success) {
-      setApiKey(result.apiKey);
-      setShowApiKey(true);
-      setShowDialog(false);
-    } else {
-      alert(result.error);
-    }
+    setError("");
+    startTransition(async () => {
+      const result = await regenerateApiKey();
+      if (result.success) {
+        setShowDialog(false);
+        setSuccess(true);
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
-  const renderSection = () => {
-    switch (activeSection) {
-      case "general":
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">General Settings</h3>
-            <div className="space-y-2">
-              <Label htmlFor="maxRecords">
-                Maximum number of records to keep
-              </Label>
+  const renderGeneralSection = () => (
+    // Add key to force re-render when section changes
+    <div key="general-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">General Settings</h3>
+      <div className="space-y-2">
+        <Label htmlFor="maxRecords">Maximum number of records to keep</Label>
+        <Input
+          id="maxRecords"
+          name="maxRecords"
+          type="number"
+          defaultValue={initialSettings.general.maxRecords}
+          autoComplete="off"
+        />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="ignoreNonPlate"
+          name="ignoreNonPlate"
+          defaultChecked={initialSettings.general.ignoreNonPlate}
+        />
+        <Label htmlFor="ignoreNonPlate">
+          Ignore non-plate number OCR reads
+        </Label>
+      </div>
+    </div>
+  );
+
+  const renderMqttSection = () => (
+    <div key="mqtt-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">MQTT Configuration</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="mqttBroker">MQTT Broker URL/IP</Label>
+          <Input
+            id="mqttBroker"
+            name="mqttBroker"
+            defaultValue={initialSettings.mqtt.broker}
+            placeholder="mqtt://example.com"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="mqttTopic">MQTT Topic</Label>
+          <Input
+            id="mqttTopic"
+            name="mqttTopic"
+            defaultValue={initialSettings.mqtt.topic}
+            placeholder="alpr/plates"
+            autoComplete="off"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDatabaseSection = () => (
+    <div key="database-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">Database Configuration</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="dbHost">Database Host & Port</Label>
+          <Input
+            id="dbHost"
+            name="dbHost"
+            defaultValue={initialSettings.database.host}
+            placeholder="localhost:5432"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dbName">Database Name</Label>
+          <Input
+            id="dbName"
+            name="dbName"
+            defaultValue={initialSettings.database.name}
+            placeholder="alpr_db"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dbUser">Database User</Label>
+          <Input
+            id="dbUser"
+            name="dbUser"
+            defaultValue={initialSettings.database.user}
+            placeholder="username"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="dbPassword">Database Password</Label>
+          <Input
+            id="dbPassword"
+            name="dbPassword"
+            type="password"
+            defaultValue={initialSettings.database.password}
+            placeholder="••••••••"
+            autoComplete="new-password"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPushSection = () => (
+    <div key="push-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">Push Notification Configuration</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="pushServer">Push Notification Server</Label>
+          <Input
+            id="pushServer"
+            name="pushServer"
+            defaultValue={initialSettings.push.server}
+            placeholder="https://push.example.com"
+            autoComplete="off"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="pushCredentials">Token or User Key</Label>
+          <Input
+            id="pushCredentials"
+            name="pushCredentials"
+            type="password"
+            defaultValue={initialSettings.push.credentials}
+            placeholder="••••••••"
+            autoComplete="new-password"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSecuritySection = () => (
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Change Password</h3>
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <Input
+              id="currentPassword"
+              name="currentPassword"
+              type="password"
+              required
+              autoComplete="current-password"
+            />
+          </div>
+          <div>
+            <Label htmlFor="newPassword">New Password</Label>
+            <Input
+              id="newPassword"
+              name="newPassword"
+              type="password"
+              required
+              autoComplete="new-password"
+            />
+          </div>
+          <div>
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              autoComplete="new-password"
+            />
+          </div>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Changing..." : "Change Password"}
+          </Button>
+        </form>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">API Key Management</h3>
+        <div>
+          <Label>Current API Key</Label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
               <Input
-                id="maxRecords"
-                {...register("maxRecords")}
-                type="number"
-                placeholder="10000"
+                readOnly
+                value={initialApiKey}
+                type={showApiKey ? "text" : "password"}
+                autoComplete="off"
               />
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="ignoreNonPlate" {...register("ignoreNonPlate")} />
-              <Label htmlFor="ignoreNonPlate">
-                Ignore non-plate number OCR reads
-              </Label>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowApiKey(!showApiKey)}
+              size="icon"
+            >
+              {showApiKey ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        );
+        </div>
 
-      case "security":
-        return <SecuritySettings initialApiKey={initialApiKey} />;
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogTrigger asChild>
+            <Button variant="destructive">Regenerate API Key</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to regenerate the API key? This will
+                invalidate the current key and any systems using it will need to
+                be updated.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRegenerateApiKey}>
+                Regenerate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
 
-      case "mqtt":
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
-              MQTT Configuration (Not Recommended)
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="mqttBroker">MQTT Broker URL/IP</Label>
-                <Input
-                  id="mqttBroker"
-                  {...register("mqttBroker")}
-                  placeholder="mqtt://example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mqttTopic">MQTT Topic</Label>
-                <Input
-                  id="mqttTopic"
-                  {...register("mqttTopic")}
-                  placeholder="alpr/plates"
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case "database":
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Database Configuration</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dbHost">Database Host & Port</Label>
-                <Input
-                  id="dbHost"
-                  {...register("dbHost")}
-                  placeholder="localhost:5432"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dbName">Database Name</Label>
-                <Input
-                  id="dbName"
-                  {...register("dbName")}
-                  placeholder="alpr_db"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dbUser">Database User</Label>
-                <Input
-                  id="dbUser"
-                  {...register("dbUser")}
-                  placeholder="username"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dbPassword">Database Password</Label>
-                <Input
-                  id="dbPassword"
-                  {...register("dbPassword")}
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case "push":
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">
-              Push Notification Configuration
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="pushServer">Push Notification Server</Label>
-                <Input
-                  id="pushServer"
-                  {...register("pushServer")}
-                  placeholder="https://push.example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pushCredentials">Token or User Key</Label>
-                <Input
-                  id="pushCredentials"
-                  {...register("pushCredentials")}
-                  type="password"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case "security":
-        return (
-          <div className="space-y-8">
-            {/* Password Change Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Change Password</h3>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    {...register("currentPassword")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    {...register("newPassword")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    {...register("confirmPassword")}
-                  />
-                </div>
-                <Button onClick={handlePasswordChange}>Change Password</Button>
-              </div>
-            </div>
-
-            {/* API Key Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">API Key Management</h3>
-              <div className="space-y-4">
-                <div>
-                  <Label>Current API Key</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Input
-                        readOnly
-                        value={apiKey}
-                        type={showApiKey ? "text" : "password"}
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                      size="icon"
-                    >
-                      {showApiKey ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <Dialog open={showDialog} onOpenChange={setShowDialog}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      onClick={(e) => {
-                        e.preventDefault(); // Prevent form submission
-                        setShowDialog(true);
-                      }}
-                    >
-                      Regenerate API Key
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Regenerate API Key</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to regenerate the API key? This
-                        will invalidate the current key and any systems using it
-                        will need to be updated.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowDialog(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={handleRegenerateApiKey}
-                      >
-                        Regenerate
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const renderSection = () => (
+    <div key={activeSection}>
+      {(() => {
+        switch (activeSection) {
+          case "general":
+            return renderGeneralSection();
+          case "mqtt":
+            return renderMqttSection();
+          case "database":
+            return renderDatabaseSection();
+          case "push":
+            return renderPushSection();
+          case "security":
+            return renderSecuritySection();
+          default:
+            return null;
+        }
+      })()}
+    </div>
+  );
 
   return (
     <DashboardLayout>
@@ -386,36 +404,48 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             </div>
           </nav>
         </header>
+
         <div className="flex-1">
           <div className="py-6">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <div className="mb-4 p-4 text-red-600 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 p-4 text-green-600 bg-green-50 rounded-md">
+                Settings updated successfully!
+              </div>
+            )}
+
+            {activeSection !== "security" ? (
+              <form action={handleSettingsSubmit}>
+                <Card className="w-full max-w-4xl">
+                  <CardHeader>
+                    <CardTitle>ALPR Database Settings</CardTitle>
+                    <CardDescription>
+                      Configure your ALPR database application settings
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>{renderSection()}</CardContent>
+                  <CardFooter>
+                    <Button type="submit" disabled={isPending}>
+                      {isPending ? "Saving..." : "Save Settings"}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            ) : (
               <Card className="w-full max-w-4xl">
                 <CardHeader>
-                  <CardTitle>ALPR Database Settings</CardTitle>
+                  <CardTitle>Security Settings</CardTitle>
                   <CardDescription>
-                    Configure your ALPR database application settings
+                    Manage your security settings and API keys
                   </CardDescription>
                 </CardHeader>
                 <CardContent>{renderSection()}</CardContent>
-                {activeSection !== "security" && (
-                  <CardFooter>
-                    <div className="w-full flex items-center gap-4">
-                      <Button type="submit" disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Settings"}
-                      </Button>
-                      {saveSuccess && (
-                        <span className="text-green-600">
-                          Settings saved successfully!
-                        </span>
-                      )}
-                      {saveError && (
-                        <span className="text-red-600">Error: {saveError}</span>
-                      )}
-                    </div>
-                  </CardFooter>
-                )}
               </Card>
-            </form>
+            )}
           </div>
         </div>
       </div>

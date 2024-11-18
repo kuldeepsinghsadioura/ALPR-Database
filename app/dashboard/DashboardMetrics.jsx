@@ -37,6 +37,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/layout/MainLayout";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const formatTimeRange = (hour) => {
   const formatHour = (h) => {
@@ -76,6 +78,7 @@ export default function DashboardMetrics() {
     top_plates: [],
   });
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchMetrics() {
@@ -337,9 +340,14 @@ export default function DashboardMetrics() {
                           </p> */}
                       </div>
                     </div>
-                    <Badge variant={"secondary"} className="ml-2">
-                      {plate.count} reads
-                    </Badge>
+                    <Link
+                      href={{
+                        pathname: "/live_feed",
+                        query: { search: plate.plate },
+                      }}
+                    >
+                      <Badge variant="secondary">{plate.count} reads</Badge>
+                    </Link>
                   </li>
                 ))}
               </ul>

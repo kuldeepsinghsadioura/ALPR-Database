@@ -1,5 +1,6 @@
+// app/settings/page.jsx
 import SettingsForm from "./SettingsForm";
-import { getConfig } from "@/lib/settings";
+import { getSettings } from "@/app/actions";
 import { getAuthConfig } from "@/lib/auth";
 
 // Force dynamic behavior since config can change
@@ -9,9 +10,13 @@ export const revalidate = 0;
 
 export default async function SettingsPage() {
   const [settings, authConfig] = await Promise.all([
-    getConfig(),
+    getSettings(),
     getAuthConfig(),
   ]);
+
+  if (!settings) {
+    throw new Error("Failed to load settings");
+  }
 
   return (
     <SettingsForm

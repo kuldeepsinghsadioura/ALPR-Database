@@ -437,22 +437,27 @@ export async function loginAction(formData) {
 
   try {
     const config = await getAuthConfig();
+
+    // Verify password
     if (hashPassword(password) !== config.password) {
+      console.log("Invalid password attempt");
       return { error: "Invalid password" };
     }
 
+    // Create new session
     const sessionId = await createSession();
     console.log("Created session ID:", sessionId);
 
+    // Set cookie
     const cookieStore = cookies();
     cookieStore.set("session", sessionId, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24, // 24 hours
     });
 
-    // Let's check if we can read the cookie right after setting it
+    // Verify cookie was set
     const checkCookie = cookieStore.get("session");
     console.log("Cookie after setting:", checkCookie);
 
@@ -464,82 +469,75 @@ export async function loginAction(formData) {
 }
 
 export async function getSettings() {
-  try {
-    const config = await getConfig();
-    return { success: true, data: config };
-  } catch (error) {
-    console.error("Error getting settings:", error);
-    return { success: false, error: "Failed to get settings" };
-  }
+  const config = await getConfig();
+  return config; // Return the config directly, no success wrapper needed
 }
 
-export async function saveSettings(formData) {
+export async function updateSettings(formData) {
   try {
-    // Transform form data to config structure
+    const currentConfig = await getConfig();
+
+    // Create new config with only the changed fields
     const newConfig = {
+      ...currentConfig,
       general: {
-        maxRecords: formData.maxRecords,
-        ignoreNonPlate: formData.ignoreNonPlate,
+        ...currentConfig.general,
+        maxRecords: formData.get("maxRecords")
+          ? parseInt(formData.get("maxRecords"))
+          : currentConfig.general.maxRecords,
+        ignoreNonPlate: formData.get("ignoreNonPlate") === "true",
       },
       mqtt: {
-        broker: formData.mqttBroker,
-        topic: formData.mqttTopic,
+        ...currentConfig.mqtt,
+        broker: formData.get("mqttBroker") ?? currentConfig.mqtt.broker,
+        topic: formData.get("mqttTopic") ?? currentConfig.mqtt.topic,
       },
       database: {
-        host: formData.dbHost,
-        name: formData.dbName,
-        user: formData.dbUser,
-        password: formData.dbPassword,
+        ...currentConfig.database,
+        host: formData.get("dbHost") ?? currentConfig.database.host,
+        name: formData.get("dbName") ?? currentConfig.database.name,
+        user: formData.get("dbUser") ?? currentConfig.database.user,
+        password:
+          formData.get("dbPassword") === "••••••••"
+            ? currentConfig.database.password
+            : formData.get("dbPassword") ?? currentConfig.database.password,
       },
       push: {
-        server: formData.pushServer,
-        credentials: formData.pushCredentials,
+        ...currentConfig.push,
+        server: formData.get("pushServer") ?? currentConfig.push.server,
+        credentials:
+          formData.get("pushCredentials") === "••••••••"
+            ? currentConfig.push.credentials
+            : formData.get("pushCredentials") ?? currentConfig.push.credentials,
       },
     };
 
-    // First save the config file
-    const saveResult = await saveConfig(newConfig);
-    if (!saveResult.success) {
-      return saveResult;
+    const result = await saveConfig(newConfig);
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
 
-    // Reset the pool to force new connection with new settings
-    await resetPool();
-
-    // Test the new connection
-    try {
-      await getPool();
-      return { success: true };
-    } catch (error) {
-      // If connection fails, return error but config file is already updated
-      return {
-        success: false,
-        error: `Settings saved but database connection failed: ${error.message}. Please check your database settings.`,
-      };
-    }
+    revalidatePath("/settings");
+    return { success: true };
   } catch (error) {
-    console.error("Error saving settings:", error);
+    console.error("Error updating settings:", error);
     return { success: false, error: error.message };
   }
 }
 
-export async function changePassword(currentPassword, newPassword) {
+export async function updatePassword(newPassword) {
   try {
+    const updatedPassword = hashPassword(newPassword);
     const config = await getAuthConfig();
-
-    if (hashPassword(currentPassword) !== config.password) {
-      return { success: false, error: "Current password is incorrect" };
-    }
-
     await updateAuthConfig({
       ...config,
-      password: hashPassword(newPassword),
+      password: updatedPassword,
     });
 
+    revalidatePath("/settings");
     return { success: true };
   } catch (error) {
-    console.error("Error changing password:", error);
-    return { success: false, error: "Failed to change password" };
+    return { success: false, error: error.message };
   }
 }
 
@@ -553,9 +551,9 @@ export async function regenerateApiKey() {
       apiKey: newApiKey,
     });
 
+    revalidatePath("/settings");
     return { success: true, apiKey: newApiKey };
   } catch (error) {
-    console.error("Error regenerating API key:", error);
-    return { success: false, error: "Failed to regenerate API key" };
+    return { success: false, error: error.message };
   }
 }

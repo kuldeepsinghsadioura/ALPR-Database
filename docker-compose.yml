@@ -11,6 +11,9 @@ services:
       - DB_PASSWORD=password # Change this to match your postgres password
     depends_on:
       - db
+    volumes:
+      - app-auth:/auth
+      - app-config:/config
 
   db:
     image: postgres:13
@@ -32,3 +35,15 @@ services:
 
 volumes:
   db-data:
+  app-auth:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./auth
+  app-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./config

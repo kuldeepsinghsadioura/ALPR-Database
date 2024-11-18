@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { changePassword, regenerateApiKey } from "@/app/actions";
+import { UpdatePassword, regenerateApiKey } from "@/app/actions";
 
 export function SecuritySettings({ initialApiKey }) {
   const [apiKey, setApiKey] = useState(initialApiKey);
@@ -29,66 +29,33 @@ export function SecuritySettings({ initialApiKey }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
+  async function handlePasswordChange(formData) {
     setError("");
-    setSuccess("");
-
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
-      setError("All password fields are required");
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("New passwords do not match");
-      return;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setError("New password must be at least 8 characters long");
-      return;
-    }
-
-    try {
-      const result = await changePassword(
-        passwordData.currentPassword,
-        passwordData.newPassword
-      );
-
+    startTransition(async () => {
+      const result = await updatePassword(formData);
       if (result.success) {
-        setSuccess("Password changed successfully");
-        setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
+        setSuccess(true);
+        // Reset form
+        formData.target.reset();
       } else {
         setError(result.error);
       }
-    } catch (error) {
-      setError("Failed to change password");
-    }
-  };
+    });
+  }
 
-  const handleRegenerateApiKey = async () => {
-    try {
-      const result = await regenerateApiKey();
+  async function handleRegenerateApiKey() {
+    setError("");
+    startTransition(async () => {
+      const result = await updateApiKey();
       if (result.success) {
         setApiKey(result.apiKey);
         setShowApiKey(true);
         setShowDialog(false);
-        setSuccess("API key regenerated successfully");
       } else {
         setError(result.error);
       }
-    } catch (error) {
-      setError("Failed to regenerate API key");
-    }
-  };
+    });
+  }
 
   return (
     <div className="space-y-8">
@@ -100,8 +67,6 @@ export function SecuritySettings({ initialApiKey }) {
           {success}
         </div>
       )}
-
-      {/* Password Change Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Change Password</h3>
         <form onSubmit={handlePasswordChange} className="space-y-4">
