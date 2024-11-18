@@ -10,6 +10,7 @@ import {
   Calendar,
   TrendingUp,
   Flag,
+  ArrowUpRightIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ import {
   deletePlateFromDB,
 } from "@/app/actions";
 import Image from "next/image";
+import Link from "next/link";
 
 const formatDaysAgo = (days) => {
   if (days === 0) return "Today";
@@ -775,7 +777,20 @@ export default function PlateTable() {
                   </CardFooter>
                 </Card>
                 <div>
-                  <h3 className="mb-4 text-md font-medium">Recent Reads</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Recent Reads</h3>
+                    <Link
+                      href={`/live_feed?search=${plateInsights.plateNumber}`}
+                      passHref
+                    >
+                      <Button variant="outline" size="sm" asChild>
+                        <span className="flex items-center gap-2">
+                          View All
+                          <ArrowUpRightIcon className="h-4 w-4" />
+                        </span>
+                      </Button>
+                    </Link>
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow>

@@ -7,9 +7,7 @@ export default function LivePlates() {
   return (
     <DashboardLayout>
       <BasicTitle title="Live ALPR Feed" recording={true}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <PlateTableWrapper />
-        </Suspense>
+        <PlateTableWrapper />
       </BasicTitle>
     </DashboardLayout>
   );
