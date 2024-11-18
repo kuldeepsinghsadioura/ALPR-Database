@@ -472,14 +472,16 @@ export async function loginAction(formData) {
 
 export async function getSettings() {
   const config = await getConfig();
-  return config; // Return the config directly, no success wrapper needed
+  return config;
 }
 
 export async function updateSettings(formData) {
   try {
     const currentConfig = await getConfig();
 
-    // Create new config with only the changed fields
+    // Debug log to see what's coming from the form
+    console.log("pushoverEnabled value:", formData.get("pushoverEnabled"));
+
     const newConfig = {
       ...currentConfig,
       general: {
@@ -487,7 +489,7 @@ export async function updateSettings(formData) {
         maxRecords: formData.get("maxRecords")
           ? parseInt(formData.get("maxRecords"))
           : currentConfig.general.maxRecords,
-        ignoreNonPlate: formData.get("ignoreNonPlate") === "true",
+        ignoreNonPlate: formData.get("ignoreNonPlate") === "on",
       },
       mqtt: {
         ...currentConfig.mqtt,
@@ -504,15 +506,35 @@ export async function updateSettings(formData) {
             ? currentConfig.database.password
             : formData.get("dbPassword") ?? currentConfig.database.password,
       },
-      push: {
-        ...currentConfig.push,
-        server: formData.get("pushServer") ?? currentConfig.push.server,
-        credentials:
-          formData.get("pushCredentials") === "••••••••"
-            ? currentConfig.push.credentials
-            : formData.get("pushCredentials") ?? currentConfig.push.credentials,
+      notifications: {
+        pushover: {
+          ...currentConfig.notifications?.pushover,
+          enabled: formData.get("pushoverEnabled") === "true", // Updated this line
+          app_token:
+            formData.get("pushoverAppToken") === "••••••••"
+              ? currentConfig.notifications?.pushover?.app_token
+              : formData.get("pushoverAppToken") ??
+                currentConfig.notifications?.pushover?.app_token,
+          user_key:
+            formData.get("pushoverUserKey") === "••••••••"
+              ? currentConfig.notifications?.pushover?.user_key
+              : formData.get("pushoverUserKey") ??
+                currentConfig.notifications?.pushover?.user_key,
+          title:
+            formData.get("pushoverTitle") ??
+            currentConfig.notifications?.pushover?.title,
+          priority: formData.get("pushoverPriority")
+            ? parseInt(formData.get("pushoverPriority"))
+            : currentConfig.notifications?.pushover?.priority,
+          sound:
+            formData.get("pushoverSound") ??
+            currentConfig.notifications?.pushover?.sound,
+        },
       },
     };
+
+    // Debug log to see what we're saving
+    console.log("Saving pushover config:", newConfig.notifications.pushover);
 
     const result = await saveConfig(newConfig);
     if (!result.success) {

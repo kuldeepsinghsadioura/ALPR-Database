@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
   addNotificationPlate,
@@ -27,13 +26,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Trash2, Bell } from "lucide-react";
 
 export function NotificationsTable({ initialData }) {
   const [data, setData] = useState(initialData);
   const [newPlate, setNewPlate] = useState("");
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [plateToDelete, setPlateToDelete] = useState(null);
+  const [testStatus, setTestStatus] = useState(null);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -64,6 +65,39 @@ export function NotificationsTable({ initialData }) {
     }
   };
 
+  const handleTestNotification = async (plateNumber) => {
+    try {
+      setTestStatus({
+        type: "loading",
+        message: "Sending test notification...",
+      });
+      const formData = new FormData();
+      formData.append("plateNumber", plateNumber);
+      formData.append("message", "This is a test notification");
+
+      const response = await fetch("/api/notifications/test", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setTestStatus({
+          type: "success",
+          message: "Test notification sent successfully!",
+        });
+      } else {
+        throw new Error(result.error || "Failed to send test notification");
+      }
+    } catch (error) {
+      setTestStatus({ type: "error", message: error.message });
+    }
+
+    // Clear status after 3 seconds
+    setTimeout(() => setTestStatus(null), 3000);
+  };
+
   const handleDeleteClick = (plate) => {
     setPlateToDelete(plate);
     setIsDeleteConfirmOpen(true);
@@ -75,7 +109,7 @@ export function NotificationsTable({ initialData }) {
     const formData = new FormData();
     formData.append("plateNumber", plateToDelete.plate_number);
 
-    await deleteNotification(formData); // Pass the formData
+    await deleteNotification(formData);
     setData((prev) =>
       prev.filter((p) => p.plate_number !== plateToDelete.plate_number)
     );
@@ -95,6 +129,20 @@ export function NotificationsTable({ initialData }) {
           />
           <Button type="submit">Create Notification</Button>
         </form>
+
+        {testStatus && (
+          <Alert
+            className={`mb-4 ${
+              testStatus.type === "error"
+                ? "bg-red-50 text-red-900 border-red-200"
+                : testStatus.type === "success"
+                ? "bg-green-50 text-green-900 border-green-200"
+                : "bg-blue-50 text-blue-900 border-blue-200"
+            }`}
+          >
+            <AlertDescription>{testStatus.message}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="rounded-md border dark:border-gray-700">
           <Table>
@@ -151,14 +199,27 @@ export function NotificationsTable({ initialData }) {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => handleDeleteClick(plate)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-blue-500 hover:text-blue-700"
+                          onClick={() =>
+                            handleTestNotification(plate.plate_number)
+                          }
+                          title="Send test notification"
+                        >
+                          <Bell className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteClick(plate)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

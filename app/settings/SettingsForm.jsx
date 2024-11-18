@@ -30,6 +30,7 @@ import {
   updatePassword,
   regenerateApiKey,
 } from "@/app/actions";
+import { Switch } from "@/components/ui/switch";
 
 const navigation = [
   { title: "General", id: "general" },
@@ -70,8 +71,21 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
         newFormData.append("dbPassword", formData.get("dbPassword"));
         break;
       case "push":
-        newFormData.append("pushServer", formData.get("pushServer"));
-        newFormData.append("pushCredentials", formData.get("pushCredentials"));
+        newFormData.append(
+          "pushoverEnabled",
+          formData.get("pushoverEnabled") === "on"
+        );
+        newFormData.append(
+          "pushoverAppToken",
+          formData.get("pushoverAppToken")
+        );
+        newFormData.append("pushoverUserKey", formData.get("pushoverUserKey"));
+        newFormData.append("pushoverTitle", formData.get("pushoverTitle"));
+        newFormData.append(
+          "pushoverPriority",
+          formData.get("pushoverPriority")
+        );
+        newFormData.append("pushoverSound", formData.get("pushoverSound"));
         break;
     }
 
@@ -227,28 +241,101 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
 
   const renderPushSection = () => (
     <div key="push-section" className="space-y-4">
-      <h3 className="text-lg font-semibold">Push Notification Configuration</h3>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="pushServer">Push Notification Server</Label>
-          <Input
-            id="pushServer"
-            name="pushServer"
-            defaultValue={initialSettings.push.server}
-            placeholder="https://push.example.com"
-            autoComplete="off"
+      <h3 className="text-lg font-semibold">Pushover Configuration</h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between py-2">
+          <div className="space-y-0.5">
+            <Label htmlFor="pushoverEnabled">Enable Pushover</Label>
+            <p className="text-sm text-muted-foreground">
+              Receive notifications when plates are detected
+            </p>
+          </div>
+          <Switch
+            id="pushoverEnabled"
+            name="pushoverEnabled"
+            defaultChecked={initialSettings.notifications?.pushover?.enabled}
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="pushCredentials">Token or User Key</Label>
-          <Input
-            id="pushCredentials"
-            name="pushCredentials"
-            type="password"
-            defaultValue={initialSettings.push.credentials}
-            placeholder="••••••••"
-            autoComplete="new-password"
-          />
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="pushoverAppToken">
+              Application Token (APP_TOKEN)
+            </Label>
+            <Input
+              id="pushoverAppToken"
+              name="pushoverAppToken"
+              type="password"
+              defaultValue={initialSettings.notifications?.pushover?.app_token}
+              placeholder="Your Pushover application token"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
+              // Use a random name attribute to further prevent autofill
+              {...{ "data-lpignore": "true" }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pushoverUserKey">User Key (USER_KEY)</Label>
+            <Input
+              id="pushoverUserKey"
+              name="pushoverUserKey"
+              type="password"
+              defaultValue={initialSettings.notifications?.pushover?.user_key}
+              placeholder="Your Pushover user key"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
+              {...{ "data-lpignore": "true" }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pushoverTitle">Notification Title</Label>
+            <Input
+              id="pushoverTitle"
+              name="pushoverTitle"
+              defaultValue={initialSettings.notifications?.pushover?.title}
+              placeholder="ALPR Alert"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
+              {...{ "data-lpignore": "true" }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pushoverPriority">Priority (-2 to 2)</Label>
+            <Input
+              id="pushoverPriority"
+              name="pushoverPriority"
+              type="number"
+              min="-2"
+              max="2"
+              defaultValue={initialSettings.notifications?.pushover?.priority}
+              autoComplete="off"
+              {...{ "data-lpignore": "true" }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pushoverSound">Notification Sound</Label>
+            <Input
+              id="pushoverSound"
+              name="pushoverSound"
+              defaultValue={initialSettings.notifications?.pushover?.sound}
+              placeholder="pushover"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-form-type="other"
+              {...{ "data-lpignore": "true" }}
+            />
+          </div>
         </div>
       </div>
     </div>
