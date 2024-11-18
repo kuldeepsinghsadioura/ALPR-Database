@@ -32,13 +32,15 @@ Docker is the easiest and fastest way to deploy. Below is a docker-compose.yml f
 
 2. In a new directory, create a file named `docker-compose.yml` and paste in the content below, changing the variables to the passwords you would like to use.
 
-3. Download the required database schema:
+3. Create two new directories / folders in this directory called "config" and "auth". These will ensure that your settings are saved separately and not lost during updates.
+
+4. Download the required database schema:
    `curl -O https://raw.githubusercontent.com/algertc/alpr-dashboard/main/schema.sql `
    Or, if you prefer a download link, click [here](https://github.com/algertc/ALPR-Database/blob/main/schema.sql) to download the schema from this repository. Place it in the same directory as your docker-compose.yml.
 
-4. Start the application: `bash docker compose up -d `
+5. Start the application: `bash docker compose up -d `
 
-5. Access the application at `http://localhost:3000`
+6. Access the application at `http://localhost:3000`
 
 ### Docker Compose
 
