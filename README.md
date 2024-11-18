@@ -16,7 +16,9 @@ Please star and share the project :)
 - Add vehicles you know to a known plates table
 - Custom tags
 - Configurable retention
-- Set up push notifications for specific plates
+- Configurable Push Notifications
+- Flexible API
+- Detailed system insights
 
 ## Install
 
