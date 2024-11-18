@@ -1,4 +1,6 @@
 # ALPR Database
+A Fully-Featured Automated License Plate Recognition Database for Blue Iris + CodeProject AI Server
+
 
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/Hero.jpg)
 
