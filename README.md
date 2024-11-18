@@ -38,7 +38,7 @@ Docker is the easiest and fastest way to deploy. Below is a docker-compose.yml f
    `curl -O https://raw.githubusercontent.com/algertc/alpr-dashboard/main/schema.sql `
    Or, if you prefer a download link, click [here](https://github.com/algertc/ALPR-Database/blob/main/schema.sql) to download the schema from this repository. Place it in the same directory as your docker-compose.yml.
 
-5. Start the application: `bash docker compose up -d `
+5. Start the application: `docker compose up -d `
 
 6. Access the application at `http://localhost:3000`
 
