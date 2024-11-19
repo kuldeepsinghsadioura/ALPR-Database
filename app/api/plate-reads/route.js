@@ -3,34 +3,134 @@ import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 
-// Helper function to extract plates from memo string
+// Revised to use a blacklist of all other possible AI labels if using the memo. This will filter any other AI objects out, while still allowing for weird OCR reads and vanity plates.
+const EXCLUDED_LABELS = [
+  "person",
+  "bicycle",
+  "car",
+  "motorcycle",
+  "bus",
+  "truck",
+  "bird",
+  "cat",
+  "dog",
+  "horse",
+  "sheep",
+  "cow",
+  "bear",
+  "deer",
+  "rabbit",
+  "raccoon",
+  "fox",
+  "skunk",
+  "squirrel",
+  "pig",
+  "vehicle",
+  "boat",
+  "bottle",
+  "chair",
+  "cup",
+  "table",
+  "airplane",
+  "train",
+  "traffic light",
+  "fire hydrant",
+  "stop sign",
+  "parking meter",
+  "bench",
+  "elephant",
+  "zebra",
+  "giraffe",
+  "backpack",
+  "umbrella",
+  "handbag",
+  "tie",
+  "suitcase",
+  "frisbee",
+  "skis",
+  "snowboard",
+  "sports ball",
+  "kite",
+  "baseball bat",
+  "baseball glove",
+  "skateboard",
+  "surfboard",
+  "tennis racket",
+  "wine glass",
+  "fork",
+  "knife",
+  "spoon",
+  "bowl",
+  "banana",
+  "apple",
+  "sandwich",
+  "orange",
+  "broccoli",
+  "carrot",
+  "hot dog",
+  "pizza",
+  "donut",
+  "cake",
+  "couch",
+  "potted plant",
+  "bed",
+  "dining table",
+  "toilet",
+  "tv",
+  "laptop",
+  "mouse",
+  "remote",
+  "keyboard",
+  "cell phone",
+  "microwave",
+  "oven",
+  "toaster",
+  "sink",
+  "refrigerator",
+  "book",
+  "clock",
+  "vase",
+  "scissors",
+  "teddy bear",
+  "hair drier",
+  "toothbrush",
+  "plate",
+  "dayplate",
+  "nightplate",
+  "people",
+  "motorbike",
+].map((label) => label.toLowerCase());
+
 function extractPlatesFromMemo(memo) {
   if (!memo) return [];
 
-  // Split by comma to handle multiple detections
+  // Split up all the detected objects/plates in memo
   const detections = memo.split(",").map((d) => d.trim());
 
-  // Process each detection
+  // Process each item in the memo
   const plates = detections
     .map((detection) => {
-      // Split by colon to separate plate from confidence
-      const [plate] = detection.split(":");
+      // Split by colon to separate label from confidence
+      const [label] = detection.split(":");
 
-      // Basic plate validation
-      // Most plates are 5-8 characters
-      // Usually contains at least one letter and one number
-      // Allows for special characters like hyphens
-      if (
-        plate &&
-        plate.length >= 4 &&
-        plate.length <= 8 &&
-        /^[A-Z0-9-]+$/i.test(plate) && // Only alphanumeric and hyphen
-        /[A-Z]/i.test(plate) && // At least one letter
-        /[0-9]/.test(plate) // At least one number
-      ) {
-        return plate.toUpperCase();
+      if (!label) return null;
+
+      // Convert to lowercase for comparison
+      const normalizedLabel = label.trim().toLowerCase();
+
+      // ignore other AI objects and only return plates
+      if (EXCLUDED_LABELS.includes(normalizedLabel)) {
+        return null;
       }
-      return null;
+
+      // The older dayplate and nightplate models return the plate in brackets, so check for these and remove them if they are present.
+      let plateNumber = label.trim();
+      if (plateNumber.includes("[") && plateNumber.includes("]")) {
+        plateNumber = plateNumber.replace(/\[|\]/g, "");
+      }
+
+      // Return cleaned plate number in uppercase
+      return plateNumber.toUpperCase();
     })
     .filter((plate) => plate !== null);
 

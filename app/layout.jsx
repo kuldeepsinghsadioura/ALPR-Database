@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { initializeAuth } from "@/lib/auth";
 import { Suspense } from "react";
+import VersionAlert from "@/components/UpdateAlert";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
       >
         <Suspense fallback={<>Loading...</>}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <VersionAlert />
             {children}
           </ThemeProvider>
         </Suspense>
