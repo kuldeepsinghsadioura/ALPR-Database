@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { getVersionInfo } from "@/lib/version";
 
 const CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
+const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export default function VersionAlert() {
   const [versionInfo, setVersionInfo] = useState(null);
@@ -24,14 +25,36 @@ export default function VersionAlert() {
   useEffect(() => {
     setMounted(true);
 
+    // Don't spam the update alert
+    const checkDismissalState = () => {
+      try {
+        const dismissedData = localStorage.getItem("versionAlertDismissed");
+        if (dismissedData) {
+          const { timestamp, version } = JSON.parse(dismissedData);
+          const now = Date.now();
+
+          if (
+            now - timestamp < DISMISS_DURATION &&
+            version === versionInfo?.latest
+          ) {
+            setIsAlertVisible(false);
+            return;
+          }
+        }
+        setIsAlertVisible(true);
+      } catch (error) {
+        console.error("Error checking dismissal state:", error);
+        setIsAlertVisible(true);
+      }
+    };
+
     // Initial check
     startTransition(async () => {
       try {
         const info = await getVersionInfo();
         if (info) {
           setVersionInfo(info);
-          // Reset alert visibility when new version is detected
-          setIsAlertVisible(true);
+          checkDismissalState();
         }
       } catch (error) {
         console.error("Error checking version:", error);
@@ -45,10 +68,7 @@ export default function VersionAlert() {
           const info = await getVersionInfo();
           if (info) {
             setVersionInfo(info);
-            // Only show alert for new versions after interval
-            if (info.needsUpdate && info.latest !== versionInfo?.latest) {
-              setIsAlertVisible(true);
-            }
+            checkDismissalState();
           }
         } catch (error) {
           console.error("Error checking version:", error);
@@ -62,10 +82,26 @@ export default function VersionAlert() {
     };
   }, [versionInfo?.latest]);
 
+  const handleDismiss = () => {
+    try {
+      // Save dismissal time and version to localStorage
+      localStorage.setItem(
+        "versionAlertDismissed",
+        JSON.stringify({
+          timestamp: Date.now(),
+          version: versionInfo.latest,
+        })
+      );
+    } catch (error) {
+      console.error("Error saving dismissal state:", error);
+    }
+    setIsAlertVisible(false);
+  };
+
   // Don't render anything during SSR
   if (!mounted) return null;
 
-  //Don't render if we don't have version info or no update is needed
+  // Don't render if we don't have version info or no update is needed or alert is closed
   if (
     isPending ||
     !versionInfo?.latest ||
@@ -99,7 +135,7 @@ export default function VersionAlert() {
           variant="ghost"
           size="sm"
           className="absolute right-2 top-2 h-8 w-8 p-0 hover:bg-slate-100"
-          onClick={() => setIsAlertVisible(false)}
+          onClick={handleDismiss}
           aria-label="Close alert"
         >
           <X className="h-4 w-4" />
@@ -113,6 +149,9 @@ export default function VersionAlert() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <p className="mb-4">
+                In the same directory you originally deployed from:
+              </p>
               <p className="mb-2">
                 1. Get the latest database schema in case any changes were made:
               </p>
@@ -121,8 +160,8 @@ export default function VersionAlert() {
                 https://raw.githubusercontent.com/algertc/ALPR-Database/main/schema.sql
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Place this file in the same directory as your docker-compose.yml
-                file. Alternatively, you can
+                This file should be in the same directory as your
+                docker-compose.yml file. Alternatively, you can
                 <a
                   href="https://github.com/algertc/ALPR-Database/blob/main/schema.sql"
                   target="_blank"
