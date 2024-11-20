@@ -1,4 +1,3 @@
-// app/notifications/page.jsx
 import { getNotificationPlates } from "@/app/actions";
 import { NotificationsTable } from "@/components/NotificationsTable";
 import DashboardLayout from "@/components/layout/MainLayout";
