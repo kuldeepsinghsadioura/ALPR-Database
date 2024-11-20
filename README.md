@@ -59,8 +59,8 @@ services:
     depends_on:
       - db
     volumes:
-      - app-auth:/auth
-      - app-config:/config
+      - app-auth:/app/auth
+      - app-config:/app/config
 
   db:
     image: postgres:13
