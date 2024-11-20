@@ -178,7 +178,7 @@ export default function VersionAlert() {
               <p className="mb-2">
                 2. Restart the application with the latest version:
               </p>
-              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
                 docker compose pull
               </div>
               <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
