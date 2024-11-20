@@ -13,11 +13,7 @@ export default async function NotificationsPage() {
   return (
     <DashboardLayout>
       <BasicTitle title="Push Notifications">
-        {notificationPlates.length > 0 ? (
-          <NotificationsTable initialData={notificationPlates} />
-        ) : (
-          <p>No notifications found in the database.</p>
-        )}
+        <NotificationsTable initialData={notificationPlates} />
       </BasicTitle>
     </DashboardLayout>
   );
