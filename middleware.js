@@ -17,8 +17,44 @@ export async function middleware(request) {
     "/favicon.ico",
     "/api/plate-reads", // API auth handled in the route itself
     "/api/verify-session",
-    "api/health-check",
+    "/api/health-check",
+    "/api/verify-key",
   ];
+
+  // Check for API key in query parameters for iframe embeds (insecure)
+  const url = new URL(request.url);
+  const queryApiKey = url.searchParams.get("api_key");
+
+  if (queryApiKey) {
+    try {
+      const response = await fetch(new URL("/api/verify-key", request.url), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ apiKey: queryApiKey }),
+      });
+
+      const result = await response.json();
+      if (result.valid) {
+        // Create a new response that preserves the API key in all internal links
+        const res = NextResponse.next();
+
+        // Rewrite the request URL to include the API key
+        const rewrittenUrl = new URL(request.url);
+        if (!rewrittenUrl.searchParams.has("api_key")) {
+          rewrittenUrl.searchParams.set("api_key", queryApiKey);
+        }
+
+        // Set a header that your frontend can use to maintain the API key
+        res.headers.set("x-api-key", queryApiKey);
+
+        return res;
+      }
+    } catch (error) {
+      console.error("API key verification error:", error);
+    }
+  }
 
   if (publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
     if (request.nextUrl.pathname === "/api/plates") {
@@ -30,16 +66,13 @@ export async function middleware(request) {
       const apiKey = authHeader.replace("Bearer ", "");
 
       try {
-        const response = await fetch(
-          new URL("/api/auth/verify-key", request.url),
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ apiKey }),
-          }
-        );
+        const response = await fetch(new URL("/api/verify-key", request.url), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ apiKey }),
+        });
 
         if (!response.ok) {
           return new Response("Invalid API Key", { status: 401 });
@@ -51,32 +84,6 @@ export async function middleware(request) {
     }
 
     return NextResponse.next();
-  }
-
-  // Check for API key in query parameters
-  const url = new URL(request.url);
-  const queryApiKey = url.searchParams.get("api_key");
-
-  if (queryApiKey) {
-    try {
-      const response = await fetch(
-        new URL("/api/auth/verify-key", request.url),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ apiKey: queryApiKey }),
-        }
-      );
-
-      if (response.ok) {
-        return NextResponse.next();
-      }
-    } catch (error) {
-      console.error("API key verification error:", error);
-      return new Response("Internal Server Error", { status: 500 });
-    }
   }
 
   // Check session cookie for authenticated routes

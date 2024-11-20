@@ -1,7 +1,8 @@
-import { getPool } from "@/lib/db";
+import { cleanupOldRecords, getPool } from "@/lib/db";
 import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
+import { getConfig } from "@/lib/settings";
 
 // Revised to use a blacklist of all other possible AI labels if using the memo. This will filter any other AI objects out, while still allowing for weird OCR reads and vanity plates.
 const EXCLUDED_LABELS = [
@@ -139,6 +140,10 @@ function extractPlatesFromMemo(memo) {
 
 export async function POST(req) {
   let dbClient = null;
+
+  // delete plate reads over the maxRecords limit
+  const config = await getConfig();
+  await cleanupOldRecords(config.maxRecords);
 
   try {
     const data = await req.json();
