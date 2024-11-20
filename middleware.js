@@ -53,6 +53,32 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // Check for API key in query parameters
+  const url = new URL(request.url);
+  const queryApiKey = url.searchParams.get("api_key");
+
+  if (queryApiKey) {
+    try {
+      const response = await fetch(
+        new URL("/api/auth/verify-key", request.url),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ apiKey: queryApiKey }),
+        }
+      );
+
+      if (response.ok) {
+        return NextResponse.next();
+      }
+    } catch (error) {
+      console.error("API key verification error:", error);
+      return new Response("Internal Server Error", { status: 500 });
+    }
+  }
+
   // Check session cookie for authenticated routes
   const session = request.cookies.get("session");
   if (!session) {
