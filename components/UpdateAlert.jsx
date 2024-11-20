@@ -179,10 +179,13 @@ export default function VersionAlert() {
                 2. Restart the application with the latest version:
               </p>
               <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+                docker compose pull
+              </div>
+              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
                 docker compose up -d
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Run this command in the directory containing your
+                Run these commands in the directory containing your
                 docker-compose.yml file.
               </p>
             </div>
