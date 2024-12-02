@@ -149,7 +149,6 @@ export async function POST(req) {
     const data = await req.json();
     console.log("Received plate read data:", data);
 
-    // API key validation
     const apiKey = req.headers.get("x-api-key");
     if (!apiKey) {
       return Response.json({ error: "API key is required" }, { status: 401 });
@@ -164,7 +163,7 @@ export async function POST(req) {
     const plates = data.memo
       ? extractPlatesFromMemo(data.memo)
       : data.plate_number
-      ? [data.plate_number]
+      ? [data.plate_number.toUpperCase()]
       : [];
 
     if (plates.length === 0) {
@@ -182,8 +181,8 @@ export async function POST(req) {
     const timestamp = data.timestamp || new Date().toISOString();
     const processedPlates = [];
     const duplicatePlates = [];
+    const camera = data.camera || null;
 
-    // Process each plate
     for (const plate of plates) {
       // Check notifications
       const shouldNotify = await checkPlateForNotification(plate);
@@ -198,8 +197,8 @@ export async function POST(req) {
           ON CONFLICT (plate_number) DO NOTHING
         ),
         new_read AS (
-          INSERT INTO plate_reads (plate_number, image_data, timestamp)
-          SELECT $1, $2, $3
+          INSERT INTO plate_reads (plate_number, image_data, timestamp, camera_name)
+          SELECT $1, $2, $3, $4
           WHERE NOT EXISTS (
             SELECT 1 FROM plate_reads 
             WHERE plate_number = $1 AND timestamp = $3
@@ -207,7 +206,7 @@ export async function POST(req) {
           RETURNING id
         )
         SELECT id FROM new_read`,
-        [plate, data.Image || null, timestamp]
+        [plate, data.Image || null, timestamp, camera]
       );
 
       if (result.rows.length === 0) {

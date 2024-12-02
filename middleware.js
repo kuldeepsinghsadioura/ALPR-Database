@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-console.log("middleware is identified");
-
 export async function middleware(request) {
   // console.log("\n--- Middleware Start ---");
   // console.log("URL:", request.nextUrl.pathname);
@@ -19,6 +17,7 @@ export async function middleware(request) {
     "/api/verify-session",
     "/api/health-check",
     "/api/verify-key",
+    "/api/verify-whitelist",
   ];
 
   // Check for API key in query parameters for iframe embeds (insecure)
@@ -89,10 +88,29 @@ export async function middleware(request) {
   // Check session cookie for authenticated routes
   const session = request.cookies.get("session");
   if (!session) {
+    const isWhitelistedIpResponse = await fetch(
+      new URL("/api/verify-whitelist", request.url),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ip: request.ip,
+          headers: Object.fromEntries(request.headers),
+        }),
+      }
+    );
+
+    const isWhitelistedIp = (await isWhitelistedIpResponse.json()).allowed;
+
+    if (isWhitelistedIp) {
+      return NextResponse.next();
+    }
+
     console.log("No session cookie block run");
     return NextResponse.redirect(new URL("/login", request.url));
   }
-
   try {
     console.log("Verifying session", session.value);
 

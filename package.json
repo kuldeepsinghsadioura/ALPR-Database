@@ -45,6 +45,7 @@
     "embla-carousel-react": "^8.3.1",
     "fs": "^0.0.1-security",
     "input-otp": "^1.4.1",
+    "jose": "^5.9.6",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.456.0",
@@ -60,10 +61,10 @@
     "recharts": "^2.13.3",
     "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.4",
+    "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.1",
-    "zod": "^3.23.8",
-    "tailwindcss": "^3.4.1"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",
