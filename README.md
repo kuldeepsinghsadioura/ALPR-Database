@@ -13,7 +13,7 @@ This project serves as a complement to a CodeProject Blue Iris setup, giving you
 Please star and share the project :)
 #### Features:
 
-- Searchable Database
+- Searchable Database & Fuzzy Search
 - Live recognition feed with images
 - Add vehicles you know to a known plates table
 - Custom tags
@@ -21,6 +21,7 @@ Please star and share the project :)
 - Configurable Push Notifications
 - Flexible API
 - Detailed system insights
+- HomeAssistant Dashboard Integration
 
 ## Install
 
