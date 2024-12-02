@@ -25,6 +25,10 @@ import {
   resetPool,
   updateNotificationPriorityDB,
   getTagsForPlate,
+  correctAllPlateReads,
+  getDistinctCameraNames,
+  updatePlateRead,
+  updateAllPlateReads,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -275,9 +279,10 @@ export async function getLatestPlateReads({
   page = 1,
   pageSize = 25,
   search = "",
-  fuzzySearch = false, // Add this parameter
+  fuzzySearch = false,
   tag = "all",
   dateRange = null,
+  cameraName = "",
 } = {}) {
   try {
     const result = await getPlateReads({
@@ -285,9 +290,10 @@ export async function getLatestPlateReads({
       pageSize,
       filters: {
         plateNumber: search,
-        fuzzySearch, // Pass it to the database query
+        fuzzySearch,
         tag: tag !== "all" ? tag : undefined,
         dateRange,
+        cameraName: cameraName || undefined,
       },
     });
 
@@ -485,7 +491,7 @@ export async function loginAction(formData) {
     console.log("Created session ID:", sessionId);
 
     // Set cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set("session", sessionId, {
       httpOnly: true,
       secure: false,
@@ -513,24 +519,36 @@ export async function updateSettings(formData) {
   try {
     const currentConfig = await getConfig();
 
-    // Debug log to see what's coming from the form
-    console.log("pushoverEnabled value:", formData.get("pushoverEnabled"));
+    const newConfig = { ...currentConfig };
 
-    const newConfig = {
-      ...currentConfig,
-      general: {
+    const updateIfExists = (key) => formData.get(key) !== null;
+
+    //isolate sections so we don't erase other stuff
+    if (updateIfExists("maxRecords") || updateIfExists("ignoreNonPlate")) {
+      newConfig.general = {
         ...currentConfig.general,
         maxRecords: formData.get("maxRecords")
           ? parseInt(formData.get("maxRecords"))
           : currentConfig.general.maxRecords,
-        ignoreNonPlate: formData.get("ignoreNonPlate") === "on",
-      },
-      mqtt: {
+        ignoreNonPlate: formData.get("ignoreNonPlate") === "true",
+      };
+    }
+
+    if (updateIfExists("mqttBroker") || updateIfExists("mqttTopic")) {
+      newConfig.mqtt = {
         ...currentConfig.mqtt,
         broker: formData.get("mqttBroker") ?? currentConfig.mqtt.broker,
         topic: formData.get("mqttTopic") ?? currentConfig.mqtt.topic,
-      },
-      database: {
+      };
+    }
+
+    if (
+      updateIfExists("dbHost") ||
+      updateIfExists("dbName") ||
+      updateIfExists("dbUser") ||
+      updateIfExists("dbPassword")
+    ) {
+      newConfig.database = {
         ...currentConfig.database,
         host: formData.get("dbHost") ?? currentConfig.database.host,
         name: formData.get("dbName") ?? currentConfig.database.name,
@@ -539,11 +557,15 @@ export async function updateSettings(formData) {
           formData.get("dbPassword") === "••••••••"
             ? currentConfig.database.password
             : formData.get("dbPassword") ?? currentConfig.database.password,
-      },
-      notifications: {
+      };
+    }
+
+    if (updateIfExists("pushoverEnabled")) {
+      newConfig.notifications = {
+        ...currentConfig.notifications,
         pushover: {
           ...currentConfig.notifications?.pushover,
-          enabled: formData.get("pushoverEnabled") === "true", // Updated this line
+          enabled: formData.get("pushoverEnabled") === "true",
           app_token:
             formData.get("pushoverAppToken") === "••••••••"
               ? currentConfig.notifications?.pushover?.app_token
@@ -564,12 +586,18 @@ export async function updateSettings(formData) {
             formData.get("pushoverSound") ??
             currentConfig.notifications?.pushover?.sound,
         },
-      },
-    };
+      };
+    }
 
-    // Debug log to see what we're saving
-    console.log("Saving pushover config:", newConfig.notifications.pushover);
-
+    if (updateIfExists("haEnabled") || updateIfExists("haWhitelist")) {
+      newConfig.homeassistant = {
+        ...currentConfig.homeassistant,
+        enabled: formData.get("haEnabled") === "true",
+        whitelist: formData.get("haWhitelist")
+          ? JSON.parse(formData.get("haWhitelist"))
+          : currentConfig.homeassistant?.whitelist || [],
+      };
+    }
     const result = await saveConfig(newConfig);
     if (!result.success) {
       return { success: false, error: result.error };
@@ -613,5 +641,46 @@ export async function regenerateApiKey() {
     return { success: true, apiKey: newApiKey };
   } catch (error) {
     return { success: false, error: error.message };
+  }
+}
+
+export async function getCameraNames() {
+  try {
+    const cameraNames = await getDistinctCameraNames();
+    return {
+      success: true,
+      data: cameraNames,
+    };
+  } catch (error) {
+    console.error("Error getting camera names:", error);
+    return {
+      success: false,
+      error: "Failed to fetch camera names",
+    };
+  }
+}
+
+export async function correctPlateRead(formData) {
+  try {
+    const readId = formData.get("readId");
+    const oldPlateNumber = formData.get("oldPlateNumber");
+    const newPlateNumber = formData.get("newPlateNumber");
+    const correctAll = formData.get("correctAll") === "true";
+    const removePrevious = formData.get("removePrevious") === "true";
+
+    if (correctAll) {
+      await updateAllPlateReads(oldPlateNumber, newPlateNumber);
+    } else {
+      await updatePlateRead(readId, newPlateNumber);
+    }
+
+    if (removePrevious) {
+      await removePlate(oldPlateNumber);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error correcting plate read:", error);
+    return { success: false, error: "Failed to correct plate read" };
   }
 }

@@ -11,6 +11,11 @@ import {
   TrendingUp,
   Flag,
   ArrowUpRightIcon,
+  ArrowUp,
+  ArrowDown,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -157,6 +162,10 @@ export default function PlateTable() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [plateInsights, setPlateInsights] = useState(null);
   const [date, setDate] = useState({ from: undefined, to: undefined });
+  const [sortConfig, setSortConfig] = useState({
+    key: "last_seen_at", // default sort by last seen
+    direction: "desc", // default newest first
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -183,14 +192,12 @@ export default function PlateTable() {
     // console.log("Filtering data...");
     const filtered = data.filter((plate) => {
       const firstSeenDate = new Date(plate.first_seen_at);
-      // Use the function
       const withinDateRange = isWithinDateRange(
         firstSeenDate,
         selectedDateRange
       );
       // console.log("Is within date range:", withinDateRange);
 
-      // Other filtering conditions can follow
       return (
         withinDateRange &&
         (searchTerm === "" ||
@@ -201,8 +208,53 @@ export default function PlateTable() {
           plate.tags?.some((tag) => tag.name === selectedTag))
       );
     });
-    setFilteredData(filtered);
-  }, [data, searchTerm, selectedTag, selectedDateRange]);
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortConfig.key) {
+        case "occurrence_count":
+          return sortConfig.direction === "asc"
+            ? a.occurrence_count - b.occurrence_count
+            : b.occurrence_count - a.occurrence_count;
+        case "first_seen_at":
+          return sortConfig.direction === "asc"
+            ? new Date(a.first_seen_at) - new Date(b.first_seen_at)
+            : new Date(b.first_seen_at) - new Date(a.first_seen_at);
+        case "last_seen_at":
+          return sortConfig.direction === "asc"
+            ? a.days_since_last_seen - b.days_since_last_seen
+            : b.days_since_last_seen - a.days_since_last_seen;
+        case "plate_number":
+          return sortConfig.direction === "asc"
+            ? a.plate_number.localeCompare(b.plate_number)
+            : b.plate_number.localeCompare(a.plate_number);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredData(sorted);
+  }, [data, searchTerm, selectedTag, selectedDateRange, sortConfig]);
+
+  const requestSort = (key) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction:
+        prevConfig.key === key && prevConfig.direction === "asc"
+          ? "desc"
+          : "asc",
+    }));
+  };
+
+  const getSortIcon = (columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return <ChevronsUpDown className="ml-2 h-2 w-2" />;
+    }
+    return sortConfig.direction === "asc" ? (
+      <ChevronUp className="ml-2 h-2 w-2" />
+    ) : (
+      <ChevronDown className="ml-2 h-2 w-2" />
+    );
+  };
 
   const handleAddTag = async (plateNumber, tagName) => {
     try {
@@ -418,12 +470,48 @@ export default function PlateTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[150px]">Plate Number</TableHead>
-              <TableHead className="w-[80px]">Seen</TableHead>
+              <TableHead className="w-[180px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => requestSort("plate_number")}
+                  className="h-8 flex items-center font-semibold p-0"
+                >
+                  Plate Number
+                  {getSortIcon("plate_number")}
+                </Button>
+              </TableHead>
+              <TableHead className="w-[140px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => requestSort("occurrence_count")}
+                  className="h-8 flex items-center font-semibold p-0"
+                >
+                  Seen
+                  {getSortIcon("occurrence_count")}
+                </Button>
+              </TableHead>
               <TableHead className="w-56 2xl:w-96">Name</TableHead>
               <TableHead>Notes</TableHead>
-              <TableHead className="w-[120px]">First Seen</TableHead>
-              <TableHead className="w-[120px]">Last Seen</TableHead>
+              <TableHead className="w-[140px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => requestSort("first_seen_at")}
+                  className="h-8 flex items-center font-semibold p-0"
+                >
+                  First Seen
+                  {getSortIcon("first_seen_at")}
+                </Button>
+              </TableHead>
+              <TableHead className="w-[140px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => requestSort("last_seen_at")}
+                  className="h-8 flex items-center font-semibold p-0"
+                >
+                  Last Seen
+                  {getSortIcon("last_seen_at")}
+                </Button>
+              </TableHead>
               <TableHead className="w-[150px]">Tags</TableHead>
               <TableHead className="w-[120px] text-right">Actions</TableHead>
             </TableRow>

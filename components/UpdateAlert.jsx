@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { getVersionInfo } from "@/lib/version";
+import { ScrollArea } from "./ui/scroll-area";
+import { Badge } from "./ui/badge";
 
 const CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
 const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
@@ -21,6 +23,9 @@ export default function VersionAlert() {
   const [mounted, setMounted] = useState(false);
   const [isAlertVisible, setIsAlertVisible] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
+  const [changelog, setChangelog] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -120,13 +125,20 @@ export default function VersionAlert() {
           <AlertDescription>
             A new version ({versionInfo.latest}) is available. You are currently
             running version {versionInfo.current}.
-            <div className="mt-2">
+            <div className="flex mt-2 gap-2">
               <Button
                 variant="outline"
                 className="mr-2"
                 onClick={() => setIsModalOpen(true)}
               >
                 View Update Instructions
+              </Button>
+              <Button
+                variant="outline"
+                className="mr-2"
+                onClick={() => setIsChangeLogOpen(true)}
+              >
+                View Changelog
               </Button>
             </div>
           </AlertDescription>
@@ -147,23 +159,23 @@ export default function VersionAlert() {
           <DialogHeader>
             <DialogTitle>Update Instructions</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <p className="mb-4">
+              <p className="mb-8">
                 In the same directory you originally deployed from:
               </p>
               <p className="mb-2">
-                1. Get the latest database schema in case any changes were made:
+                1. Get the migrations.sql file to update your database schema:
               </p>
               <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
                 curl -O
-                https://raw.githubusercontent.com/algertc/ALPR-Database/main/schema.sql
+                https://raw.githubusercontent.com/algertc/ALPR-Database/main/migrations.sql
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 This file should be in the same directory as your
                 docker-compose.yml file. Alternatively, you can
                 <a
-                  href="https://github.com/algertc/ALPR-Database/blob/main/schema.sql"
+                  href="https://github.com/algertc/ALPR-Database/blob/main/migrations.sql"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 ml-1"
@@ -171,6 +183,23 @@ export default function VersionAlert() {
                   download it manually from GitHub
                 </a>
                 .
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2">
+                2. Check for updates to the
+                <a
+                  href="https://github.com/algertc/ALPR-Database/blob/main/docker-compose.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 ml-1"
+                >
+                  docker-compose.yml
+                </a>
+                {"  "}
+                file on GitHub. Ensure your file is up-to-date with the latest
+                version.
               </p>
             </div>
 
@@ -194,6 +223,48 @@ export default function VersionAlert() {
               Note: Your existing data will be preserved during the update.
             </p>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isChangeLogOpen} onOpenChange={setIsChangeLogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Changelog</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            {!versionInfo?.changelog ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground">No changelog available</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {versionInfo.changelog.map((version) => (
+                  <div key={version.version} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold">
+                        Version {version.version}
+                      </h3>
+                      {version.version === versionInfo.current && (
+                        <Badge variant="outline" className="text-xs">
+                          Current
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {version.date}
+                    </p>
+                    <ul className="space-y-1 list-disc list-inside">
+                      {version.changes.map((change, index) => (
+                        <li key={index} className="text-sm">
+                          {change}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>

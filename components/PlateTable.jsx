@@ -11,6 +11,7 @@ import {
   X,
   CalendarDays,
   HelpCircle,
+  Edit,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,12 +74,16 @@ export default function PlateTable({
   onRemoveTag,
   onAddKnownPlate,
   onDeleteRecord,
+  availableCameras,
+  onCorrectPlate,
 }) {
   // Only keep state for modals and temporary form data
   const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [activePlate, setActivePlate] = useState(null);
   const [newKnownPlate, setNewKnownPlate] = useState({ name: "", notes: "" });
+  const [correction, setCorrection] = useState(null);
+  const [isCorrectPlateOpen, setIsCorrectPlateOpen] = useState(false);
 
   // Helper functions
   const getImageUrl = (base64Data) => {
@@ -126,6 +131,10 @@ export default function PlateTable({
     onUpdateFilters({ tag: value });
   };
 
+  const handleCameraChange = (value) => {
+    onUpdateFilters({ camera: value === "all" ? "" : value });
+  };
+
   const handleDateRangeSelect = (range) => {
     onUpdateFilters({
       dateFrom: range.from ? format(range.from, "yyyy-MM-dd") : null,
@@ -152,6 +161,21 @@ export default function PlateTable({
     if (!activePlate) return;
     await onDeleteRecord(activePlate.plate_number);
     setIsDeleteConfirmOpen(false);
+  };
+
+  const handleCorrectSubmit = async () => {
+    if (!correction) return;
+
+    const formData = new FormData();
+    formData.append("readId", correction.id);
+    formData.append("oldPlateNumber", correction.plateNumber);
+    formData.append("newPlateNumber", correction.newPlateNumber);
+    formData.append("correctAll", correction.correctAll.toString());
+    formData.append("removePrevious", correction.removePlate.toString());
+
+    await onCorrectPlate(formData);
+    setCorrection(null);
+    setIsCorrectPlateOpen(false);
   };
 
   const clearFilters = () => {
@@ -222,6 +246,22 @@ export default function PlateTable({
                       />
                       {tag.name}
                     </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.cameraName || "all"}
+              onValueChange={handleCameraChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by camera" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All cameras</SelectItem>
+                {availableCameras.map((camera) => (
+                  <SelectItem key={camera} value={camera}>
+                    {camera}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -301,9 +341,10 @@ export default function PlateTable({
               <TableRow>
                 <TableHead>Image</TableHead>
                 <TableHead>Plate Number</TableHead>
-                <TableHead>Vehicle Description</TableHead>
+                {/* <TableHead>Vehicle Description</TableHead> */}
                 <TableHead>Occurrences</TableHead>
                 <TableHead>Tags</TableHead>
+                <TableHead>Camera</TableHead>
                 <TableHead>Timestamp</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -353,7 +394,7 @@ export default function PlateTable({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>{plate.vehicle_description}</TableCell>
+                    {/* <TableCell>{plate.vehicle_description}</TableCell> */}
                     <TableCell>{plate.occurrence_count}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -387,6 +428,13 @@ export default function PlateTable({
                           </div>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {plate.camera_name || (
+                        <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                          Unknown
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {new Date(plate.timestamp).toLocaleString()}
@@ -427,6 +475,23 @@ export default function PlateTable({
                           }}
                         >
                           <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className=""
+                          onClick={() => {
+                            setCorrection({
+                              id: plate.id,
+                              plateNumber: plate.plate_number,
+                              newPlateNumber: plate.plate_number,
+                              correctAll: false,
+                              removePlate: false,
+                            });
+                            setIsCorrectPlateOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -539,6 +604,101 @@ export default function PlateTable({
             </Button>
             <Button variant="destructive" onClick={handleDeleteSubmit}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={correction !== null}
+        onOpenChange={(open) => !open && setCorrection(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Correct Plate Number</DialogTitle>
+            <DialogDescription>
+              Update the incorrect plate number recognition.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="current-plate" className="text-right">
+                Current
+              </Label>
+              <Input
+                id="current-plate"
+                value={correction?.plateNumber || ""}
+                disabled
+                className="col-span-3 font-mono"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-plate" className="text-right">
+                New
+              </Label>
+              <Input
+                id="new-plate"
+                value={correction?.newPlateNumber || ""}
+                onChange={(e) =>
+                  setCorrection((curr) => ({
+                    ...curr,
+                    newPlateNumber: e.target.value.toUpperCase(),
+                  }))
+                }
+                className="col-span-3 font-mono"
+                placeholder="ENTER NEW PLATE NUMBER"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="correct-all"
+                checked={correction?.correctAll || false}
+                onCheckedChange={(checked) =>
+                  setCorrection((curr) => ({
+                    ...curr,
+                    correctAll: checked,
+                  }))
+                }
+              />
+              <Label htmlFor="correct-all">
+                Correct all occurrences of this plate number
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="remove-plate"
+                checked={correction?.removePlate || false}
+                onCheckedChange={(checked) =>
+                  setCorrection((curr) => ({
+                    ...curr,
+                    removePlate: checked,
+                  }))
+                }
+              />
+              <Label htmlFor="remove-plate">
+                Remove previous plate number from database
+              </Label>
+            </div>
+            {correction?.removePlate && (
+              <div className="text-sm text-amber-500 dark:text-amber-400">
+                Warning: This is a destructive action. Ensure the previous plate
+                number does not belong to any real vehicles to avoid loss of
+                data.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCorrection(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCorrectSubmit}
+              disabled={
+                !correction?.newPlateNumber ||
+                correction.newPlateNumber === correction.plateNumber
+              }
+            >
+              Update Plate Number
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTransition, useOptimistic } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,12 +31,14 @@ import {
   regenerateApiKey,
 } from "@/app/actions";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 const navigation = [
   { title: "General", id: "general" },
   { title: "MQTT/HTTP", id: "mqtt" },
   { title: "Database", id: "database" },
   { title: "Push Notifications", id: "push" },
+  { title: "HomeAssistant", id: "homeassistant" },
   { title: "Security", id: "security" },
 ];
 
@@ -86,6 +88,12 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
           formData.get("pushoverPriority")
         );
         newFormData.append("pushoverSound", formData.get("pushoverSound"));
+        break;
+      case "homeassistant":
+        newFormData.append("haEnabled", formData.get("haEnabled") === "on");
+        if (formData.get("haWhitelist")) {
+          newFormData.append("haWhitelist", formData.get("haWhitelist"));
+        }
         break;
     }
 
@@ -341,6 +349,43 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     </div>
   );
 
+  const renderHomeAssistantSection = () => (
+    <div key="homeassistant-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">
+        HomeAssistant iframe Login Bypass (Insecure)
+      </h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between py-2">
+          <div className="space-y-0.5">
+            <Label htmlFor="haEnabled" className="font-semibold">
+              Enable Whitelist
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Allow specific devices to bypass authentication when accessing the
+              app via HomeAssistant iframe.
+            </p>
+          </div>
+          <Switch
+            id="haEnabled"
+            name="haEnabled"
+            defaultChecked={initialSettings.homeassistant?.enabled}
+          />
+        </div>
+
+        {initialSettings.homeassistant?.enabled && (
+          <IPWhitelistManager
+            initialIPs={initialSettings.homeassistant?.whitelist || []}
+            onUpdate={(newIPs) => {
+              const formData = new FormData();
+              formData.append("haWhitelist", JSON.stringify(newIPs));
+              handleSettingsSubmit(formData);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+
   const renderSecuritySection = () => (
     <div className="space-y-8">
       <div className="space-y-4">
@@ -448,6 +493,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             return renderDatabaseSection();
           case "push":
             return renderPushSection();
+          case "homeassistant":
+            return renderHomeAssistantSection();
           case "security":
             return renderSecuritySection();
           default:
@@ -509,10 +556,10 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
               <form action={handleSettingsSubmit}>
                 <Card className="w-full max-w-4xl">
                   <CardHeader>
-                    <CardTitle>ALPR Database Settings</CardTitle>
+                    {/* <CardTitle>ALPR Database Settings</CardTitle>
                     <CardDescription>
                       Configure your ALPR database application settings
-                    </CardDescription>
+                    </CardDescription> */}
                   </CardHeader>
                   <CardContent>{renderSection()}</CardContent>
                   <CardFooter>
@@ -539,3 +586,81 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     </DashboardLayout>
   );
 }
+
+const IPWhitelistManager = ({ initialIPs = [], onUpdate }) => {
+  const [newIP, setNewIP] = useState("");
+  const [error, setError] = useState("");
+
+  const isValidIP = (ip) => {
+    // Basic IP validation (IPv4 and IPv6)
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const ipv6Regex =
+      /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^(([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}$/;
+
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  };
+
+  const handleAddIP = () => {
+    setError("");
+    if (!newIP) {
+      setError("Please enter an IP address");
+      return;
+    }
+
+    if (!isValidIP(newIP)) {
+      setError("Please enter a valid IP address");
+      return;
+    }
+
+    if (initialIPs.includes(newIP)) {
+      setError("This IP is already in the whitelist");
+      return;
+    }
+
+    onUpdate([...initialIPs, newIP]);
+    setNewIP("");
+  };
+
+  const handleRemoveIP = (ipToRemove) => {
+    onUpdate(initialIPs.filter((ip) => ip !== ipToRemove));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="ipInput">IP Address Whitelist</Label>
+        <div className="flex space-x-2">
+          <Input
+            id="ipInput"
+            value={newIP}
+            onChange={(e) => setNewIP(e.target.value)}
+            placeholder="Enter IP address"
+            className="flex-1"
+          />
+          <Button onClick={handleAddIP}>Add IP</Button>
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {initialIPs.map((ip) => (
+          <Badge
+            key={ip}
+            variant="secondary"
+            className="flex items-center gap-1"
+          >
+            {ip}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-4 w-4 p-0 hover:bg-transparent"
+              onClick={() => handleRemoveIP(ip)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+};

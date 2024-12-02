@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import PlateTable from "./PlateTable";
 import {
   getLatestPlateReads,
@@ -10,17 +10,21 @@ import {
   tagPlate,
   untagPlate,
   deletePlateRead,
+  getCameraNames,
+  correctPlateRead,
 } from "@/app/actions";
 
 export function PlateTableWrapper() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [availableTags, setAvailableTags] = useState([]);
+  const [availableCameras, setAvailableCameras] = useState([]);
 
   // Get current query parameters
   const page = searchParams.get("page") || "1";
@@ -30,13 +34,14 @@ export function PlateTableWrapper() {
   const tag = searchParams.get("tag") || "all";
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
+  const cameraName = searchParams.get("camera");
 
   // Load initial data and tags
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
       try {
-        const [platesResult, tagsResult] = await Promise.all([
+        const [platesResult, tagsResult, camerasResult] = await Promise.all([
           getLatestPlateReads({
             page: parseInt(page),
             pageSize: parseInt(pageSize),
@@ -45,8 +50,10 @@ export function PlateTableWrapper() {
             tag,
             dateRange:
               dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
+            cameraName,
           }),
           getTags(),
+          getCameraNames(),
         ]);
 
         // Update data if we have it (removed success check)
@@ -58,6 +65,10 @@ export function PlateTableWrapper() {
         if (tagsResult.success) {
           setAvailableTags(tagsResult.data);
         }
+
+        if (camerasResult.success) {
+          setAvailableCameras(camerasResult.data);
+        }
       } catch (error) {
         console.error("Error loading initial data:", error);
       }
@@ -65,7 +76,7 @@ export function PlateTableWrapper() {
     };
 
     loadInitialData();
-  }, [page, pageSize, search, fuzzySearch, tag, dateFrom, dateTo]);
+  }, [page, pageSize, search, fuzzySearch, tag, dateFrom, dateTo, cameraName]);
 
   const createQueryString = useCallback(
     (params) => {
@@ -188,11 +199,49 @@ export function PlateTableWrapper() {
     [router, pathname, searchParams, createQueryString]
   );
 
+  const handleCorrectPlate = async (formData) => {
+    const result = await correctPlateRead(formData);
+    if (result.success) {
+      const readId = formData.get("readId");
+      const newPlateNumber = formData.get("newPlateNumber");
+      const correctAll = formData.get("correctAll") === "true";
+
+      if (correctAll) {
+        // If correcting all instances, reload the entire dataset
+        const platesResult = await getLatestPlateReads({
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          search,
+          fuzzySearch,
+          tag,
+          dateRange: dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
+          cameraName,
+        });
+
+        if (platesResult.data) {
+          setData(platesResult.data);
+          setTotal(platesResult.pagination.total);
+        }
+      } else {
+        // If correcting single instance, update optimistically
+        setData((prevData) =>
+          prevData.map((plate) =>
+            plate.id === parseInt(readId)
+              ? { ...plate, plate_number: newPlateNumber }
+              : plate
+          )
+        );
+      }
+    }
+    return result;
+  };
+
   return (
     <PlateTable
       data={data}
       loading={loading}
       availableTags={availableTags}
+      availableCameras={availableCameras}
       pagination={{
         page: parseInt(page),
         pageSize: parseInt(pageSize),
@@ -208,12 +257,14 @@ export function PlateTableWrapper() {
           from: dateFrom ? new Date(dateFrom) : null,
           to: dateTo ? new Date(dateTo) : null,
         },
+        cameraName,
       }}
       onUpdateFilters={updateFilters}
       onAddTag={handleAddTag}
       onRemoveTag={handleRemoveTag}
       onAddKnownPlate={handleAddKnownPlate}
       onDeleteRecord={handleDeleteRecord}
+      onCorrectPlate={handleCorrectPlate}
     />
   );
 }
