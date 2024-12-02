@@ -122,7 +122,7 @@ ALPR recognitions are sent to the `api/plate-reads` endpoint.
 
 We can make use of the built-in macros to dynamically get the alert data and send it as our payload. It should look like this:
 
-    { "plate_number":"&PLATE", "Image":"&ALERT_JPEG", "timestamp":"&ALERT_TIME" }
+    { "plate_number":"&PLATE", "Image":"&ALERT_JPEG", "camera":"&CAM", "timestamp":"&ALERT_TIME" }
 
 **Set your API key with the x-api-key header as seen below.**
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/blueiris.png)
