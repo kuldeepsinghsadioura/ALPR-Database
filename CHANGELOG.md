@@ -1,7 +1,7 @@
 # Changelog
 
 ## [0.1.4] - 2024-12-01
-- Added camera name column
+- Added camera name column to live feed. Optionally send with "camera":"&CAM" or &NAME for long name.
 - Additional sorting options in plate database
 - Auth bypass for HomeAssistant dashboards
 - Database migration fix
