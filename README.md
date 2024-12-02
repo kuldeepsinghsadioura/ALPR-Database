@@ -71,6 +71,16 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./migrations.sql:/migrations.sql
+
+    # Make sure you download the migrations.sql file if you are updating your existing database. If you changed the user or database name, you will need to plug that in in the command below.
+    command: >
+      bash -c "
+        docker-entrypoint.sh postgres &
+        until pg_isready; do sleep 1; done;
+        psql -U postgres -d postgres -f /migrations.sql;
+        wait
+      "
     ports:
       - "5432:5432"
     healthcheck:
