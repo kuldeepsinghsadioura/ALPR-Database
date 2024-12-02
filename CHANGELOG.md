@@ -5,6 +5,7 @@
 - Additional sorting options in plate database
 - Auth bypass for HomeAssistant dashboards
 - Database migration fix (**Requires new migrations.sql file from GitHub**)
+- Ability to correct/edit OCR recognitions in the live feed
 
 ## [0.1.3] - 11-20-2024
 - Database Pruning Fix
