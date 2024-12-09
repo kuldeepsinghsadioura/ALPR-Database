@@ -28,7 +28,6 @@ export function PlateTableWrapper() {
   const [availableTags, setAvailableTags] = useState([]);
   const [availableCameras, setAvailableCameras] = useState([]);
 
-  // Get current query parameters
   const page = searchParams.get("page") || "1";
   const pageSize = searchParams.get("pageSize") || "25";
   const search = searchParams.get("search") || "";
@@ -37,8 +36,9 @@ export function PlateTableWrapper() {
   const dateFrom = searchParams.get("dateFrom");
   const dateTo = searchParams.get("dateTo");
   const cameraName = searchParams.get("camera");
+  const hourFrom = searchParams.get("hourFrom");
+  const hourTo = searchParams.get("hourTo");
 
-  // Load initial data and tags
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
@@ -53,6 +53,13 @@ export function PlateTableWrapper() {
               tag,
               dateRange:
                 dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
+              hourRange:
+                hourFrom && hourTo
+                  ? {
+                      from: parseInt(hourFrom),
+                      to: parseInt(hourTo),
+                    }
+                  : null,
               cameraName,
             }),
             getTags(),
@@ -60,7 +67,6 @@ export function PlateTableWrapper() {
             getTimeFormat(),
           ]);
 
-        // Update data if we have it (removed success check)
         if (platesResult.data) {
           setData(platesResult.data);
           setTotal(platesResult.pagination.total);
@@ -82,7 +88,18 @@ export function PlateTableWrapper() {
     };
 
     loadInitialData();
-  }, [page, pageSize, search, fuzzySearch, tag, dateFrom, dateTo, cameraName]);
+  }, [
+    page,
+    pageSize,
+    search,
+    fuzzySearch,
+    tag,
+    dateFrom,
+    dateTo,
+    hourFrom,
+    hourTo,
+    cameraName,
+  ]);
 
   const createQueryString = useCallback(
     (params) => {
@@ -198,7 +215,6 @@ export function PlateTableWrapper() {
       const queryString = createQueryString({
         ...Object.fromEntries(searchParams.entries()),
         ...newParams,
-        page: "1", // Reset to first page on filter change
       });
       router.push(`${pathname}?${queryString}`);
     },
@@ -264,6 +280,13 @@ export function PlateTableWrapper() {
           from: dateFrom ? new Date(dateFrom) : null,
           to: dateTo ? new Date(dateTo) : null,
         },
+        hourRange:
+          hourFrom && hourTo
+            ? {
+                from: parseInt(hourFrom),
+                to: parseInt(hourTo),
+              }
+            : null,
         cameraName,
       }}
       onUpdateFilters={updateFilters}

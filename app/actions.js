@@ -304,6 +304,7 @@ export async function getLatestPlateReads({
   fuzzySearch = false,
   tag = "all",
   dateRange = null,
+  hourRange = null,
   cameraName = "",
 } = {}) {
   try {
@@ -315,6 +316,7 @@ export async function getLatestPlateReads({
         fuzzySearch,
         tag: tag !== "all" ? tag : undefined,
         dateRange,
+        hourRange,
         cameraName: cameraName || undefined,
       },
     });

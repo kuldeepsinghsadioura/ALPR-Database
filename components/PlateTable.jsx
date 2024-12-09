@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Search,
@@ -15,6 +15,7 @@ import {
   Download,
   ExternalLink,
   Maximize2,
+  Clock,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -205,7 +206,170 @@ export default function PlateTable({
       tag: "all",
       dateFrom: null,
       dateTo: null,
+      hourFrom: null,
+      hourTo: null,
     });
+  };
+
+  const HourRangeFilter = ({ timeFormat, value = {}, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    // Local display state - what the user actually entered
+    const [displayHours, setDisplayHours] = useState({
+      from: null,
+      to: null,
+    });
+
+    // Generate hours based on time format
+    const hours = Array.from({ length: 24 }, (_, i) => {
+      if (timeFormat === 12) {
+        const period = i < 12 ? "AM" : "PM";
+        const hour = i === 0 ? 12 : i > 12 ? i - 12 : i;
+        return { value: i, label: `${hour}${period}` };
+      }
+      return { value: i, label: i.toString().padStart(2, "0") + ":00" };
+    });
+
+    const getTimeRangeLabel = () => {
+      if (
+        typeof displayHours.from === "number" &&
+        typeof displayHours.to === "number" &&
+        displayHours.from >= 0 &&
+        displayHours.from < 24 &&
+        displayHours.to >= 0 &&
+        displayHours.to < 24
+      ) {
+        // Always show what the user entered
+        return `${hours[displayHours.from].label} - ${
+          hours[displayHours.to].label
+        }`;
+      }
+      return "Hour Range";
+    };
+
+    const handleApply = () => {
+      if (
+        typeof displayHours.from === "number" &&
+        typeof displayHours.to === "number"
+      ) {
+        const tzOffset = -(new Date().getTimezoneOffset() / 60);
+
+        // Convert to UTC for the query parameters only
+        const utcFrom = (displayHours.from - tzOffset + 24) % 24;
+        const utcTo = (displayHours.to - tzOffset + 24) % 24;
+
+        // Pass UTC hours for the query but maintain our local display state
+        onChange({
+          from: Math.floor(utcFrom),
+          to: Math.floor(utcTo),
+        });
+        setIsOpen(false);
+      }
+    };
+
+    const handleClear = () => {
+      setDisplayHours({ from: null, to: null });
+      onChange({ from: undefined, to: undefined });
+      setIsOpen(false);
+    };
+
+    return (
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Clock className="h-4 w-4" />
+            {getTimeRangeLabel()}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h4 className="font-medium">Filter by Hour</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>From</Label>
+                  <Select
+                    value={
+                      typeof displayHours.from === "number"
+                        ? displayHours.from.toString()
+                        : undefined
+                    }
+                    onValueChange={(val) =>
+                      setDisplayHours((prev) => ({
+                        ...prev,
+                        from: parseInt(val),
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Start hour" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hours.map((hour) => (
+                        <SelectItem
+                          key={hour.value}
+                          value={hour.value.toString()}
+                        >
+                          {hour.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>To</Label>
+                  <Select
+                    value={
+                      typeof displayHours.to === "number"
+                        ? displayHours.to.toString()
+                        : undefined
+                    }
+                    onValueChange={(val) =>
+                      setDisplayHours((prev) => ({
+                        ...prev,
+                        to: parseInt(val),
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="End hour" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hours.map((hour) => (
+                        <SelectItem
+                          key={hour.value}
+                          value={hour.value.toString()}
+                        >
+                          {hour.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleClear}
+              >
+                Clear
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleApply}
+                disabled={
+                  typeof displayHours.from !== "number" ||
+                  typeof displayHours.to !== "number"
+                }
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
   };
 
   return (
@@ -320,9 +484,28 @@ export default function PlateTable({
               </PopoverContent>
             </Popover>
 
+            <HourRangeFilter
+              timeFormat={timeFormat}
+              value={filters.hourRange || {}}
+              onChange={(hourRange) =>
+                onUpdateFilters({
+                  hourFrom:
+                    typeof hourRange.from === "number"
+                      ? hourRange.from.toString()
+                      : undefined,
+                  hourTo:
+                    typeof hourRange.to === "number"
+                      ? hourRange.to.toString()
+                      : undefined,
+                })
+              }
+            />
+
             {(filters.search ||
               filters.tag !== "all" ||
-              filters.dateRange.from) && (
+              filters.dateRange.from ||
+              (filters.hourRange?.from !== undefined &&
+                filters.hourRange?.to !== undefined)) && (
               <Button
                 variant="ghost"
                 size="sm"
