@@ -254,8 +254,13 @@ export default function PlateTable({
         const tzOffset = -(new Date().getTimezoneOffset() / 60);
 
         // Convert to UTC for the query parameters only
-        const utcFrom = (displayHours.from - tzOffset + 24) % 24;
-        const utcTo = (displayHours.to - tzOffset + 24) % 24;
+        let utcFrom = (displayHours.from - tzOffset + 24) % 24;
+        let utcTo = (displayHours.to - tzOffset + 24) % 24;
+
+        // Adjust if the range spans past midnight
+        if (displayHours.to < displayHours.from) {
+          utcTo += 24; // Move 'to' into the next day
+        }
 
         // Pass UTC hours for the query but maintain our local display state
         onChange({
