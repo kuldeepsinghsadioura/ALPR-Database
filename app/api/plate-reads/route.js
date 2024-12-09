@@ -143,7 +143,7 @@ export async function POST(req) {
 
   // delete plate reads over the maxRecords limit
   const config = await getConfig();
-  await cleanupOldRecords(config.maxRecords);
+  await cleanupOldRecords(config.general.maxRecords);
 
   try {
     const data = await req.json();

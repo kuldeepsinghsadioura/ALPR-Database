@@ -1,35 +1,56 @@
-import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
-import { X } from 'lucide-react'
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import Image from 'next/image'
-import { fetchPlateInsights } from '@/app/actions'
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import Image from "next/image";
+import { fetchPlateInsights } from "@/app/actions";
 
-export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
-  const [metrics, setMetrics] = useState(null)
+export function PlateMetricsModal({
+  isOpen,
+  onClose,
+  plateNumber,
+  timeFormat = 12,
+}) {
+  const [metrics, setMetrics] = useState(null);
 
   useEffect(() => {
     if (isOpen && plateNumber) {
       const fetchMetrics = async () => {
-        const result = await fetchPlateInsights(plateNumber)
+        const result = await fetchPlateInsights(plateNumber);
         if (result.success) {
-          setMetrics(result.data)
+          setMetrics(result.data);
         }
-      }
-      fetchMetrics()
+      };
+      fetchMetrics();
     }
-  }, [isOpen, plateNumber])
+  }, [isOpen, plateNumber]);
 
-  if (!isOpen || !metrics) return null
+  if (!isOpen || !metrics) return null;
 
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-background shadow-lg p-6 overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Insights for {metrics.plateNumber}</h2>
+        <h2 className="text-2xl font-bold">
+          Insights for {metrics.plateNumber}
+        </h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
@@ -43,15 +64,23 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
             <dl className="space-y-2">
               <div>
                 <dt className="font-semibold">Known Name</dt>
-                <dd>{metrics.knownName || 'N/A'}</dd>
+                <dd>{metrics.knownName || "N/A"}</dd>
               </div>
               <div>
                 <dt className="font-semibold">First Seen</dt>
-                <dd>{new Date(metrics.summary.firstSeen).toLocaleString()}</dd>
+                <dd>
+                  {new Date(metrics.summary.firstSeen).toLocaleString("en-US", {
+                    hour12: timeFormat === 12,
+                  })}
+                </dd>
               </div>
               <div>
                 <dt className="font-semibold">Last Seen</dt>
-                <dd>{new Date(metrics.summary.lastSeen).toLocaleString()}</dd>
+                <dd>
+                  {new Date(metrics.summary.lastSeen).toLocaleString("en-US", {
+                    hour12: timeFormat === 12,
+                  })}
+                </dd>
               </div>
               <div>
                 <dt className="font-semibold">Total Occurrences</dt>
@@ -60,7 +89,7 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
             </dl>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Tags</CardTitle>
@@ -70,7 +99,7 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
               {metrics.tags.map((tag) => (
                 <Badge
                   key={tag.name}
-                  style={{ backgroundColor: tag.color, color: '#fff' }}
+                  style={{ backgroundColor: tag.color, color: "#fff" }}
                 >
                   {tag.name}
                 </Badge>
@@ -78,7 +107,7 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
             </div>
           </CardContent>
         </Card>
-        
+
         {metrics.notes && (
           <Card>
             <CardHeader>
@@ -89,7 +118,7 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
             </CardContent>
           </Card>
         )}
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Time Distribution</CardTitle>
@@ -105,7 +134,7 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Recent Reads</CardTitle>
@@ -131,7 +160,11 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
                         className="rounded"
                       />
                     </TableCell>
-                    <TableCell>{new Date(read.timestamp).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {new Date(read.timestamp).toLocaleString("en-US", {
+                        hour12: timeFormat === 12,
+                      })}
+                    </TableCell>
                     <TableCell>{read.vehicleDescription}</TableCell>
                   </TableRow>
                 ))}
@@ -141,11 +174,12 @@ export function PlateMetricsModal({ isOpen, onClose, plateNumber }) {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 PlateMetricsModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   plateNumber: PropTypes.string.isRequired,
-}
+  timeFormat: PropTypes.number,
+};

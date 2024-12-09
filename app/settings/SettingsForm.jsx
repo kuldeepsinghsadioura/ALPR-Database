@@ -32,6 +32,14 @@ import {
 } from "@/app/actions";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import ToggleSwitch from "@/components/ui/toggle-switch";
 
 const navigation = [
   { title: "General", id: "general" },
@@ -61,6 +69,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
       case "general":
         newFormData.append("maxRecords", formData.get("maxRecords"));
         newFormData.append("ignoreNonPlate", formData.get("ignoreNonPlate"));
+        newFormData.append("timeFormat", Number(formData.get("timeFormat")));
         break;
       case "mqtt":
         newFormData.append("mqttBroker", formData.get("mqttBroker"));
@@ -148,7 +157,9 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     <div key="general-section" className="space-y-4">
       <h3 className="text-lg font-semibold">General Settings</h3>
       <div className="space-y-2">
-        <Label htmlFor="maxRecords">Maximum number of records to keep</Label>
+        <Label htmlFor="maxRecords">
+          Maximum number of records to keep in live feed
+        </Label>
         <Input
           id="maxRecords"
           name="maxRecords"
@@ -157,7 +168,37 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
           autoComplete="off"
         />
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="space-y-2 w-fit">
+        <Label htmlFor="timeFormat">Time Format</Label>
+        <ToggleSwitch
+          id="timeFormat"
+          options={[
+            { value: 12, label: "12h" },
+            { value: 24, label: "24h" },
+          ]}
+          name="timeFormat"
+          defaultValue={initialSettings.general.timeFormat}
+          // onChange={(value) => setTimeFormat(value)}
+        />
+      </div>
+      {/* <div className="space-y-2">
+        <Label htmlFor="timeFormat">Time Format</Label>
+        <div className="flex items-center space-x-2">
+          <Select
+            defaultValue={initialSettings.general.timeFormat || "24"}
+            name="timeFormat"
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select time format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="12">12-hour</SelectItem>
+              <SelectItem value="24">24-hour</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div> */}
+      {/* <div className="flex items-center space-x-2">
         <Checkbox
           id="ignoreNonPlate"
           name="ignoreNonPlate"
@@ -166,7 +207,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
         <Label htmlFor="ignoreNonPlate">
           Ignore non-plate number OCR reads
         </Label>
-      </div>
+      </div> */}
     </div>
   );
 
@@ -554,13 +595,12 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
 
             {activeSection !== "security" ? (
               <form action={handleSettingsSubmit}>
-                <Card className="w-full max-w-4xl">
-                  <CardHeader>
-                    {/* <CardTitle>ALPR Database Settings</CardTitle>
+                <Card className="w-full max-w-4xl py-6">
+                  {/* <CardTitle>ALPR Database Settings</CardTitle>
                     <CardDescription>
                       Configure your ALPR database application settings
                     </CardDescription> */}
-                  </CardHeader>
+
                   <CardContent>{renderSection()}</CardContent>
                   <CardFooter>
                     <Button type="submit" disabled={isPending}>

@@ -25,7 +25,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { getDashboardMetrics } from "@/app/actions";
+import { getDashboardMetrics, getTimeFormat } from "@/app/actions";
 import {
   AlertTriangle,
   TrendingUp,
@@ -40,32 +40,15 @@ import DashboardLayout from "@/components/layout/MainLayout";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const formatTimeRange = (hour) => {
-  const formatHour = (h) => {
-    const period = h >= 12 ? "PM" : "AM";
-    const adjustedHour = h % 12 || 12;
-    return `${adjustedHour}${period}`;
-  };
-  return formatHour(hour);
-};
-
-const formatTimestamp = (timestamp) => {
-  if (!timestamp) return "N/A";
-
-  try {
-    return new Date(timestamp).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch (error) {
-    console.error("Error formatting timestamp:", error);
-    return "Invalid Date";
+export function formatTimeRange(hour, timeFormat) {
+  if (timeFormat === 24) {
+    return `${String(hour).padStart(2, "0")}:00`;
   }
-};
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const adjustedHour = hour % 12 || 12;
+  return `${adjustedHour}${period}`;
+}
 
 export default function DashboardMetrics() {
   const [metrics, setMetrics] = useState({
@@ -77,25 +60,33 @@ export default function DashboardMetrics() {
     suspicious_count: 0,
     top_plates: [],
   });
+
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [timeFormat, setTimeFormat] = useState(12); // Default to 12
 
   useEffect(() => {
-    async function fetchMetrics() {
+    async function fetchData() {
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - 7);
-        const data = await getDashboardMetrics(timeZone, startDate, endDate);
-        // Ensure time_distribution is an array before processing
+
+        // Fetch both metrics and timeFormat
+        const [data, config] = await Promise.all([
+          getDashboardMetrics(timeZone, startDate, endDate),
+          getTimeFormat(),
+        ]);
+
+        setTimeFormat(config);
+
         const sanitizedData = {
           ...data,
           time_distribution: Array.isArray(data?.time_distribution)
             ? data.time_distribution
             : [],
           top_plates: Array.isArray(data?.top_plates) ? data.top_plates : [],
-          // Convert string values to numbers
           total_plates_count: parseInt(data?.total_plates_count) || 0,
           total_reads: parseInt(data?.total_reads) || 0,
           unique_plates: parseInt(data?.unique_plates) || 0,
@@ -104,8 +95,7 @@ export default function DashboardMetrics() {
         };
         setMetrics(sanitizedData);
       } catch (error) {
-        console.error("Error fetching metrics:", error);
-        // Set default state on error
+        console.error("Error fetching data:", error);
         setMetrics({
           time_distribution: [],
           total_plates_count: 0,
@@ -119,16 +109,16 @@ export default function DashboardMetrics() {
         setLoading(false);
       }
     }
-    fetchMetrics();
+    fetchData();
   }, []);
 
   //Transform time distribution data
   const timeDistributionData = metrics.time_distribution
     .filter((item) => item && typeof item.hour_block === "number")
     .map((item) => ({
-      timeRange: formatTimeRange(item.hour_block),
+      timeRange: formatTimeRange(item.hour_block, timeFormat),
       frequency: parseInt(item.frequency) || 0,
-      hour: item.hour_block, // Keep original hour for sorting
+      hour: item.hour_block,
     }))
     .sort((a, b) => a.hour - b.hour);
 
@@ -203,10 +193,11 @@ export default function DashboardMetrics() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={metrics.time_distribution.map((item) => ({
-                      timeRange: formatTimeRange(item.hour_block),
+                      timeRange: formatTimeRange(item.hour_block, timeFormat),
                       frequency: Math.round(parseFloat(item.frequency)) || 0,
                       fullLabel: `${formatTimeRange(
-                        item.hour_block
+                        item.hour_block,
+                        timeFormat
                       )} - ${Math.round(parseFloat(item.frequency))} reads`,
                     }))}
                     margin={{

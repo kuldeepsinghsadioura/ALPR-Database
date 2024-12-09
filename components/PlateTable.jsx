@@ -12,6 +12,9 @@ import {
   CalendarDays,
   HelpCircle,
   Edit,
+  Download,
+  ExternalLink,
+  Maximize2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,6 +79,7 @@ export default function PlateTable({
   onDeleteRecord,
   availableCameras,
   onCorrectPlate,
+  timeFormat = 12,
 }) {
   // Only keep state for modals and temporary form data
   const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false);
@@ -84,6 +88,7 @@ export default function PlateTable({
   const [newKnownPlate, setNewKnownPlate] = useState({ name: "", notes: "" });
   const [correction, setCorrection] = useState(null);
   const [isCorrectPlateOpen, setIsCorrectPlateOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Helper functions
   const getImageUrl = (base64Data) => {
@@ -95,17 +100,33 @@ export default function PlateTable({
   const handleImageClick = (e, plate) => {
     e.preventDefault();
     if (!plate.image_data) return;
+    setSelectedImage({
+      url: getImageUrl(plate.image_data),
+      plateNumber: plate.plate_number,
+    });
+  };
+
+  const handleDownloadImage = () => {
+    if (!selectedImage) return;
+
+    const link = document.createElement("a");
+    link.href = selectedImage.url;
+    link.download = `plate-${selectedImage.plateNumber}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleOpenInNewTab = () => {
     const win = window.open();
-    if (win) {
+    if (win && selectedImage) {
       win.document.write(`
         <html>
-          <head><title>License Plate Image - ${
-            plate.plate_number
-          }</title></head>
+          <head><title>License Plate Image - ${selectedImage.plateNumber}</title></head>
           <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000;">
-            <img src="${getImageUrl(plate.image_data)}" 
+            <img src="${selectedImage.url}" 
                  style="max-width: 100%; max-height: 100vh; object-fit: contain;" 
-                 alt="${plate.plate_number}" />
+                 alt="${selectedImage.plateNumber}" />
           </body>
         </html>
       `);
@@ -339,14 +360,14 @@ export default function PlateTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Plate Number</TableHead>
                 {/* <TableHead>Vehicle Description</TableHead> */}
-                <TableHead>Occurrences</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Camera</TableHead>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="w-24">Image</TableHead>
+                <TableHead className="w-32">Plate Number</TableHead>
+                <TableHead className="w-24">Occurrences</TableHead>
+                <TableHead className="w-40">Tags</TableHead>
+                <TableHead className="w-32">Camera</TableHead>
+                <TableHead className="w-40">Timestamp</TableHead>
+                <TableHead className="w-32 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -366,21 +387,17 @@ export default function PlateTable({
                 data.map((plate) => (
                   <TableRow key={plate.id}>
                     <TableCell>
-                      <a
-                        href={getImageUrl(plate.image_data)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer"
-                        onClick={(e) => handleImageClick(e, plate)}
-                      >
+                      <button onClick={(e) => handleImageClick(e, plate)}>
+                        {" "}
                         <Image
                           src={getImageUrl(plate.image_data)}
                           alt={plate.plate_number}
                           width={100}
                           height={75}
-                          className="rounded hover:opacity-80 transition-opacity"
+                          className="rounded cursor-pointer"
+                          onClick={(e) => handleImageClick(e, plate)}
                         />
-                      </a>
+                      </button>
                     </TableCell>
                     <TableCell
                       className={`font-medium font-mono ${
@@ -437,10 +454,12 @@ export default function PlateTable({
                       )}
                     </TableCell>
                     <TableCell>
-                      {new Date(plate.timestamp).toLocaleString()}
+                      {new Date(plate.timestamp).toLocaleString("en-US", {
+                        hour12: timeFormat === 12,
+                      })}
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-2 justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -540,6 +559,48 @@ export default function PlateTable({
             </Button>
           </div>
         </div>
+        <Dialog
+          open={selectedImage !== null}
+          onOpenChange={(open) => !open && setSelectedImage(null)}
+        >
+          <DialogContent className="max-w-7xl">
+            <DialogHeader>
+              <DialogTitle>
+                License Plate Image - {selectedImage?.plateNumber}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="relative w-full h-[60vh]">
+              {selectedImage && (
+                <Image
+                  src={selectedImage.url}
+                  alt={`License plate ${selectedImage.plateNumber}`}
+                  fill
+                  className="object-contain"
+                />
+              )}
+            </div>
+            <DialogFooter>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={handleOpenInNewTab}
+                  className="gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Open in New Tab
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleDownloadImage}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Image
+                </Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
 
       <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>

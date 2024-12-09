@@ -12,6 +12,7 @@ import {
   deletePlateRead,
   getCameraNames,
   correctPlateRead,
+  getTimeFormat,
 } from "@/app/actions";
 
 export function PlateTableWrapper() {
@@ -19,6 +20,7 @@ export function PlateTableWrapper() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [timeFormat, setTimeFormat] = useState(12);
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,20 +43,22 @@ export function PlateTableWrapper() {
     const loadInitialData = async () => {
       setLoading(true);
       try {
-        const [platesResult, tagsResult, camerasResult] = await Promise.all([
-          getLatestPlateReads({
-            page: parseInt(page),
-            pageSize: parseInt(pageSize),
-            search,
-            fuzzySearch,
-            tag,
-            dateRange:
-              dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
-            cameraName,
-          }),
-          getTags(),
-          getCameraNames(),
-        ]);
+        const [platesResult, tagsResult, camerasResult, timeFormatResult] =
+          await Promise.all([
+            getLatestPlateReads({
+              page: parseInt(page),
+              pageSize: parseInt(pageSize),
+              search,
+              fuzzySearch,
+              tag,
+              dateRange:
+                dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
+              cameraName,
+            }),
+            getTags(),
+            getCameraNames(),
+            getTimeFormat(),
+          ]);
 
         // Update data if we have it (removed success check)
         if (platesResult.data) {
@@ -69,6 +73,8 @@ export function PlateTableWrapper() {
         if (camerasResult.success) {
           setAvailableCameras(camerasResult.data);
         }
+
+        setTimeFormat(timeFormatResult);
       } catch (error) {
         console.error("Error loading initial data:", error);
       }
@@ -242,6 +248,7 @@ export function PlateTableWrapper() {
       loading={loading}
       availableTags={availableTags}
       availableCameras={availableCameras}
+      timeFormat={timeFormat}
       pagination={{
         page: parseInt(page),
         pageSize: parseInt(pageSize),

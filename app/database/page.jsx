@@ -8,7 +8,10 @@ export default async function Database() {
 
   if (typeof window !== "undefined") {
     // Stop this from trying to connect during build
-    plateReads = await getPlates();
+    plateReads = await getPlates(1, 25, {
+      key: "last_seen_at",
+      direction: "desc",
+    });
   }
 
   return (

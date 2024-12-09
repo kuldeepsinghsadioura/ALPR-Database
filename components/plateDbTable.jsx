@@ -89,6 +89,7 @@ import {
   fetchPlateInsights,
   alterPlateFlag,
   deletePlateFromDB,
+  getTimeFormat,
 } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
@@ -100,25 +101,24 @@ const formatDaysAgo = (days) => {
   return `${days} days ago`;
 };
 
-const formatTimeRange = (timeRange) => {
-  const [start, end] = timeRange.split("-");
-  const formatHour = (hour) => {
-    const hourNum = parseInt(hour);
-    if (hourNum === 0) return "12 AM";
-    if (hourNum === 12) return "12 PM";
-    return hourNum > 12 ? `${hourNum - 12} PM` : `${hourNum} AM`;
-  };
-  return `${formatHour(start)} - ${formatHour(end)}`;
-};
+export function formatTimeRange(hour, timeFormat) {
+  if (timeFormat === 24) {
+    return `${String(hour).padStart(2, "0")}:00`;
+  }
 
-const formatTimestamp = (timestamp) => {
+  const period = hour >= 12 ? "PM" : "AM";
+  const adjustedHour = hour % 12 || 12;
+  return `${adjustedHour}${period}`;
+}
+
+const formatTimestamp = (timestamp, timeFormat) => {
   return new Date(timestamp).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    hour12: true,
+    hour12: timeFormat === 12,
   });
 };
 
@@ -163,20 +163,36 @@ export default function PlateTable() {
   const [plateInsights, setPlateInsights] = useState(null);
   const [date, setDate] = useState({ from: undefined, to: undefined });
   const [sortConfig, setSortConfig] = useState({
-    key: "last_seen_at", // default sort by last seen
-    direction: "desc", // default newest first
+    key: "last_seen_at",
+    direction: "desc",
   });
+  const [filters, setFilters] = useState({
+    search: "",
+    tag: "all",
+    fuzzySearch: false,
+    dateRange: { from: null, to: null },
+  });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [timeFormat, setTimeFormat] = useState(12);
 
   useEffect(() => {
     const loadData = async () => {
-      const result = await getPlates();
+      const result = await getPlates(page, pageSize, sortConfig, {
+        search: searchTerm,
+        tag: selectedTag,
+        dateRange: date,
+      });
       if (result.success) {
         setData(result.data);
-        setFilteredData(result.data);
+        setTotalCount(result.pagination.total);
+        setPageCount(result.pagination.pageCount);
       }
     };
     loadData();
-  }, []);
+  }, [page, pageSize, sortConfig, searchTerm, selectedTag, date]);
 
   useEffect(() => {
     const loadTags = async () => {
@@ -189,60 +205,75 @@ export default function PlateTable() {
   }, []);
 
   useEffect(() => {
-    // console.log("Filtering data...");
-    const filtered = data.filter((plate) => {
-      const firstSeenDate = new Date(plate.first_seen_at);
-      const withinDateRange = isWithinDateRange(
-        firstSeenDate,
-        selectedDateRange
-      );
-      // console.log("Is within date range:", withinDateRange);
-
-      return (
-        withinDateRange &&
-        (searchTerm === "" ||
-          plate.plate_number
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())) &&
-        (selectedTag === "all" ||
-          plate.tags?.some((tag) => tag.name === selectedTag))
-      );
-    });
-
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortConfig.key) {
-        case "occurrence_count":
-          return sortConfig.direction === "asc"
-            ? a.occurrence_count - b.occurrence_count
-            : b.occurrence_count - a.occurrence_count;
-        case "first_seen_at":
-          return sortConfig.direction === "asc"
-            ? new Date(a.first_seen_at) - new Date(b.first_seen_at)
-            : new Date(b.first_seen_at) - new Date(a.first_seen_at);
-        case "last_seen_at":
-          return sortConfig.direction === "asc"
-            ? a.days_since_last_seen - b.days_since_last_seen
-            : b.days_since_last_seen - a.days_since_last_seen;
-        case "plate_number":
-          return sortConfig.direction === "asc"
-            ? a.plate_number.localeCompare(b.plate_number)
-            : b.plate_number.localeCompare(a.plate_number);
-        default:
-          return 0;
+    const fetchTimeFormat = async () => {
+      try {
+        const result = await getTimeFormat();
+        setTimeFormat(result);
+      } catch (error) {
+        console.error("Failed to fetch time format:", error);
       }
-    });
+    };
+    fetchTimeFormat();
+  }, []);
 
-    setFilteredData(sorted);
-  }, [data, searchTerm, selectedTag, selectedDateRange, sortConfig]);
+  // useEffect(() => {
+  //   // console.log("Filtering data...");
+  //   const filtered = data.filter((plate) => {
+  //     const firstSeenDate = new Date(plate.first_seen_at);
+  //     const withinDateRange = isWithinDateRange(
+  //       firstSeenDate,
+  //       selectedDateRange
+  //     );
+  //     // console.log("Is within date range:", withinDateRange);
+
+  //     return (
+  //       withinDateRange &&
+  //       (searchTerm === "" ||
+  //         plate.plate_number
+  //           .toLowerCase()
+  //           .includes(searchTerm.toLowerCase())) &&
+  //       (selectedTag === "all" ||
+  //         plate.tags?.some((tag) => tag.name === selectedTag))
+  //     );
+  //   });
+
+  //   const sorted = [...filtered].sort((a, b) => {
+  //     switch (sortConfig.key) {
+  //       case "occurrence_count":
+  //         return sortConfig.direction === "asc"
+  //           ? a.occurrence_count - b.occurrence_count
+  //           : b.occurrence_count - a.occurrence_count;
+  //       case "first_seen_at":
+  //         return sortConfig.direction === "asc"
+  //           ? new Date(a.first_seen_at) - new Date(b.first_seen_at)
+  //           : new Date(b.first_seen_at) - new Date(a.first_seen_at);
+  //       case "last_seen_at":
+  //         return sortConfig.direction === "asc"
+  //           ? a.days_since_last_seen - b.days_since_last_seen
+  //           : b.days_since_last_seen - a.days_since_last_seen;
+  //       case "plate_number":
+  //         return sortConfig.direction === "asc"
+  //           ? a.plate_number.localeCompare(b.plate_number)
+  //           : b.plate_number.localeCompare(a.plate_number);
+  //       default:
+  //         return 0;
+  //     }
+  //   });
+
+  //   setFilteredData(sorted);
+  // }, [data, searchTerm, selectedTag, selectedDateRange, sortConfig]);
 
   const requestSort = (key) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction:
-        prevConfig.key === key && prevConfig.direction === "asc"
-          ? "desc"
-          : "asc",
-    }));
+    setSortConfig((prevConfig) => {
+      const newConfig = {
+        key,
+        direction:
+          prevConfig.key === key && prevConfig.direction === "asc"
+            ? "desc"
+            : "asc",
+      };
+      return newConfig;
+    });
   };
 
   const getSortIcon = (columnKey) => {
@@ -388,9 +419,21 @@ export default function PlateTable() {
     }
   };
 
+  const handlePageSizeChange = (value) => {
+    setPageSize(Number(value));
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setPage((prev) => Math.min(pageCount, prev + 1));
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center space-x-2">
         <div className="flex items-center space-x-2">
           <Search className="text-gray-400 dark:text-gray-500" />
           <Input
@@ -399,15 +442,18 @@ export default function PlateTable() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-64"
           />
-        </div>
-        <div className="flex items-center space-x-2">
-          <Filter className="text-gray-400 dark:text-gray-500" />
+
           <Select value={selectedTag} onValueChange={setSelectedTag}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by tag" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All tags</SelectItem>
+              <SelectItem value="all">
+                <div className="flex gap-3 items-center">
+                  <Filter className=" w-4 h-4" />
+                  All tags
+                </div>
+              </SelectItem>
               {availableTags.map((tag) => (
                 <SelectItem key={tag.name} value={tag.name}>
                   <div className="flex items-center">
@@ -465,6 +511,25 @@ export default function PlateTable() {
               </Button>
             )}
         </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Show</span>
+          <Select
+            value={pageSize.toString()}
+            onValueChange={handlePageSizeChange}
+          >
+            <SelectTrigger className="w-[80px]">
+              <SelectValue>{pageSize}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 25, 50, 100].map((size) => (
+                <SelectItem key={size} value={size.toString()}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">per page</span>
+        </div>
       </div>
       <div className="rounded-md border dark:border-gray-700">
         <Table>
@@ -517,7 +582,7 @@ export default function PlateTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.map((plate) => (
+            {data.map((plate) => (
               <TableRow key={plate.plate_number}>
                 <TableCell className="font-mono text-lg font-medium">
                   <span
@@ -647,6 +712,30 @@ export default function PlateTable() {
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex items-center justify-between ">
+        <div className="text-sm text-muted-foreground">
+          Showing {(page - 1) * pageSize + 1} to{" "}
+          {Math.min(page * pageSize, totalCount)} of {totalCount} results
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={page <= 1}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={page >= pageCount}
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
       <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>
@@ -810,7 +899,10 @@ export default function PlateTable() {
                       <BarChart
                         data={plateInsights.timeDistribution.map((item) => ({
                           ...item,
-                          timeRange: formatTimeRange(item.timeRange),
+                          timeRange: formatTimeRange(
+                            item.timeRange,
+                            timeFormat
+                          ),
                         }))}
                         margin={{
                           top: 20,
@@ -854,7 +946,8 @@ export default function PlateTable() {
                       {formatTimeRange(
                         plateInsights.timeDistribution.reduce((max, current) =>
                           current.frequency > max.frequency ? current : max
-                        ).timeRange
+                        ).timeRange,
+                        timeFormat
                       )}
                       <TrendingUp className="h-4 w-4" />
                     </div>
@@ -890,7 +983,7 @@ export default function PlateTable() {
                       {plateInsights.recentReads.map((read, index) => (
                         <TableRow key={index}>
                           <TableCell className="whitespace-nowrap">
-                            {formatTimestamp(read.timestamp)}
+                            {formatTimestamp(read.timestamp, timeFormat)}
                           </TableCell>
                           <TableCell>{read.vehicleDescription}</TableCell>
                           <TableCell>

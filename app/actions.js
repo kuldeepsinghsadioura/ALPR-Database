@@ -67,30 +67,26 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
   try {
     const metrics = await getMetrics(startDate, endDate);
 
-    // Create an array with all 24 hour blocks
-    const allHourBlocks = Array.from({ length: 24 }, (_, i) => i);
+    // Pre-initialize the hourCounts array
+    const hourCounts = new Array(24).fill(0);
 
-    // Format the time distribution data in the specified timezone
-    const timeDistribution = allHourBlocks.map((hourBlock) => {
-      const matchingReads = metrics.time_data.filter((read) => {
+    // Single pass through the data to aggregate by hour
+    if (metrics.time_data) {
+      metrics.time_data.forEach((read) => {
         const timestamp = new Date(read.timestamp);
         const localTimestamp = new Date(
           timestamp.toLocaleString("en-US", { timeZone })
         );
         const localHour = localTimestamp.getHours();
-        return localHour === hourBlock;
+        hourCounts[localHour] += read.frequency;
       });
+    }
 
-      const frequency = matchingReads.reduce(
-        (sum, read) => sum + read.frequency,
-        0
-      );
-
-      return {
-        hour_block: hourBlock,
-        frequency: frequency,
-      };
-    });
+    // Convert to final format in one go
+    const timeDistribution = hourCounts.map((frequency, hour_block) => ({
+      hour_block,
+      frequency,
+    }));
 
     return {
       ...metrics,
@@ -265,13 +261,39 @@ export async function getPlateHistoryData(plateNumber) {
     return { success: false, error: "Failed to get plate history" };
   }
 }
-
-export async function getPlates() {
+export async function getPlates(
+  page = 1,
+  pageSize = 25,
+  sortConfig = { key: "last_seen_at", direction: "desc" },
+  filters = {}
+) {
   try {
-    return { success: true, data: await getAllPlates() };
+    const result = await getAllPlates({
+      page,
+      pageSize,
+      sortBy: sortConfig.key,
+      sortDesc: sortConfig.direction === "desc",
+      filters: {
+        tag: filters.tag !== "all" ? filters.tag : undefined,
+        dateRange: filters.dateRange,
+        search: filters.search,
+        fuzzySearch: filters.fuzzySearch,
+      },
+    });
+    return { success: true, ...result };
   } catch (error) {
     console.error("Error getting plates database:", error);
-    return { success: false, error: "Failed to get plates database" };
+    return {
+      success: false,
+      error: "Failed to get plates database",
+      data: [],
+      pagination: {
+        total: 0,
+        pageCount: 0,
+        page: 1,
+        pageSize: 25,
+      },
+    };
   }
 }
 
@@ -321,6 +343,7 @@ export async function getLatestPlateReads({
 }
 
 export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
+  const config = await getConfig();
   try {
     let plateNumber;
     if (formDataOrPlateNumber instanceof FormData) {
@@ -379,6 +402,7 @@ export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
         timeDistribution: timeDistribution,
         recentReads: insights.recent_reads || [],
       },
+      timeFormat: config.general.timeFormat || 12,
     };
   } catch (error) {
     console.error("Failed to get plate insights:", error);
@@ -531,6 +555,9 @@ export async function updateSettings(formData) {
           ? parseInt(formData.get("maxRecords"))
           : currentConfig.general.maxRecords,
         ignoreNonPlate: formData.get("ignoreNonPlate") === "true",
+        timeFormat: formData.get("timeFormat")
+          ? parseInt(formData.get("timeFormat"))
+          : currentConfig.general.timeFormat,
       };
     }
 
@@ -683,4 +710,9 @@ export async function correctPlateRead(formData) {
     console.error("Error correcting plate read:", error);
     return { success: false, error: "Failed to correct plate read" };
   }
+}
+
+export async function getTimeFormat() {
+  const config = await getConfig();
+  return config.general.timeFormat;
 }
