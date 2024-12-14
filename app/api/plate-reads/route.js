@@ -141,10 +141,6 @@ function extractPlatesFromMemo(memo) {
 export async function POST(req) {
   let dbClient = null;
 
-  // delete plate reads over the maxRecords limit
-  const config = await getConfig();
-  await cleanupOldRecords(config.general.maxRecords);
-
   try {
     const data = await req.json();
     console.log("Received plate read data:", data);
@@ -218,6 +214,12 @@ export async function POST(req) {
         });
       }
     }
+
+    // delete plate reads over the maxRecords limit
+    const config = await getConfig();
+    cleanupOldRecords(config.general.maxRecords).catch((err) =>
+      console.error("Background cleanup failed:", err)
+    );
 
     // Prepare response based on results
     const response = {
