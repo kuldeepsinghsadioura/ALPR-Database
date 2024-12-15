@@ -215,13 +215,11 @@ export async function POST(req) {
       }
     }
 
-    // delete plate reads over the maxRecords limit
     const config = await getConfig();
     cleanupOldRecords(config.general.maxRecords).catch((err) =>
       console.error("Background cleanup failed:", err)
     );
 
-    // Prepare response based on results
     const response = {
       processed: processedPlates,
       duplicates: duplicatePlates,
