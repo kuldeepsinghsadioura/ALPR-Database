@@ -23,6 +23,16 @@ import {
 import Image from "next/image";
 import { fetchPlateInsights } from "@/app/actions";
 
+export function formatTimeRange(hour, timeFormat) {
+  if (timeFormat === 24) {
+    return `${String(hour).padStart(2, "0")}:00`;
+  }
+
+  const period = hour >= 12 ? "PM" : "AM";
+  const adjustedHour = hour % 12 || 12;
+  return `${adjustedHour}${period}`;
+}
+
 export function PlateMetricsModal({
   isOpen,
   onClose,
@@ -36,12 +46,15 @@ export function PlateMetricsModal({
       const fetchMetrics = async () => {
         const result = await fetchPlateInsights(plateNumber);
         if (result.success) {
+          console.log("Received metrics:", result.data);
+          console.log("TimeFormat:", timeFormat);
+          console.log("Time Distribution:", result.data.timeDistribution);
           setMetrics(result.data);
         }
       };
       fetchMetrics();
     }
-  }, [isOpen, plateNumber]);
+  }, [isOpen, plateNumber, timeFormat]);
 
   if (!isOpen || !metrics) return null;
 
@@ -125,8 +138,26 @@ export function PlateMetricsModal({
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics.timeDistribution}>
-                <XAxis dataKey="timeRange" />
+              <BarChart
+                data={metrics.timeDistribution.map((item) => ({
+                  timeRange: formatTimeRange(item.hour_block, timeFormat),
+                  frequency: item.frequency,
+                }))}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 50,
+                }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="timeRange"
+                  tickLine={false}
+                  axisLine={false}
+                  angle={-45}
+                  textAnchor="end"
+                />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="frequency" fill="#8884d8" />

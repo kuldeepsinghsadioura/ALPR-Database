@@ -16,6 +16,8 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,6 +92,7 @@ import {
   alterPlateFlag,
   deletePlateFromDB,
   getTimeFormat,
+  toggleIgnorePlate,
 } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
@@ -162,6 +165,7 @@ export default function PlateTable() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [plateInsights, setPlateInsights] = useState(null);
   const [date, setDate] = useState({ from: undefined, to: undefined });
+  const [isIgnoreConfirmOpen, setIsIgnoreConfirmOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({
     key: "last_seen_at",
     direction: "desc",
@@ -416,6 +420,26 @@ export default function PlateTable() {
       }
     } catch (error) {
       console.error("Failed to toggle plate flag:", error);
+    }
+  };
+
+  const handleToggleIgnore = async () => {
+    if (!activePlate) return;
+
+    const formData = new FormData();
+    formData.append("plateNumber", activePlate.plate_number);
+    formData.append("ignore", (!activePlate.ignore).toString());
+
+    const result = await toggleIgnorePlate(formData);
+    if (result.success) {
+      setData((prevData) =>
+        prevData.map((plate) =>
+          plate.plate_number === activePlate.plate_number
+            ? { ...plate, ignore: !plate.ignore }
+            : plate
+        )
+      );
+      setIsIgnoreConfirmOpen(false);
     }
   };
 
@@ -697,6 +721,28 @@ export default function PlateTable() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      className={
+                        plate.ignore
+                          ? "text-orange-500 hover:text-orange-700"
+                          : ""
+                      }
+                      onClick={() => {
+                        setActivePlate(plate);
+                        setIsIgnoreConfirmOpen(true);
+                      }}
+                    >
+                      {plate.ignore ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {plate.ignore ? "Stop ignoring" : "Ignore plate"}
+                      </span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="text-red-500 hover:text-red-700"
                       onClick={() => {
                         setActivePlate(plate);
@@ -777,6 +823,34 @@ export default function PlateTable() {
           <DialogFooter>
             <Button type="submit" onClick={handleAddKnownPlate}>
               Add to Known Plates
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isIgnoreConfirmOpen} onOpenChange={setIsIgnoreConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {activePlate?.ignore ? "Stop Ignoring Plate" : "Ignore Plate"}
+            </DialogTitle>
+            <DialogDescription>
+              {activePlate?.ignore
+                ? "This plate number will now be accepted into the recognition feed."
+                : "This plate will be ignored in the recognition feed."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsIgnoreConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={activePlate?.ignore ? "default" : "destructive"}
+              onClick={handleToggleIgnore}
+            >
+              {activePlate?.ignore ? "Stop Ignoring" : "Ignore Plate"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -898,11 +972,11 @@ export default function PlateTable() {
                     >
                       <BarChart
                         data={plateInsights.timeDistribution.map((item) => ({
-                          ...item,
                           timeRange: formatTimeRange(
-                            item.timeRange,
+                            item.hour_block,
                             timeFormat
                           ),
+                          frequency: item.frequency,
                         }))}
                         margin={{
                           top: 20,

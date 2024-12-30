@@ -29,6 +29,7 @@ import {
   getDistinctCameraNames,
   updatePlateRead,
   updateAllPlateReads,
+  togglePlateIgnore,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -50,6 +51,7 @@ import {
   hashPassword,
   createSession,
 } from "@/lib/auth";
+import { formatTimeRange } from "@/lib/utils";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -361,33 +363,23 @@ export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
     const insights = await getPlateInsights(plateNumber);
 
     // Create an array with all 24 hour blocks
-    const allHourBlocks = Array.from({ length: 12 }, (_, i) => i * 2);
+    const hourCounts = new Array(24).fill(0);
 
-    // Format the time distribution data in the specified timezone
-    const timeDistribution = allHourBlocks.map((hourBlock) => {
-      const timeRange = `${String(hourBlock).padStart(2, "0")}:00-${String(
-        (hourBlock + 2) % 24
-      ).padStart(2, "0")}:00`;
-      const matchingReads = insights.time_data.filter((read) => {
+    if (insights.time_data) {
+      insights.time_data.forEach((read) => {
         const timestamp = new Date(read.timestamp);
         const localTimestamp = new Date(
-          timestamp.toLocaleString("en-US", { timeZone })
+          timestamp.toLocaleString("en-US", { timeZone: timeZone || "UTC" })
         );
-        const readHourBlock = Math.floor(localTimestamp.getHours() / 2) * 2;
-        return readHourBlock === hourBlock;
+        const localHour = localTimestamp.getHours();
+        hourCounts[localHour] += read.frequency;
       });
+    }
 
-      const frequency = matchingReads.reduce(
-        (sum, read) => sum + read.frequency,
-        0
-      );
-
-      return {
-        timeBlock: hourBlock,
-        frequency: frequency,
-        timeRange: timeRange,
-      };
-    });
+    const timeDistribution = hourCounts.map((frequency, hour) => ({
+      hour_block: hour, // Pass the raw hour
+      frequency,
+    }));
 
     return {
       success: true,
@@ -717,4 +709,17 @@ export async function correctPlateRead(formData) {
 export async function getTimeFormat() {
   const config = await getConfig();
   return config.general.timeFormat;
+}
+
+export async function toggleIgnorePlate(formData) {
+  try {
+    const plateNumber = formData.get("plateNumber");
+    const ignore = formData.get("ignore") === "true";
+
+    const result = await togglePlateIgnore(plateNumber, ignore);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Failed to toggle plate ignore:", error);
+    return { success: false, error: "Failed to toggle plate ignore" };
+  }
 }

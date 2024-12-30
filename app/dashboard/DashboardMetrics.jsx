@@ -177,7 +177,7 @@ export default function DashboardMetrics() {
               Frequency of plate sightings by time of day (last 7 days)
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[400px]">
+          <CardContent className="">
             {loading ? (
               <Skeleton className="w-full h-full" />
             ) : (
@@ -301,7 +301,7 @@ export default function DashboardMetrics() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top 5 Plates (24h)</CardTitle>
+            <CardTitle>Top 10 Plates (24h)</CardTitle>
             <CardDescription>
               Most frequently seen license plates in the last 24 hours
             </CardDescription>
@@ -309,7 +309,7 @@ export default function DashboardMetrics() {
           <CardContent>
             {loading ? (
               <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(10)].map((_, i) => (
                   <Skeleton key={i} className="w-full h-8" />
                 ))}
               </div>
@@ -318,17 +318,36 @@ export default function DashboardMetrics() {
                 {metrics.top_plates.map((plate, index) => (
                   <li
                     key={plate.plate}
-                    className="flex items-center justify-between px-4 py-2 rounded-lg dark:bg-zinc-900"
+                    className="flex items-center justify-between px-4 py-2 rounded-lg bg-neutral-100 dark:bg-zinc-900"
                   >
                     <div className="flex items-center gap-4">
                       <span className="text-2xl font-bold text-primary">
                         {index + 1}
                       </span>
-                      <div>
-                        <p className="font-semibold">{plate.plate}</p>
-                        {/* <p className="text-sm text-muted-foreground">
-                            Last seen: {formatTimestamp(plate.lastSeen)}
-                          </p> */}
+                      <div className="">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">{plate.plate}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {plate.name && (
+                            <span className="text-sm text-neutral font-semibold">
+                              ({plate.name})
+                            </span>
+                          )}
+                          {plate.tags && plate.tags.length > 0 && (
+                            <div className="flex gap-1 mt-1">
+                              {plate.tags.map((tag) => (
+                                <Badge
+                                  key={tag.name}
+                                  style={{ backgroundColor: tag.color }}
+                                  className="text-xs"
+                                >
+                                  {tag.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <Link
@@ -337,7 +356,9 @@ export default function DashboardMetrics() {
                         query: { search: plate.plate },
                       }}
                     >
-                      <Badge variant="secondary">{plate.count} reads</Badge>
+                      <Badge variant="secondary" className="bg-neutral-400">
+                        {plate.count} reads
+                      </Badge>
                     </Link>
                   </li>
                 ))}

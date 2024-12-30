@@ -39,54 +39,55 @@ export function PlateTableWrapper() {
   const hourFrom = searchParams.get("hourFrom");
   const hourTo = searchParams.get("hourTo");
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const [platesResult, tagsResult, camerasResult, timeFormatResult] =
-          await Promise.all([
-            getLatestPlateReads({
-              page: parseInt(page),
-              pageSize: parseInt(pageSize),
-              search,
-              fuzzySearch,
-              tag,
-              dateRange:
-                dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
-              hourRange:
-                hourFrom && hourTo
-                  ? {
-                      from: parseInt(hourFrom),
-                      to: parseInt(hourTo),
-                    }
-                  : null,
-              cameraName,
-            }),
-            getTags(),
-            getCameraNames(),
-            getTimeFormat(),
-          ]);
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      const [platesResult, tagsResult, camerasResult, timeFormatResult] =
+        await Promise.all([
+          getLatestPlateReads({
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+            search,
+            fuzzySearch,
+            tag,
+            dateRange:
+              dateFrom && dateTo ? { from: dateFrom, to: dateTo } : null,
+            hourRange:
+              hourFrom && hourTo
+                ? {
+                    from: parseInt(hourFrom),
+                    to: parseInt(hourTo),
+                  }
+                : null,
+            cameraName,
+          }),
+          getTags(),
+          getCameraNames(),
+          getTimeFormat(),
+        ]);
 
-        if (platesResult.data) {
-          setData(platesResult.data);
-          setTotal(platesResult.pagination.total);
-        }
-
-        if (tagsResult.success) {
-          setAvailableTags(tagsResult.data);
-        }
-
-        if (camerasResult.success) {
-          setAvailableCameras(camerasResult.data);
-        }
-
-        setTimeFormat(timeFormatResult);
-      } catch (error) {
-        console.error("Error loading initial data:", error);
+      if (platesResult.data) {
+        setData(platesResult.data);
+        setTotal(platesResult.pagination.total);
       }
-      setLoading(false);
-    };
 
+      if (tagsResult.success) {
+        setAvailableTags(tagsResult.data);
+      }
+
+      if (camerasResult.success) {
+        setAvailableCameras(camerasResult.data);
+      }
+
+      setTimeFormat(timeFormatResult);
+    } catch (error) {
+      console.error("Error loading initial data:", error);
+    }
+    setLoading(false);
+  };
+
+  // Initial load effect
+  useEffect(() => {
     loadInitialData();
   }, [
     page,
@@ -101,6 +102,49 @@ export function PlateTableWrapper() {
     cameraName,
   ]);
 
+  // SSE subscription effect
+  useEffect(() => {
+    console.log("Setting up SSE connection...");
+    const eventSource = new EventSource("/api/SSE/plates");
+
+    eventSource.onmessage = async (event) => {
+      console.log("Received SSE event:", event.data);
+      const data = JSON.parse(event.data);
+      if (data.type === "new-plate") {
+        console.log("New plate detected, checking if reload needed...");
+        // Only reload if we're on the first page and have no filters
+        if (
+          page === "1" &&
+          !search &&
+          tag === "all" &&
+          !dateFrom &&
+          !dateTo &&
+          !hourFrom &&
+          !hourTo &&
+          !cameraName
+        ) {
+          console.log("Reloading data...");
+          await loadInitialData();
+        }
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("SSE Error:", error);
+      eventSource.close();
+    };
+
+    eventSource.onopen = () => {
+      console.log("SSE connection established");
+    };
+
+    return () => {
+      console.log("Cleaning up SSE connection...");
+      eventSource.close();
+    };
+  }, [page, search, tag, dateFrom, dateTo, hourFrom, hourTo, cameraName]);
+
+  // Rest of your existing functions
   const createQueryString = useCallback(
     (params) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()));

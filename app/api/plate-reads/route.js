@@ -4,7 +4,7 @@ import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 import { getConfig } from "@/lib/settings";
 
-// Revised to use a blacklist of all other possible AI labels if using the memo. This will filter any other AI objects out, while still allowing for weird OCR reads and vanity plates.
+// Revised to use a blacklist of all other possible AI labels if using the memo
 const EXCLUDED_LABELS = [
   "person",
   "bicycle",
@@ -103,7 +103,9 @@ const EXCLUDED_LABELS = [
 ].map((label) => label.toLowerCase());
 
 function extractPlatesFromMemo(memo) {
-  if (!memo) return [];
+  if (!memo) {
+    return [];
+  }
 
   // Split up all the detected objects/plates in memo
   const detections = memo.split(",").map((d) => d.trim());
@@ -114,7 +116,9 @@ function extractPlatesFromMemo(memo) {
       // Split by colon to separate label from confidence
       const [label] = detection.split(":");
 
-      if (!label) return null;
+      if (!label) {
+        return null;
+      }
 
       // Convert to lowercase for comparison
       const normalizedLabel = label.trim().toLowerCase();
@@ -124,7 +128,7 @@ function extractPlatesFromMemo(memo) {
         return null;
       }
 
-      // The older dayplate and nightplate models return the plate in brackets, so check for these and remove them if they are present.
+      // The older dayplate and nightplate models return the plate in brackets
       let plateNumber = label.trim();
       if (plateNumber.includes("[") && plateNumber.includes("]")) {
         plateNumber = plateNumber.replace(/\[|\]/g, "");
@@ -220,14 +224,36 @@ export async function POST(req) {
       console.error("Background cleanup failed:", err)
     );
 
-    const response = {
-      processed: processedPlates,
-      duplicates: duplicatePlates,
-      message: `Processed ${processedPlates.length} plates, ${duplicatePlates.length} duplicates`,
-    };
+    if (processedPlates.length > 0) {
+      // Live Revalidate
+      if (global.plateSubscribers) {
+        console.log("Broadcasting to SSE subscribers...");
+        const event = {
+          type: "new-plate",
+          data: processedPlates,
+        };
 
-    const status = processedPlates.length > 0 ? 201 : 409;
-    return Response.json(response, { status });
+        let subscriberCount = 0;
+        global.plateSubscribers.forEach((controller) => {
+          try {
+            controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
+            subscriberCount++;
+          } catch (error) {
+            console.error("Error sending SSE update:", error);
+          }
+        });
+        console.log(`Broadcasted to ${subscriberCount} subscribers`);
+      }
+    }
+
+    return Response.json(
+      {
+        processed: processedPlates,
+        duplicates: duplicatePlates,
+        message: `Processed ${processedPlates.length} plates, ${duplicatePlates.length} duplicates`,
+      },
+      { status: processedPlates.length > 0 ? 201 : 409 }
+    );
   } catch (error) {
     console.error("Error processing request:", error);
     return Response.json(
