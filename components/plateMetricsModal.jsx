@@ -19,6 +19,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 import Image from "next/image";
 import { fetchPlateInsights } from "@/app/actions";

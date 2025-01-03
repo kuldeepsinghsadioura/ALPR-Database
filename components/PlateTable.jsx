@@ -106,7 +106,7 @@ export default function PlateTable({
       }, 4500);
     }
     return () => clearInterval(interval);
-  }, [isLive]);
+  }, [isLive, router]);
 
   // Helper functions
   const getImageUrl = (base64Data) => {

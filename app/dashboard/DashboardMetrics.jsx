@@ -288,7 +288,7 @@ export default function DashboardMetrics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="h-full flex flex-col">
+        <Card className="h-full md:max-h-[600px] 2xl:max-h-[800px] flex flex-col">
           <CardHeader>
             <CardTitle>Time Distribution</CardTitle>
             <CardDescription>
@@ -419,7 +419,7 @@ export default function DashboardMetrics() {
           </CardFooter>
         </Card>
 
-        <Card>
+        <Card className="md:max-h-[600px] 2xl:max-h-[800px] overflow-auto">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Top 10 Plates
