@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { initializeAuth } from "@/lib/auth";
 import { Suspense } from "react";
 import VersionAlert from "@/components/UpdateAlert";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +30,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-neutral-950`}
       >
-        <Suspense fallback={<>Loading...</>}>
+        <Suspense fallback={<DashboardSkeleton />}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <VersionAlert />
             {children}

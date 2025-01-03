@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Search,
@@ -66,6 +66,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
+import { useRouter } from "next/navigation";
 
 export default function PlateTable({
   data,
@@ -82,6 +83,8 @@ export default function PlateTable({
   onCorrectPlate,
   timeFormat = 12,
 }) {
+  console.log("PlateTable rendering with data:", data.length);
+
   // Only keep state for modals and temporary form data
   const [isAddKnownPlateOpen, setIsAddKnownPlateOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -90,6 +93,20 @@ export default function PlateTable({
   const [correction, setCorrection] = useState(null);
   const [isCorrectPlateOpen, setIsCorrectPlateOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [searchInput, setSearchInput] = useState(filters.search || "");
+  const [isLive, setIsLive] = useState(true);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    let interval;
+    if (isLive) {
+      interval = setInterval(() => {
+        router.refresh();
+      }, 4500);
+    }
+    return () => clearInterval(interval);
+  }, [isLive]);
 
   // Helper functions
   const getImageUrl = (base64Data) => {
@@ -136,13 +153,17 @@ export default function PlateTable({
 
   const handleSearchChange = (e) => {
     const value = e.target.value.toUpperCase();
-    // Get the cursor position before updating
     const cursorPosition = e.target.selectionStart;
-    onUpdateFilters({ search: value });
-    // After state update, restore cursor position
+    // Save cursor position
     setTimeout(() => {
       e.target.setSelectionRange(cursorPosition, cursorPosition);
     }, 0);
+    setSearchInput(value);
+
+    // Delay the actual filter update
+    setTimeout(() => {
+      onUpdateFilters({ search: value });
+    }, 300);
   };
 
   const handleFuzzySearchToggle = (checked) => {
@@ -201,13 +222,16 @@ export default function PlateTable({
   };
 
   const clearFilters = () => {
+    setSearchInput("");
     onUpdateFilters({
       search: "",
-      tag: "all",
+      fuzzySearch: null,
+      tag: null,
       dateFrom: null,
       dateTo: null,
       hourFrom: null,
       hourTo: null,
+      camera: null,
     });
   };
 
@@ -378,7 +402,7 @@ export default function PlateTable({
   };
 
   return (
-    <Card>
+    <Card className="rounded-md">
       <CardContent className="py-4">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
           <div className="flex items-center justify-start space-x-2">
@@ -386,7 +410,7 @@ export default function PlateTable({
               <Search className="text-gray-400 dark:text-gray-500" />
               <Input
                 placeholder="Search plates..."
-                value={filters.search}
+                value={searchInput}
                 onChange={handleSearchChange}
                 className="w-64"
               />
@@ -399,7 +423,7 @@ export default function PlateTable({
                   />
                   <label
                     htmlFor="fuzzy-search"
-                    className="text-sm text-muted-foreground cursor-pointer"
+                    className="text-sm cursor-pointer"
                   >
                     Fuzzy Search
                   </label>
@@ -505,6 +529,21 @@ export default function PlateTable({
                 })
               }
             />
+            <div className="flex items-center border rounded-md px-3 py-2 bg-background">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={isLive}
+                  onCheckedChange={setIsLive}
+                  id="live-updates"
+                />
+                <label
+                  htmlFor="live-updates"
+                  className="text-sm cursor-pointer"
+                >
+                  Live Updates
+                </label>
+              </div>
+            </div>
 
             {(filters.search ||
               filters.tag !== "all" ||

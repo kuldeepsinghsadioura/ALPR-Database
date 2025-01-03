@@ -1,5 +1,5 @@
 general:
-  maxRecords: 2000
+  maxRecords: 6000
   ignoreNonPlate: false
   timeFormat: 12
 mqtt:

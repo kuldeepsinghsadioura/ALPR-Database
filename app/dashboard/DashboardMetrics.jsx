@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import {
   BarChart,
   Bar,
@@ -21,11 +21,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/ui/hover-card";
+
+import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { getDashboardMetrics, getTimeFormat } from "@/app/actions";
+import {
+  fetchPlateImagePreviews,
+  getDashboardMetrics,
+  getTimeFormat,
+} from "@/app/actions";
 import {
   AlertTriangle,
   TrendingUp,
@@ -34,11 +44,19 @@ import {
   Calendar,
   Clock,
   Database,
+  ExternalLink,
+  ArrowUpRight,
+  Loader2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/components/layout/MainLayout";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { TimeFrameSelector } from "./TimeSelect";
+import { TagDistributionChart } from "./TagDistribution";
+import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
+import { DummyChart } from "./dummyChart";
 
 export function formatTimeRange(hour, timeFormat) {
   if (timeFormat === 24) {
@@ -49,6 +67,121 @@ export function formatTimeRange(hour, timeFormat) {
   const adjustedHour = hour % 12 || 12;
   return `${adjustedHour}${period}`;
 }
+
+const PlateImagePreviews = ({ plate, timeFrame }) => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadImages = async () => {
+      try {
+        setLoading(true);
+        const fetchedImages = await fetchPlateImagePreviews(plate, timeFrame);
+        if (mounted) {
+          setImages(fetchedImages || []);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadImages();
+
+    return () => {
+      mounted = false;
+    };
+  }, [plate, timeFrame]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-32 flex items-center justify-center text-sm text-muted-foreground">
+        Error loading images
+      </div>
+    );
+  }
+
+  if (!images?.length) {
+    return (
+      <div className="h-32 flex items-center justify-center text-sm text-muted-foreground">
+        No recent images available
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {images.map((img, idx) => (
+        <div
+          key={idx}
+          className="relative aspect-video bg-muted rounded-sm overflow-hidden"
+        >
+          <Image
+            src={`data:image/jpeg;base64,${img.image_data}`}
+            alt={`Capture from ${new Date(img.capture_time).toLocaleString()}`}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute bottom-0 left-0 right-0 px-2 py-1 text-[10px] bg-black/50 text-white">
+            {new Date(img.capture_time).toLocaleTimeString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ClickableBar = ({ payload, x, y, width, height, radius }) => {
+  // Get the local hour number from the payload
+  const localHour = payload.hour_block;
+
+  // Get timezone offset in hours
+  const tzOffset = -(new Date().getTimezoneOffset() / 60);
+
+  // Convert to UTC for the query parameters
+  let utcFrom = (localHour - tzOffset + 24) % 24;
+  let utcTo = (localHour - tzOffset + 24) % 24;
+
+  return (
+    <Link
+      href={{
+        pathname: "/live_feed",
+        query: {
+          page: 1,
+          hourFrom: Math.floor(utcFrom).toString().padStart(2, "0"),
+          hourTo: Math.floor(utcTo).toString().padStart(2, "0"),
+        },
+      }}
+    >
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={radius}
+        ry={radius}
+        fill="var(--color-frequency)"
+        className="cursor-pointer hover:opacity-80 transition-opacity"
+      />
+    </Link>
+  );
+};
 
 export default function DashboardMetrics() {
   const [metrics, setMetrics] = useState({
@@ -64,6 +197,7 @@ export default function DashboardMetrics() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [timeFormat, setTimeFormat] = useState(12); // Default to 12
+  const [timeFrame, setTimeFrame] = useState("24h");
 
   useEffect(() => {
     async function fetchData() {
@@ -71,7 +205,24 @@ export default function DashboardMetrics() {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 7);
+        //startDate.setDate(endDate.getDate() - 7);
+
+        switch (timeFrame) {
+          case "3d":
+            startDate.setDate(endDate.getDate() - 3);
+            break;
+          case "7d":
+            startDate.setDate(endDate.getDate() - 7);
+            break;
+          case "30d":
+            startDate.setDate(endDate.getDate() - 30);
+            break;
+          case "all":
+            startDate.setFullYear(2000); // Or some early date
+            break;
+          default: // 24h
+            startDate.setDate(endDate.getDate() - 1);
+        }
 
         // Fetch both metrics and timeFormat
         const [data, config] = await Promise.all([
@@ -110,7 +261,7 @@ export default function DashboardMetrics() {
       }
     }
     fetchData();
-  }, []);
+  }, [timeFrame]);
 
   //Transform time distribution data
   const timeDistributionData = metrics.time_distribution
@@ -130,54 +281,21 @@ export default function DashboardMetrics() {
       : "No data available";
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        <MetricCard
-          title="Total Unique Plates"
-          value={metrics.total_plates_count}
-          icon={<Database className="h-4 w-4" />}
-          description="Total unique plates stored in the database"
-          loading={loading}
-        />
-        <MetricCard
-          title="Total Reads (24h)"
-          value={metrics.total_reads}
-          icon={<Eye className="h-4 w-4" />}
-          description="License plates scanned in the last 24 hours"
-          loading={loading}
-        />
-        <MetricCard
-          title="Unique Plates (24h)"
-          value={metrics.unique_plates}
-          icon={<Car className="h-4 w-4" />}
-          description="Distinct vehicles detected in the last 24 hours"
-          loading={loading}
-        />
-        <MetricCard
-          title="Weekly Unique"
-          value={metrics.weekly_unique}
-          icon={<Calendar className="h-4 w-4" />}
-          description="Unique plates seen in the last 7 days"
-          loading={loading}
-        />
-        <MetricCard
-          title="Suspicious Plates"
-          value={metrics.suspicious_count}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          description="Total plates tagged as suspicious"
-          loading={loading}
-        />
+    <div className="space-y-4">
+      <div className="flex justify-between pt-4">
+        <h1 className="text-3xl font-bold mb-6">License Plate Dashboard</h1>
+        <TimeFrameSelector value={timeFrame} onValueChange={setTimeFrame} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="">
+        <Card className="h-full flex flex-col">
           <CardHeader>
             <CardTitle>Time Distribution</CardTitle>
             <CardDescription>
-              Frequency of plate sightings by time of day (last 7 days)
+              Frequency of plate sightings by time of day ({timeFrame})
             </CardDescription>
           </CardHeader>
-          <CardContent className="">
+          <CardContent className="flex-1 min-h-[400px]">
             {loading ? (
               <Skeleton className="w-full h-full" />
             ) : (
@@ -195,6 +313,7 @@ export default function DashboardMetrics() {
                     data={metrics.time_distribution.map((item) => ({
                       timeRange: formatTimeRange(item.hour_block, timeFormat),
                       frequency: Math.round(parseFloat(item.frequency)) || 0,
+                      hour_block: item.hour_block,
                       fullLabel: `${formatTimeRange(
                         item.hour_block,
                         timeFormat
@@ -275,6 +394,7 @@ export default function DashboardMetrics() {
                       dataKey="frequency"
                       fill="var(--color-frequency)"
                       radius={4}
+                      shape={<ClickableBar />}
                     >
                       <LabelList
                         dataKey="frequency"
@@ -288,66 +408,108 @@ export default function DashboardMetrics() {
               </ChartContainer>
             )}
           </CardContent>
-          <CardFooter className="flex-col items-start gap-2 text-sm">
+          <CardFooter className="flex-col items-start gap-2 text-sm mt-auto">
             <div className="flex gap-2 font-medium leading-none">
               Most active time: {mostActiveTime}
               <TrendingUp className="h-4 w-4" />
             </div>
             <div className="leading-none text-muted-foreground">
-              Total plate reads by hour over the last 7 days
+              Total plate reads by hour over the last {timeFrame}
             </div>
           </CardFooter>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Top 10 Plates (24h)</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              Top 10 Plates
+              <span className="text-base font-normal text-muted-foreground">
+                ({timeFrame})
+              </span>
+            </CardTitle>
             <CardDescription>
-              Most frequently seen license plates in the last 24 hours
+              Most frequently seen license plates in the last {timeFrame} -
+              Hover to preview images
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="space-y-2">
                 {[...Array(10)].map((_, i) => (
-                  <Skeleton key={i} className="w-full h-8" />
+                  <Skeleton key={i} className="w-full h-16" />
                 ))}
               </div>
             ) : (
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {metrics.top_plates.map((plate, index) => (
                   <li
                     key={plate.plate}
-                    className="flex items-center justify-between px-4 py-2 rounded-lg bg-neutral-100 dark:bg-zinc-900"
+                    className="flex items-center justify-between p-3 rounded-lg bg-neutral-100 dark:bg-zinc-900/70 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-2xl font-bold text-primary">
+                      <span className="flex items-center justify-center w-8 h-8 text-lg font-bold rounded-full bg-primary/10 text-primary">
                         {index + 1}
                       </span>
-                      <div className="">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold">{plate.plate}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {plate.name && (
-                            <span className="text-sm text-neutral font-semibold">
-                              ({plate.name})
-                            </span>
-                          )}
-                          {plate.tags && plate.tags.length > 0 && (
-                            <div className="flex gap-1 mt-1">
+                      <div className="flex items-center gap-3">
+                        <HoverCard>
+                          <HoverCardTrigger>
+                            <div className="space-y-1">
+                              <p className="font-semibold">{plate.plate}</p>
+                              {plate.name && (
+                                <p className="text-md font-medium">
+                                  {plate.name}
+                                </p>
+                              )}
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-96">
+                            <div className="space-y-4">
+                              <div>
+                                <h4 className="font-semibold mb-1">
+                                  Recent Captures Quick Look
+                                </h4>
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  Click the reads count to view all appearances
+                                </p>
+                                <Suspense
+                                  fallback={
+                                    <div className="flex items-center justify-center h-32">
+                                      <Loader2 className="w-6 h-6 animate-spin" />
+                                    </div>
+                                  }
+                                >
+                                  <PlateImagePreviews
+                                    plate={plate.plate}
+                                    timeFrame={timeFrame}
+                                  />
+                                </Suspense>
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                        {plate.tags && plate.tags.length > 0 && (
+                          <>
+                            <Separator
+                              orientation="vertical"
+                              className="h-10 mx-4"
+                            />
+                            <div className="flex gap-1">
                               {plate.tags.map((tag) => (
                                 <Badge
                                   key={tag.name}
-                                  style={{ backgroundColor: tag.color }}
-                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: tag.color,
+                                    color: "white",
+                                    textShadow: "0 1px 1px rgba(0,0,0,0.2)",
+                                  }}
+                                  className="text-xs h-fit"
                                 >
                                   {tag.name}
                                 </Badge>
                               ))}
                             </div>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
                     </div>
                     <Link
@@ -356,9 +518,10 @@ export default function DashboardMetrics() {
                         query: { search: plate.plate },
                       }}
                     >
-                      <Badge variant="secondary" className="bg-neutral-400">
-                        {plate.count} reads
-                      </Badge>
+                      <Button variant="secondary" size="sm" className="group">
+                        <span className="mr-2">{plate.count} reads</span>
+                        <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </Button>
                     </Link>
                   </li>
                 ))}
@@ -366,6 +529,51 @@ export default function DashboardMetrics() {
             )}
           </CardContent>
         </Card>
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        {/* Metrics Grid */}
+        <div className="xl:col-span-8 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <MetricCard
+              title="Total Unique Plates"
+              value={metrics.total_plates_count}
+              icon={<Database className="h-4 w-4" />}
+              description="Total unique plates stored in the database"
+              loading={loading}
+            />
+            <MetricCard
+              title="Total Reads"
+              value={metrics.total_reads}
+              icon={<Eye className="h-4 w-4" />}
+              description="License plates read during period"
+              loading={loading}
+            />
+            <MetricCard
+              title="Unique Vehicles"
+              value={metrics.unique_plates}
+              icon={<Car className="h-4 w-4" />}
+              description="Distinct vehicles detected during period"
+              loading={loading}
+            />
+            <MetricCard
+              title="New Vehicles"
+              value={metrics.new_plates_count}
+              icon={<Calendar className="h-4 w-4" />}
+              description="Vehicles detected for the first time during period"
+              loading={loading}
+            />
+          </div>
+          <DummyChart />
+        </div>
+
+        {/* Tag Distribution Chart */}
+        <div className="xl:col-span-4">
+          <TagDistributionChart
+            data={metrics.tag_stats || []}
+            loading={loading}
+            className="h-full"
+          />
+        </div>
       </div>
     </div>
   );

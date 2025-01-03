@@ -92,7 +92,6 @@ import {
   alterPlateFlag,
   deletePlateFromDB,
   getTimeFormat,
-  toggleIgnorePlate,
 } from "@/app/actions";
 import Image from "next/image";
 import Link from "next/link";
@@ -165,7 +164,7 @@ export default function PlateTable() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [plateInsights, setPlateInsights] = useState(null);
   const [date, setDate] = useState({ from: undefined, to: undefined });
-  const [isIgnoreConfirmOpen, setIsIgnoreConfirmOpen] = useState(false);
+
   const [sortConfig, setSortConfig] = useState({
     key: "last_seen_at",
     direction: "desc",
@@ -420,26 +419,6 @@ export default function PlateTable() {
       }
     } catch (error) {
       console.error("Failed to toggle plate flag:", error);
-    }
-  };
-
-  const handleToggleIgnore = async () => {
-    if (!activePlate) return;
-
-    const formData = new FormData();
-    formData.append("plateNumber", activePlate.plate_number);
-    formData.append("ignore", (!activePlate.ignore).toString());
-
-    const result = await toggleIgnorePlate(formData);
-    if (result.success) {
-      setData((prevData) =>
-        prevData.map((plate) =>
-          plate.plate_number === activePlate.plate_number
-            ? { ...plate, ignore: !plate.ignore }
-            : plate
-        )
-      );
-      setIsIgnoreConfirmOpen(false);
     }
   };
 
@@ -718,28 +697,7 @@ export default function PlateTable() {
                         {plate.flagged ? "Remove flag" : "Add flag"}
                       </span>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={
-                        plate.ignore
-                          ? "text-orange-500 hover:text-orange-700"
-                          : ""
-                      }
-                      onClick={() => {
-                        setActivePlate(plate);
-                        setIsIgnoreConfirmOpen(true);
-                      }}
-                    >
-                      {plate.ignore ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                      <span className="sr-only">
-                        {plate.ignore ? "Stop ignoring" : "Ignore plate"}
-                      </span>
-                    </Button>
+
                     <Button
                       variant="ghost"
                       size="icon"
@@ -827,34 +785,6 @@ export default function PlateTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog open={isIgnoreConfirmOpen} onOpenChange={setIsIgnoreConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {activePlate?.ignore ? "Stop Ignoring Plate" : "Ignore Plate"}
-            </DialogTitle>
-            <DialogDescription>
-              {activePlate?.ignore
-                ? "This plate number will now be accepted into the recognition feed."
-                : "This plate will be ignored in the recognition feed."}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsIgnoreConfirmOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant={activePlate?.ignore ? "default" : "destructive"}
-              onClick={handleToggleIgnore}
-            >
-              {activePlate?.ignore ? "Stop Ignoring" : "Ignore Plate"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent>
@@ -885,7 +815,12 @@ export default function PlateTable() {
           className="w-[900px] sm:max-w-[900px] lg:max-w-[1200px] overflow-y-auto"
         >
           <SheetHeader>
-            <SheetTitle>Insights for {plateInsights?.plateNumber}</SheetTitle>
+            <Link
+              href={`/live_feed?search=${plateInsights?.plateNumber}`}
+              passHref
+            >
+              <SheetTitle>Insights for {plateInsights?.plateNumber}</SheetTitle>
+            </Link>
             <SheetDescription>
               Detailed information about this plate
             </SheetDescription>

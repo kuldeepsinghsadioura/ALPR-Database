@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import DashboardLayout from "@/components/layout/MainLayout";
 import DashboardMetrics from "./DashboardMetrics";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 
 export default function Dashboard() {
   return (
     <DashboardLayout>
-      <div className="space-y-8 p-8">
-        <h1 className="text-3xl font-bold mb-6">License Plate Dashboard</h1>
-        <Suspense fallback={<div>Loading dashboard metrics...</div>}>
+      <div className="space-y-8 p-6">
+        <Suspense fallback={<DashboardSkeleton />}>
           <DashboardMetrics />
         </Suspense>
       </div>

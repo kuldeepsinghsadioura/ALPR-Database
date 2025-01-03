@@ -30,6 +30,7 @@ import {
   updatePlateRead,
   updateAllPlateReads,
   togglePlateIgnore,
+  getPlateImagePreviews,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -38,9 +39,7 @@ import {
   deleteNotification as deleteNotificationDB,
 } from "@/lib/db";
 
-import { revalidatePath } from "next/cache";
-import fs from "fs/promises";
-import yaml from "js-yaml";
+import { revalidatePath, revalidateTag, unstable_noStore } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
@@ -90,9 +89,17 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
       frequency,
     }));
 
+    // Process tag stats
+    const tagStats = metrics.tag_stats || [];
+    const totalTaggedPlates = tagStats.reduce((sum, tag) => sum + tag.count, 0);
+
     return {
       ...metrics,
       time_distribution: timeDistribution,
+      tag_stats: tagStats.map((tag) => ({
+        ...tag,
+        percentage: ((tag.count / totalTaggedPlates) * 100).toFixed(1),
+      })),
     };
   } catch (error) {
     console.error("Error fetching dashboard metrics:", error);
@@ -101,22 +108,11 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
       total_plates_count: 0,
       total_reads: 0,
       unique_plates: 0,
-      weekly_unique: 0,
+      new_plates_count: 0,
       suspicious_count: 0,
       top_plates: [],
+      tag_stats: [],
     };
-  }
-}
-
-export async function updateTag(formData) {
-  try {
-    const name = formData.get("name");
-    const color = formData.get("color");
-    const tag = await updateTagColor(name, color);
-    return { success: true, data: tag };
-  } catch (error) {
-    console.error("Error updating tag:", error);
-    return { success: false, error: "Failed to update tag color" };
   }
 }
 
@@ -193,6 +189,27 @@ export async function addTag(formData) {
   } catch (error) {
     console.error("Error creating tag:", error);
     return { success: false, error: "Failed to create tag" };
+  }
+}
+
+export async function updateTag(formData) {
+  try {
+    const newName = formData.get("name");
+    const color = formData.get("color");
+    const originalName = formData.get("originalName");
+
+    let updatedTag;
+
+    if (originalName !== newName) {
+      updatedTag = await updateTagName(originalName, newName);
+    }
+
+    updatedTag = await updateTagColor(updatedTag?.name || originalName, color);
+
+    return { success: true, data: updatedTag };
+  } catch (error) {
+    console.error("Error updating tag:", error);
+    return { success: false, error: "Failed to update tag" };
   }
 }
 
@@ -722,4 +739,39 @@ export async function toggleIgnorePlate(formData) {
     console.error("Failed to toggle plate ignore:", error);
     return { success: false, error: "Failed to toggle plate ignore" };
   }
+}
+
+export async function revalidatePlatesPage() {
+  try {
+    console.log("🔴 Starting revalidation");
+    revalidatePath("/live_feed");
+    console.log("🔴 Revalidation completed");
+  } catch (error) {
+    console.error("🔴 Revalidation failed:", error);
+    throw error;
+  }
+}
+
+export async function fetchPlateImagePreviews(plateNumber, timeFrame) {
+  const endDate = new Date();
+  const startDate = new Date();
+
+  switch (timeFrame) {
+    case "3d":
+      startDate.setDate(endDate.getDate() - 3);
+      break;
+    case "7d":
+      startDate.setDate(endDate.getDate() - 7);
+      break;
+    case "30d":
+      startDate.setDate(endDate.getDate() - 30);
+      break;
+    case "all":
+      startDate.setFullYear(2000);
+      break;
+    default: // 24h
+      startDate.setDate(endDate.getDate() - 1);
+  }
+
+  return await getPlateImagePreviews(plateNumber, startDate, endDate);
 }

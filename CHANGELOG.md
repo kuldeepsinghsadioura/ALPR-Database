@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.6] - 01-03-2025
+
+- Live update of recognition feed
+- New dashboard visualizations & controls
+- Speed & loading improvements
+- Ability to edit tag name and color
+- More sensible default database sorting
+- Set ignore flag on known plates to exclude from database
+- Time formatting fix
+- **Requires new migrations.sql update from GitHub**
+
 ## [0.1.5] - 12-09-2024
 
 - Support for 24 hour time

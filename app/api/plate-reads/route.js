@@ -1,8 +1,10 @@
-import { cleanupOldRecords, getPool } from "@/lib/db";
+import { cleanupOldRecords, getPool, isPlateIgnored } from "@/lib/db";
 import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 import { getConfig } from "@/lib/settings";
+import { revalidatePlatesPage } from "@/app/actions";
+import { revalidatePath } from "next/cache";
 
 // Revised to use a blacklist of all other possible AI labels if using the memo
 const EXCLUDED_LABELS = [
@@ -182,12 +184,19 @@ export async function POST(req) {
     const processedPlates = [];
     const duplicatePlates = [];
     const camera = data.camera || null;
+    const ignoredPlates = [];
 
     for (const plate of plates) {
       // Check notifications
       const shouldNotify = await checkPlateForNotification(plate);
       if (shouldNotify) {
         await sendPushoverNotification(plate, null, data.Image);
+      }
+
+      const isIgnored = await isPlateIgnored(plate);
+      if (isIgnored) {
+        ignoredPlates.push(plate);
+        continue; //skip to next
       }
 
       const result = await dbClient.query(
@@ -224,25 +233,22 @@ export async function POST(req) {
       console.error("Background cleanup failed:", err)
     );
 
-    if (processedPlates.length > 0) {
-      // Live Revalidate
-      if (global.plateSubscribers) {
-        console.log("Broadcasting to SSE subscribers...");
-        const event = {
-          type: "new-plate",
-          data: processedPlates,
-        };
+    // if (processedPlates.length > 0) {
+    //   console.log("New plate(s) processed, notifying clients");
 
-        let subscriberCount = 0;
-        global.plateSubscribers.forEach((controller) => {
-          try {
-            controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
-            subscriberCount++;
-          } catch (error) {
-            console.error("Error sending SSE update:", error);
-          }
-        });
-        console.log(`Broadcasted to ${subscriberCount} subscribers`);
+    //   // Add revalidation here as well for good measure
+    //   await revalidatePlatesPage();
+    // }
+    if (processedPlates.length > 0) {
+      try {
+        console.log("⭐ Starting revalidation");
+        await revalidatePlatesPage();
+        // Ensure revalidation completes
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        console.log("⭐ Revalidation completed");
+      } catch (error) {
+        console.error("⭐ Revalidation failed:", error);
+        throw error;
       }
     }
 
@@ -250,7 +256,8 @@ export async function POST(req) {
       {
         processed: processedPlates,
         duplicates: duplicatePlates,
-        message: `Processed ${processedPlates.length} plates, ${duplicatePlates.length} duplicates`,
+        ignored: ignoredPlates,
+        message: `Processed ${processedPlates.length} plates, ${duplicatePlates.length} duplicates, ${ignoredPlates.length} ignored`,
       },
       { status: processedPlates.length > 0 ? 201 : 409 }
     );
