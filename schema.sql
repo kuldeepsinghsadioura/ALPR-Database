@@ -72,7 +72,7 @@ CREATE TABLE public.known_plates (
     plate_number character varying(10) NOT NULL,
     name character varying(255),
     notes text,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ignore BOOLEAN DEFAULT FALSE
 );
 
