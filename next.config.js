@@ -14,6 +14,9 @@ const nextConfig = {
       "/package.json",
     ],
   },
+  api: {
+    responseLimit: "10mb",
+  },
 };
 
 module.exports = nextConfig;
