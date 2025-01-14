@@ -14,8 +14,10 @@ const nextConfig = {
       "/package.json",
     ],
   },
-  api: {
-    responseLimit: "10mb",
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "8mb",
+    },
   },
 };
 
