@@ -27,7 +27,7 @@ export default function LogsPage() {
       <div className="flex flex-col py-4 px-6">
         <div className="container flex h-14 items-center">
           <div className="flex items-center mb-3">
-            <h1 className="text-2xl font-medium">System Settings</h1>
+            <h1 className="text-2xl font-medium">System Logs</h1>
           </div>
         </div>
         <Suspense
