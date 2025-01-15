@@ -5,6 +5,7 @@ import { initializeAuth } from "@/lib/auth";
 import { Suspense } from "react";
 import VersionAlert from "@/components/UpdateAlert";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import "@/logging/logger";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

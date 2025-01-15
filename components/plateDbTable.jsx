@@ -952,12 +952,7 @@ export default function PlateTable() {
                   <CardFooter className="flex-col items-start gap-2 text-sm">
                     <div className="flex gap-2 font-medium leading-none">
                       Most active time:{" "}
-                      {formatTimeRange(
-                        plateInsights.timeDistribution.reduce((max, current) =>
-                          current.frequency > max.frequency ? current : max
-                        ).timeRange,
-                        timeFormat
-                      )}
+                      {formatTimeRange(plateInsights.mostActiveTime)}
                       <TrendingUp className="h-4 w-4" />
                     </div>
                     <div className="leading-none text-muted-foreground">

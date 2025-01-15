@@ -14,6 +14,11 @@ services:
     volumes:
       - app-auth:/app/auth
       - app-config:/app/config
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
 
   db:
     image: postgres:13

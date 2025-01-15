@@ -7,6 +7,9 @@ export async function middleware(request) {
   // console.log("All Cookies:", request.cookies.getAll());
   // console.log("Session Cookie:", request.cookies.get("session"));
   // console.log("Headers:", Object.fromEntries(request.headers));
+  console.log(
+    `${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`
+  );
 
   // Allow public paths
   const publicPaths = [
@@ -112,7 +115,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   try {
-    console.log("Verifying session", session.value);
+    //console.log("Verifying session", session.value);
 
     const response = await fetch(new URL("/api/verify-session", request.url), {
       method: "POST",
@@ -129,7 +132,7 @@ export async function middleware(request) {
     }
 
     const result = await response.json();
-    console.log("Response JSON:", result);
+    //console.log("Response JSON:", result);
 
     if (!result.valid) {
       console.log("Invalid session, clearing cookie");

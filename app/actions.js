@@ -51,6 +51,9 @@ import {
   createSession,
 } from "@/lib/auth";
 import { formatTimeRange } from "@/lib/utils";
+import path from "path";
+import fs from "fs/promises";
+import split2 from "split2";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -65,6 +68,7 @@ export async function handleDeleteTag(tagName) {
 }
 
 export async function getDashboardMetrics(timeZone, startDate, endDate) {
+  console.log("Fetching dashboard metrics");
   try {
     const metrics = await getMetrics(startDate, endDate);
 
@@ -117,6 +121,7 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
 }
 
 export async function deleteTagFromPlate(formData) {
+  console.log("Deleting tag from plate");
   try {
     const plateNumber = formData.get("plateNumber");
     const tagName = formData.get("tagName");
@@ -129,6 +134,7 @@ export async function deleteTagFromPlate(formData) {
 }
 
 export async function deletePlate(formData) {
+  console.log("Deleting known plate");
   try {
     const plateNumber = formData.get("plateNumber");
     await removeKnownPlate(plateNumber);
@@ -140,6 +146,7 @@ export async function deletePlate(formData) {
 }
 
 export async function deletePlateFromDB(formData) {
+  console.log("Deleting plate from database");
   try {
     const plateNumber = formData.get("plateNumber");
     await removePlate(plateNumber);
@@ -151,6 +158,7 @@ export async function deletePlateFromDB(formData) {
 }
 
 export async function deletePlateRead(formData) {
+  console.log("Deleting plate recognition");
   try {
     const plateNumber = formData.get("plateNumber");
     await removePlateRead(plateNumber);
@@ -162,6 +170,7 @@ export async function deletePlateRead(formData) {
 }
 
 export async function getKnownPlatesList() {
+  console.log("Fetching known plates");
   try {
     console.log("known plates action run");
     return { success: true, data: await getKnownPlates() };
@@ -172,6 +181,7 @@ export async function getKnownPlatesList() {
 }
 
 export async function getTags() {
+  console.log("Fetching tags");
   try {
     return { success: true, data: await getAvailableTags() };
   } catch (error) {
@@ -181,6 +191,7 @@ export async function getTags() {
 }
 
 export async function addTag(formData) {
+  console.log("Adding tag");
   try {
     const name = formData.get("name");
     const color = formData.get("color") || "#808080";
@@ -193,6 +204,7 @@ export async function addTag(formData) {
 }
 
 export async function updateTag(formData) {
+  console.log("Updating tag");
   try {
     const newName = formData.get("name");
     const color = formData.get("color");
@@ -214,6 +226,7 @@ export async function updateTag(formData) {
 }
 
 export async function removeTag(formData) {
+  console.log("Deleting tag");
   try {
     const name = formData.get("name");
     await deleteTag(name);
@@ -225,6 +238,7 @@ export async function removeTag(formData) {
 }
 
 export async function addKnownPlate(formData) {
+  console.log("Adding known plate");
   try {
     const plateNumber = formData.get("plateNumber");
     const name = formData.get("name");
@@ -239,6 +253,7 @@ export async function addKnownPlate(formData) {
 }
 
 export async function tagPlate(formData) {
+  console.log("Adding tag to plate");
   try {
     const plateNumber = formData.get("plateNumber");
     const tagName = formData.get("tagName");
@@ -261,6 +276,7 @@ export async function tagPlate(formData) {
 }
 
 export async function untagPlate(formData) {
+  console.log("Removing tag from plate");
   try {
     const plateNumber = formData.get("plateNumber");
     const tagName = formData.get("tagName");
@@ -273,6 +289,7 @@ export async function untagPlate(formData) {
 }
 
 export async function getPlateHistoryData(plateNumber) {
+  console.log("Fetching plate history");
   try {
     return { success: true, data: await getPlateHistory(plateNumber) };
   } catch (error) {
@@ -280,12 +297,14 @@ export async function getPlateHistoryData(plateNumber) {
     return { success: false, error: "Failed to get plate history" };
   }
 }
+
 export async function getPlates(
   page = 1,
   pageSize = 25,
   sortConfig = { key: "last_seen_at", direction: "desc" },
   filters = {}
 ) {
+  console.log("Querying plate database");
   try {
     const result = await getAllPlates({
       page,
@@ -326,6 +345,7 @@ export async function getLatestPlateReads({
   hourRange = null,
   cameraName = "",
 } = {}) {
+  console.log("Fetching latest plate reads");
   try {
     const result = await getPlateReads({
       page,
@@ -364,6 +384,7 @@ export async function getLatestPlateReads({
 }
 
 export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
+  console.log("Fetching plate insights");
   const config = await getConfig();
   try {
     let plateNumber;
@@ -398,6 +419,13 @@ export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
       frequency,
     }));
 
+    const mostActiveTime =
+      timeDistribution.length > 0
+        ? timeDistribution.reduce((max, current) =>
+            current.frequency > max.frequency ? current : max
+          ).hour_block
+        : "No data available";
+
     return {
       success: true,
       data: {
@@ -412,6 +440,7 @@ export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
         tags: insights.tags || [],
         timeDistribution: timeDistribution,
         recentReads: insights.recent_reads || [],
+        mostActiveTime: mostActiveTime,
       },
       timeFormat: config.general.timeFormat || 12,
     };
@@ -422,6 +451,7 @@ export async function fetchPlateInsights(formDataOrPlateNumber, timeZone) {
 }
 
 export async function alterPlateFlag(formData) {
+  console.log("Toggling plate flag");
   try {
     const plateNumber = formData.get("plateNumber");
     const flagged = formData.get("flagged") === "true";
@@ -442,6 +472,7 @@ export async function alterPlateFlag(formData) {
 }
 
 export async function getFlagged() {
+  console.log("Fetching flagged plates");
   try {
     const plates = await getFlaggedPlates();
     return plates;
@@ -452,6 +483,7 @@ export async function getFlagged() {
 }
 
 export async function getNotificationPlates() {
+  console.log("Checking notification plates");
   try {
     const plates = await getNotificationPlatesDB();
     return { success: true, data: plates };
@@ -462,17 +494,20 @@ export async function getNotificationPlates() {
 }
 
 export async function addNotificationPlate(formData) {
+  console.log("Adding notification plate");
   const plateNumber = formData.get("plateNumber");
   return await addNotificationPlateDB(plateNumber);
 }
 
 export async function toggleNotification(formData) {
+  console.log("Toggling notification");
   const plateNumber = formData.get("plateNumber");
   const enabled = formData.get("enabled") === "true";
   return await toggleNotificationDB(plateNumber, enabled);
 }
 
 export async function deleteNotification(formData) {
+  console.log("Deleting notification");
   try {
     const plateNumber = formData.get("plateNumber");
     console.log("Server action received plateNumber:", plateNumber);
@@ -485,6 +520,7 @@ export async function deleteNotification(formData) {
 }
 
 export async function updateNotificationPriority(formData) {
+  console.log("Updating notification priority");
   try {
     // When using Select component, the values come directly as arguments
     // not as FormData
@@ -507,6 +543,7 @@ export async function updateNotificationPriority(formData) {
 }
 
 export async function loginAction(formData) {
+  console.log("Logging in user");
   const password = formData.get("password");
   if (!password) {
     return { error: "Password is required" };
@@ -774,4 +811,42 @@ export async function fetchPlateImagePreviews(plateNumber, timeFrame) {
   }
 
   return await getPlateImagePreviews(plateNumber, startDate, endDate);
+}
+
+export async function getSystemLogs() {
+  try {
+    const logFile = path.join(process.cwd(), "logs", "app.log");
+    const content = await fs.readFile(logFile, "utf8");
+
+    return {
+      success: true,
+      data: content
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => {
+          try {
+            // Try parsing as Winston JSON format
+            const parsed = JSON.parse(line);
+            return {
+              timestamp: new Date(parsed.timestamp).toLocaleString(),
+              level: parsed.level.toUpperCase(),
+              // Strip ANSI color codes
+              message: parsed.message.replace(/\u001b\[\d+m/g, ""),
+            };
+          } catch (e) {
+            // Fall back to old format if it's not JSON
+            const [timestamp, rest] = line.split(" [");
+            const [level, ...messageParts] = rest.split("] ");
+            return {
+              timestamp,
+              level,
+              message: messageParts.join("] "),
+            };
+          }
+        }),
+    };
+  } catch (error) {
+    console.error("Error reading logs:", error);
+    return { success: false, error: "Failed to read system logs" };
+  }
 }

@@ -1,0 +1,310 @@
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:54:53.806Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902493835,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:54:53.843Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:54:59.655Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902499668,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:54:59.672Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:00.038Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902500043,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:00.046Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T00:55:00.060Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:00.096Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902500100,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:00.102Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:00.146Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902500149,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:00.151Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:01.261Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902501266,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:01.267Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T00:55:01.276Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:03.005Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902503012,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:03.015Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:06.360Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902506367,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:06.370Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:07.341Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902507349,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:07.354Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:07.420Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902507424,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:07.426Z"}
+{"level":"info","message":"Retrying connection... (3 attempts remaining)","timestamp":"2025-01-15T00:55:07.430Z"}
+{"level":"error","message":"Error in getAllPlates: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:08.434Z"}
+{"level":"error","message":"Error getting plates database: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:08.442Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:08.450Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902508455,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:08.457Z"}
+{"level":"error","message":"Error getting tags: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:08.460Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:08.466Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902508469,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:08.471Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:10.186Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902510192,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:10.196Z"}
+{"level":"error","message":"Error fetching plate reads: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:10.205Z"}
+{"level":"error","message":"Error getting camera names: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:10.206Z"}
+{"level":"error","message":"Error getting tags: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:10.207Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:10.905Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902510912,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:10.915Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:11.000Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902511003,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:11.005Z"}
+{"level":"info","message":"Retrying connection... (3 attempts remaining)","timestamp":"2025-01-15T00:55:11.008Z"}
+{"level":"error","message":"Error fetching dashboard metrics: Error: connect ECONNREFUSED 192.168.1.61:5431","timestamp":"2025-01-15T00:55:12.011Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:12.023Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902512028,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:12.031Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:13.021Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902513026,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:13.028Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:16.941Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902516948,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:16.951Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:18.451Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902518457,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:18.460Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:18.532Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902518536,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:18.537Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T00:55:18.543Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:18.553Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902518558,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:18.560Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:18.571Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902518573,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:18.575Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:21.731Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902521738,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:21.741Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:24.529Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902524538,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:24.542Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:24.562Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902524565,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:24.567Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:26.740Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902526747,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:26.750Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:29.710Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902529721,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:29.725Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:29.749Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902529752,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:29.753Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:31.240Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902531246,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:31.249Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:33.552Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902533561,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:33.565Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:36.431Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902536438,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:36.441Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:40.430Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902540437,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:40.440Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:45.428Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902545439,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:45.442Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:49.430Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902549438,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:49.441Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:54.429Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902554440,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:54.445Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:56.441Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902556449,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:56.453Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:55:58.432Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902558438,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:55:58.441Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:03.430Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902563444,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:03.449Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:07.426Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902567431,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:07.434Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:12.427Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902572432,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:12.434Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:15.864Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902575869,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:15.873Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:16.426Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902576433,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:16.435Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:21.429Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902581437,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:21.441Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:25.427Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902585433,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:25.436Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:56:30.426Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902590433,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:56:30.435Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:57:15.453Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902635464,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:57:15.467Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:58:15.446Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902695450,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:58:15.452Z"}
+{"level":"info","message":"Verifying session 029458e9358696c2817a6b15b23e4ecf690dc807f6472fba595ac316050bfad6","timestamp":"2025-01-15T00:58:18.432Z"}
+{"level":"info","message":"Response JSON: {\n  valid: true,\n  sessionInfo: {\n  createdAt: 1736899359358,\n  lastUsed: 1736902698439,\n  expiresAt: 1736985759358\n}\n}","timestamp":"2025-01-15T00:58:18.442Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:58:50.338Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:58:50.355Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:58:52.720Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:58:52.724Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:58:56.989Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:58:56.993Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:58:57.689Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:58:57.692Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:58:58.907Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:58:58.910Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:00.507Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:00.510Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:00.530Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:00.532Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T00:59:00.534Z"}
+{"level":"info","message":"PlateTable rendering with data: 25","timestamp":"2025-01-15T00:59:00.813Z"}
+{"level":"info","message":"GET /database","timestamp":"2025-01-15T00:59:02.314Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:02.318Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:02.402Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:02.404Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:02.427Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:02.429Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:02.442Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:02.444Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:03.880Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:03.884Z"}
+{"level":"info","message":"POST /live_feed","timestamp":"2025-01-15T00:59:06.756Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:06.761Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:06.787Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:06.789Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:08.901Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:08.907Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:13.397Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:13.406Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:17.898Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:17.899Z"}
+{"level":"info","message":"GET /known_plates","timestamp":"2025-01-15T00:59:21.762Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:21.763Z"}
+{"level":"info","message":"known plates action run","timestamp":"2025-01-15T00:59:21.770Z"}
+{"level":"info","message":"getting known plates","timestamp":"2025-01-15T00:59:21.773Z"}
+{"level":"info","message":"POST /known_plates","timestamp":"2025-01-15T00:59:21.819Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:21.821Z"}
+{"level":"info","message":"POST /known_plates","timestamp":"2025-01-15T00:59:25.012Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:25.015Z"}
+{"level":"info","message":"GET /database","timestamp":"2025-01-15T00:59:26.888Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:26.891Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:26.942Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:26.944Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:26.967Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:26.968Z"}
+{"level":"info","message":"POST /database","timestamp":"2025-01-15T00:59:26.979Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:26.981Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:27.454Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:27.457Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T00:59:30.399Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:30.403Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:33.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:33.432Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:37.434Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:37.437Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:42.440Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:42.445Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:46.430Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:46.434Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:51.433Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:51.440Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T00:59:55.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T00:59:55.431Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:00.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:00.431Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:04.430Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:04.432Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:09.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:09.430Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:13.429Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:13.431Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:18.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:18.433Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:22.451Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:22.452Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:00:27.432Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:00:27.435Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:01:15.452Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:01:15.460Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:01:16.426Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:01:16.428Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:02:15.463Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:02:15.465Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:03:15.453Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:03:15.456Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:03:18.428Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:03:18.429Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:04:15.457Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:04:15.461Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:04:16.429Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:04:16.430Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T01:05:33.262Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:33.279Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:05:37.168Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:37.171Z"}
+{"level":"info","message":"Fetching latest plate reads","timestamp":"2025-01-15T01:05:37.179Z"}
+{"level":"info","message":"Fetching tags","timestamp":"2025-01-15T01:05:37.179Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T01:05:37.197Z"}
+{"level":"info","message":"PlateTable rendering with data: 25","timestamp":"2025-01-15T01:05:37.381Z"}
+{"level":"info","message":"POST /live_feed","timestamp":"2025-01-15T01:05:41.302Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:41.307Z"}
+{"level":"info","message":"Adding tag to plate","timestamp":"2025-01-15T01:05:41.322Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:05:41.339Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:41.344Z"}
+{"level":"info","message":"Fetching latest plate reads","timestamp":"2025-01-15T01:05:41.355Z"}
+{"level":"info","message":"Fetching tags","timestamp":"2025-01-15T01:05:41.355Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:05:42.524Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:42.528Z"}
+{"level":"info","message":"Fetching latest plate reads","timestamp":"2025-01-15T01:05:42.541Z"}
+{"level":"info","message":"Fetching tags","timestamp":"2025-01-15T01:05:42.541Z"}
+{"level":"info","message":"POST /live_feed","timestamp":"2025-01-15T01:05:43.090Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:43.094Z"}
+{"level":"info","message":"Removing tag from plate","timestamp":"2025-01-15T01:05:43.105Z"}
+{"level":"info","message":"GET /live_feed","timestamp":"2025-01-15T01:05:43.117Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:43.119Z"}
+{"level":"info","message":"Fetching latest plate reads","timestamp":"2025-01-15T01:05:43.126Z"}
+{"level":"info","message":"Fetching tags","timestamp":"2025-01-15T01:05:43.126Z"}
+{"level":"info","message":"GET /notifications","timestamp":"2025-01-15T01:05:45.459Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:45.461Z"}
+{"level":"info","message":"Checking notification plates","timestamp":"2025-01-15T01:05:45.467Z"}
+{"level":"info","message":"POST /notifications","timestamp":"2025-01-15T01:05:46.742Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:46.747Z"}
+{"level":"info","message":"Toggling notification","timestamp":"2025-01-15T01:05:46.758Z"}
+{"level":"info","message":"POST /notifications","timestamp":"2025-01-15T01:05:48.093Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:48.098Z"}
+{"level":"info","message":"Toggling notification","timestamp":"2025-01-15T01:05:48.107Z"}
+{"level":"info","message":"GET /dashboard","timestamp":"2025-01-15T01:05:49.464Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:49.468Z"}
+{"level":"info","message":"POST /dashboard","timestamp":"2025-01-15T01:05:49.561Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:49.563Z"}
+{"level":"info","message":"Fetching dashboard metrics","timestamp":"2025-01-15T01:05:49.568Z"}
+{"level":"info","message":"Database connection successful","timestamp":"2025-01-15T01:05:49.574Z"}
+{"level":"info","message":"POST /dashboard","timestamp":"2025-01-15T01:05:49.602Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:49.604Z"}
+{"level":"info","message":"GET /live_feed?page=1&hourFrom=08&hourTo=08","timestamp":"2025-01-15T01:05:49.647Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:49.648Z"}
+{"level":"info","message":"GET /logs","timestamp":"2025-01-15T01:05:52.560Z"}
+{"level":"info","message":"POST /api/verify-session","timestamp":"2025-01-15T01:05:52.564Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 361ms (396 modules)","level":"info","timestamp":"2025-01-15T01:09:08.780Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /favicon.ico ...","level":"info","timestamp":"2025-01-15T01:09:09.407Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /favicon.ico in 1075ms (624 modules)","level":"info","timestamp":"2025-01-15T01:09:09.894Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /settings in 350ms (1062 modules)","level":"info","timestamp":"2025-01-15T01:09:17.799Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /login in 412ms (1167 modules)","level":"info","timestamp":"2025-01-15T01:09:28.084Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 367ms (1078 modules)","level":"info","timestamp":"2025-01-15T01:10:56.542Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 226ms (1065 modules)","level":"info","timestamp":"2025-01-15T01:11:23.711Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 177ms (1065 modules)","level":"info","timestamp":"2025-01-15T01:11:27.191Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 256ms (1065 modules)","level":"info","timestamp":"2025-01-15T01:11:33.381Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 186ms (1065 modules)","level":"info","timestamp":"2025-01-15T01:11:37.253Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /_not-found in 337ms (1054 modules)","level":"info","timestamp":"2025-01-15T01:11:37.608Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /login in 199ms (745 modules)","level":"info","timestamp":"2025-01-15T01:11:37.878Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /favicon.ico in 102ms (758 modules)","level":"info","timestamp":"2025-01-15T01:11:41.635Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 280ms (1184 modules)","level":"info","timestamp":"2025-01-15T01:11:55.111Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 366ms (1184 modules)","level":"info","timestamp":"2025-01-15T01:12:07.676Z"}
+{"message":" \u001b[31m\u001b[1m⨯\u001b[22m\u001b[39m ./app/logs/LogViewer.jsx\nError:   \u001b[31m×\u001b[0m Unexpected token `string literal (>\n  \u001b[31m│\u001b[0m           <div className=, \">\n  \u001b[31m│\u001b[0m           <div className=\")`. Expected jsx identifier\n    ╭─[\u001b[36;1;4m/Users/charliealgert/Downloads/newest_alpr/ALPR-Database/app/logs/LogViewer.jsx\u001b[0m:37:1]\n \u001b[2m34\u001b[0m │       return (\n \u001b[2m35\u001b[0m │         <Card>\n \u001b[2m36\u001b[0m │           <CardContent className=\"p-4\">\n \u001b[2m37\u001b[0m │ \u001b[35;1m╭\u001b[0m\u001b[35;1m─\u001b[0m\u001b[35;1m▶\u001b[0m         <ScrollArea ref={scrollRef} className=\"h-full\" w-full rounded-md border\">\n \u001b[2m38\u001b[0m │ \u001b[35;1m╰\u001b[0m\u001b[35;1m─\u001b[0m\u001b[35;1m▶\u001b[0m           <div className=\"p-4\">\n \u001b[2m39\u001b[0m │                 {initialLogs.map((log, index) => (\n \u001b[2m40\u001b[0m │                   <LogMessage key={index} log={log} />\n \u001b[2m41\u001b[0m │                 ))}\n    ╰────\n\nCaused by:\n    Syntax Error\n\nImport trace for requested module:\n./app/logs/LogViewer.jsx\n./app/logs/page.jsx","level":"error","timestamp":"2025-01-15T01:12:14.733Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /_error ...","level":"info","timestamp":"2025-01-15T01:12:16.113Z"}
+{"message":" \u001b[31m\u001b[1m⨯\u001b[22m\u001b[39m ./app/logs/LogViewer.jsx\nError:   \u001b[31m×\u001b[0m Unexpected token `string literal (>\n  \u001b[31m│\u001b[0m           <div className=, \">\n  \u001b[31m│\u001b[0m           <div className=\")`. Expected jsx identifier\n    ╭─[\u001b[36;1;4m/Users/charliealgert/Downloads/newest_alpr/ALPR-Database/app/logs/LogViewer.jsx\u001b[0m:37:1]\n \u001b[2m34\u001b[0m │       return (\n \u001b[2m35\u001b[0m │         <Card>\n \u001b[2m36\u001b[0m │           <CardContent className=\"p-4\">\n \u001b[2m37\u001b[0m │ \u001b[35;1m╭\u001b[0m\u001b[35;1m─\u001b[0m\u001b[35;1m▶\u001b[0m         <ScrollArea ref={scrollRef} className=\"h-full\" w-full rounded-md border\">\n \u001b[2m38\u001b[0m │ \u001b[35;1m╰\u001b[0m\u001b[35;1m─\u001b[0m\u001b[35;1m▶\u001b[0m           <div className=\"p-4\">\n \u001b[2m39\u001b[0m │                 {initialLogs.map((log, index) => (\n \u001b[2m40\u001b[0m │                   <LogMessage key={index} log={log} />\n \u001b[2m41\u001b[0m │                 ))}\n    ╰────\n\nCaused by:\n    Syntax Error\n\nImport trace for requested module:\n./app/logs/LogViewer.jsx\n./app/logs/page.jsx","level":"error","timestamp":"2025-01-15T01:12:16.212Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /_error in 359ms (1410 modules)","level":"info","timestamp":"2025-01-15T01:12:19.353Z"}
+{"message":" \u001b[33m\u001b[1m⚠\u001b[22m\u001b[39m Fast Refresh had to perform a full reload due to a runtime error.","level":"warn","timestamp":"2025-01-15T01:12:19.465Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 290ms (1424 modules)","level":"info","timestamp":"2025-01-15T01:12:27.558Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 235ms (1424 modules)","level":"info","timestamp":"2025-01-15T01:12:42.973Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 229ms (1424 modules)","level":"info","timestamp":"2025-01-15T01:12:59.508Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 266ms (1424 modules)","level":"info","timestamp":"2025-01-15T01:13:00.725Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 263ms (1420 modules)","level":"info","timestamp":"2025-01-15T01:13:31.984Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 226ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:13:47.042Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 214ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:13:52.541Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 244ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:04.972Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 293ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:18.607Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 265ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:27.052Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 207ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:35.721Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 277ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:50.801Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 219ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:14:54.352Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 262ms (1407 modules)","level":"info","timestamp":"2025-01-15T01:15:00.298Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling / ...","level":"info","timestamp":"2025-01-15T01:15:33.394Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled / in 1776ms (3149 modules)","level":"info","timestamp":"2025-01-15T01:15:34.647Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /favicon.ico in 183ms (1682 modules)","level":"info","timestamp":"2025-01-15T01:15:35.185Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 810ms (2280 modules)","level":"info","timestamp":"2025-01-15T01:17:19.071Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /api/verify-session in 90ms (790 modules)","level":"info","timestamp":"2025-01-15T01:17:19.181Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 326ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:18:15.016Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 252ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:18:46.944Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 425ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:19:33.069Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 230ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:19:40.310Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 293ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:19:50.260Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 274ms (2286 modules)","level":"info","timestamp":"2025-01-15T01:20:01.509Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /dashboard ...","level":"info","timestamp":"2025-01-15T01:20:21.736Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /dashboard in 2.3s (3573 modules)","level":"info","timestamp":"2025-01-15T01:20:23.541Z"}
+{"message":"Fetching dashboard metrics","level":"info","timestamp":"2025-01-15T01:20:24.045Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-15T01:20:24.058Z"}
+{"message":"Fetching dashboard metrics","level":"info","timestamp":"2025-01-15T01:20:24.140Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /live_feed ...","level":"info","timestamp":"2025-01-15T01:20:27.787Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /live_feed in 501ms (4446 modules)","level":"info","timestamp":"2025-01-15T01:20:27.790Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-15T01:20:27.857Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-15T01:20:27.858Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-15T01:20:27.869Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-15T01:20:33.079Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-15T01:20:33.080Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-15T01:20:37.562Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-15T01:20:37.563Z"}
