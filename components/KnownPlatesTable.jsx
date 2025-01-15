@@ -53,6 +53,13 @@ export function KnownPlatesTable({ initialData }) {
   const [editPlateData, setEditPlateData] = useState({ name: "", notes: "" });
   const [availableTags, setAvailableTags] = useState([]);
   const [isIgnoreConfirmOpen, setIsIgnoreConfirmOpen] = useState(false);
+  const [isAddPlateOpen, setIsAddPlateOpen] = useState(false);
+  const [newPlateData, setNewPlateData] = useState({
+    plateNumber: "",
+    name: "",
+    notes: "",
+  });
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     const loadTags = async () => {
@@ -200,14 +207,19 @@ export function KnownPlatesTable({ initialData }) {
       <Card>
         <CardContent className="py-4">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Search className="text-gray-400 dark:text-gray-500" />
-              <Input
-                placeholder="Search plates, names, or notes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
-              />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Search className="text-gray-400 dark:text-gray-500" />
+                <Input
+                  placeholder="Search plates, names, or notes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-64"
+                />
+              </div>
+              <Button onClick={() => setIsAddPlateOpen(true)}>
+                Add New Plate
+              </Button>
             </div>
 
             <div className="rounded-md border dark:border-gray-700">
@@ -474,6 +486,125 @@ export function KnownPlatesTable({ initialData }) {
             >
               {activePlate?.ignore ? "Stop Ignoring" : "Ignore Plate"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isAddPlateOpen} onOpenChange={setIsAddPlateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Plate</DialogTitle>
+            <DialogDescription>
+              Add a new license plate to the known plates database
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="plateNumber" className="text-right">
+                Plate Number
+              </Label>
+              <Input
+                id="plateNumber"
+                value={newPlateData.plateNumber}
+                onChange={(e) =>
+                  setNewPlateData({
+                    ...newPlateData,
+                    plateNumber: e.target.value.toUpperCase(),
+                  })
+                }
+                required
+                className="col-span-3"
+                placeholder="ABC123"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="newName" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="newName"
+                value={newPlateData.name}
+                onChange={(e) =>
+                  setNewPlateData({
+                    ...newPlateData,
+                    name: e.target.value,
+                  })
+                }
+                required
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="newNotes" className="text-right">
+                Notes
+              </Label>
+              <Textarea
+                id="newNotes"
+                value={newPlateData.notes}
+                onChange={(e) =>
+                  setNewPlateData({
+                    ...newPlateData,
+                    notes: e.target.value,
+                  })
+                }
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <div className="w-full flex flex-col gap-2">
+              {errorMessage && (
+                <p className="text-destructive text-sm">{errorMessage}</p>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddPlateOpen(false);
+                    setNewPlateData({ plateNumber: "", name: "", notes: "" });
+                    setErrorMessage(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={async () => {
+                    if (!newPlateData.plateNumber?.trim()) {
+                      setErrorMessage("Plate number is required");
+                      return;
+                    }
+                    if (!newPlateData.name?.trim()) {
+                      setErrorMessage("Name is required");
+                      return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("plateNumber", newPlateData.plateNumber);
+                    formData.append("name", newPlateData.name);
+                    formData.append("notes", newPlateData.notes);
+
+                    const result = await addKnownPlate(formData);
+                    if (result.success) {
+                      setData([
+                        ...data,
+                        {
+                          plate_number: newPlateData.plateNumber,
+                          name: newPlateData.name,
+                          notes: newPlateData.notes,
+                          created_at: new Date().toISOString(),
+                          tags: [],
+                        },
+                      ]);
+                      setIsAddPlateOpen(false);
+                      setNewPlateData({ plateNumber: "", name: "", notes: "" });
+                      setErrorMessage("");
+                    }
+                  }}
+                >
+                  Add Plate
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

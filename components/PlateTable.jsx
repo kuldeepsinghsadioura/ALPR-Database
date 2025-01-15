@@ -67,6 +67,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
+import PlateImage from "@/components/PlateImage";
 
 export default function PlateTable({
   data,
@@ -117,27 +118,52 @@ export default function PlateTable({
 
   const handleImageClick = (e, plate) => {
     e.preventDefault();
-    if (!plate.image_data) return;
-    setSelectedImage({
-      url: getImageUrl(plate.image_data),
-      plateNumber: plate.plate_number,
-    });
+    if (plate.image_path || plate.image_data) {
+      setSelectedImage({
+        url: plate.image_path
+          ? `/api/images/${encodeURIComponent(plate.image_path)}`
+          : getImageUrl(plate.image_data),
+        plateNumber: plate.plate_number,
+      });
+    }
   };
 
-  const handleDownloadImage = () => {
+  const handleDownloadImage = async () => {
     if (!selectedImage) return;
 
-    const link = document.createElement("a");
-    link.href = selectedImage.url;
-    link.download = `plate-${selectedImage.plateNumber}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // For base64 images
+      if (selectedImage.url.startsWith("data:")) {
+        const link = document.createElement("a");
+        link.href = selectedImage.url;
+        link.download = `plate-${selectedImage.plateNumber}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // For file-based images, fetch from API
+      const response = await fetch(selectedImage.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `plate-${selectedImage.plateNumber}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    }
   };
 
   const handleOpenInNewTab = () => {
+    if (!selectedImage) return;
+
     const win = window.open();
-    if (win && selectedImage) {
+    if (win) {
       win.document.write(`
         <html>
           <head><title>License Plate Image - ${selectedImage.plateNumber}</title></head>
@@ -614,17 +640,13 @@ export default function PlateTable({
                 data.map((plate) => (
                   <TableRow key={plate.id}>
                     <TableCell>
-                      <button onClick={(e) => handleImageClick(e, plate)}>
-                        {" "}
-                        <Image
-                          src={getImageUrl(plate.image_data)}
-                          alt={plate.plate_number}
-                          width={100}
-                          height={75}
-                          className="rounded cursor-pointer"
-                          onClick={(e) => handleImageClick(e, plate)}
-                        />
-                      </button>
+                      {/* <button onClick={(e) => handleImageClick(e, plate)}> */}
+                      <PlateImage
+                        plate={plate}
+                        onClick={(e) => handleImageClick(e, plate)}
+                        className=""
+                      />
+                      {/* </button> */}
                     </TableCell>
                     <TableCell
                       className={`font-medium font-mono ${
