@@ -111,7 +111,7 @@ export default function PlateTableWrapper({
   return (
     <PlateTable
       data={data}
-      availableTags={tags}
+      availableTags={[{ name: "untagged", color: "#6B7280" }, ...tags]}
       availableCameras={cameras}
       timeFormat={timeFormat}
       pagination={{

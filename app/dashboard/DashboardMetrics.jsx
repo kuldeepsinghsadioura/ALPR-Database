@@ -57,6 +57,7 @@ import { TagDistributionChart } from "./TagDistribution";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { DummyChart } from "./dummyChart";
+import { FaRoad, FaGithub, FaDocker } from "react-icons/fa";
 
 export function formatTimeRange(hour, timeFormat) {
   if (timeFormat === 24) {
@@ -283,7 +284,29 @@ export default function DashboardMetrics() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between pt-4">
-        <h1 className="text-3xl font-bold mb-6">License Plate Dashboard</h1>
+        <div className="flex gap-8 items-baseline mb-6">
+          <h1 className="text-3xl font-bold">License Plate Dashboard</h1>
+          <div className="flex gap-4 text-xl">
+            <Link
+              href="https://github.com/algertc/ALPR-Database"
+              target="_blank"
+            >
+              <FaGithub className="hover:text-blue-500" />
+            </Link>
+            <Link
+              href="https://hub.docker.com/repository/docker/algertc/alpr-dashboard/general"
+              target="_blank"
+            >
+              <FaDocker className="hover:text-blue-500" />
+            </Link>
+            <Link
+              href="https://alprdatabase.featurebase.app/roadmap"
+              target="_blank"
+            >
+              <FaRoad className="hover:text-blue-500" />
+            </Link>
+          </div>
+        </div>
         <TimeFrameSelector value={timeFrame} onValueChange={setTimeFrame} />
       </div>
 
