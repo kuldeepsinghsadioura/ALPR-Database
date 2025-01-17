@@ -124,6 +124,7 @@ export default function PlateTable({
           ? `/api/images/${encodeURIComponent(plate.image_path)}`
           : getImageUrl(plate.image_data),
         plateNumber: plate.plate_number,
+        id: plate.id,
       });
     }
   };
@@ -831,6 +832,22 @@ export default function PlateTable({
             <DialogFooter>
               <div className="flex justify-between space-x-2 w-full">
                 <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCorrection({
+                        id: selectedImage.id,
+                        plateNumber: selectedImage.plateNumber,
+                        newPlateNumber: selectedImage.plateNumber,
+                        correctAll: false,
+                        removePlate: false,
+                      });
+                      setIsCorrectPlateOpen(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Correct Plate Number
+                  </Button>
                   <Button
                     variant="outline"
                     // shit...

@@ -699,3 +699,299 @@
 {"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:42:18.147Z"}
 {"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:42:22.644Z"}
 {"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:42:22.646Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 404ms (1285 modules)","level":"info","timestamp":"2025-01-17T03:45:09.156Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /favicon.ico in 488ms (1486 modules)","level":"info","timestamp":"2025-01-17T03:45:09.710Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /dashboard ...","level":"info","timestamp":"2025-01-17T03:45:10.292Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /dashboard in 1978ms (4156 modules)","level":"info","timestamp":"2025-01-17T03:45:11.757Z"}
+{"message":"Fetching dashboard metrics","level":"info","timestamp":"2025-01-17T03:45:12.700Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:45:12.728Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /database ...","level":"info","timestamp":"2025-01-17T03:45:14.047Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /database in 629ms (4208 modules)","level":"info","timestamp":"2025-01-17T03:45:14.175Z"}
+{"message":"Querying plate database","level":"info","timestamp":"2025-01-17T03:45:14.559Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:45:14.567Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:14.605Z"}
+{"message":"Querying plate database","level":"info","timestamp":"2025-01-17T03:45:14.702Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:14.733Z"}
+{"message":" \u001b[37m\u001b[1m○\u001b[22m\u001b[39m Compiling /live_feed ...","level":"info","timestamp":"2025-01-17T03:45:15.265Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled /live_feed in 508ms (4226 modules)","level":"info","timestamp":"2025-01-17T03:45:15.272Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:15.374Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:15.378Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:45:15.391Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:15.414Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:15.415Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:20.331Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:20.332Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:24.838Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:24.839Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:29.336Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:29.337Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:33.831Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:33.831Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:38.332Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:38.333Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:43.104Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:43.105Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:48.041Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:48.043Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:52.040Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:52.041Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:45:57.013Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:45:57.014Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:01.008Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:01.009Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:06.007Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:06.008Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:10.003Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:10.004Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:15.003Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:15.004Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:19.012Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:19.013Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:24.008Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:24.008Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:28.001Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:28.002Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:33.005Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:33.006Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:46:37.000Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:46:37.001Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:47:34.236Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:47:34.238Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:47:36.003Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:47:36.004Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:25.640Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:25.643Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:29.334Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:29.335Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:33.833Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:33.834Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:38.331Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:38.332Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:42.834Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:42.834Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:47.331Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:47.332Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:51.828Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:51.829Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:48:56.334Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:48:56.334Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:00.831Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:00.832Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:05.330Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:05.331Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:09.835Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:09.836Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:14.335Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:14.336Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:18.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:18.833Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:23.350Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:23.351Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:27.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:27.833Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:32.332Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:32.333Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:36.835Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:36.836Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 1181ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:49:39.513Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:39.653Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:39.655Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:49:39.675Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:41.331Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:41.332Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:45.833Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:45.834Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:50.332Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:50.332Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:54.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:54.833Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:49:59.325Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:49:59.326Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:03.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:03.833Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:08.328Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:08.329Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 424ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:50:10.959Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:11.094Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:11.095Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:50:11.112Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:12.831Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:12.831Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:17.335Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:17.336Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:21.833Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:21.834Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:26.331Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:26.331Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 552ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:50:31.036Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:31.108Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:31.110Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:50:31.123Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:31.207Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:31.208Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:35.336Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:35.338Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 528ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:50:39.109Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:39.333Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:39.336Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:50:39.346Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:39.828Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:39.829Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:44.334Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:44.334Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:48.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:48.833Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 472ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:50:52.348Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:52.408Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:52.410Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:50:52.420Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:53.333Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:53.334Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:50:57.832Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:50:57.833Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:02.343Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:02.344Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:06.829Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:06.830Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:11.338Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:11.339Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:15.843Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:15.844Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:20.335Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:20.336Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:24.843Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:24.844Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:29.337Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:29.338Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:33.837Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:33.838Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:38.334Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:38.335Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:42.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:42.845Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:47.342Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:47.343Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:51.829Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:51.830Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:51:56.341Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:51:56.343Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:00.838Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:00.839Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:05.342Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:05.343Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:09.836Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:09.837Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:14.345Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:14.347Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:18.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:18.845Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:23.347Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:23.349Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:27.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:27.845Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:32.334Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:32.335Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:36.834Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:36.835Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:41.347Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:41.349Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:45.843Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:45.844Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:50.345Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:50.347Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:54.842Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:54.843Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 618ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:52:58.270Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:58.376Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:58.377Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:52:58.390Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:52:59.344Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:52:59.346Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:03.836Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:03.837Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:08.341Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:08.343Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:12.847Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:12.848Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:17.337Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:17.338Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:21.841Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:21.842Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:26.343Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:26.344Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:30.843Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:30.844Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:35.335Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:35.336Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:39.829Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:39.830Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:44.330Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:44.331Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:48.828Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:48.829Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:53.329Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:53.330Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:53:57.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:53:57.845Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:02.346Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:02.348Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:06.833Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:06.834Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 592ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:54:08.629Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:08.733Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:08.735Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:54:08.749Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:11.344Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:11.345Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:15.845Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:15.846Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:20.348Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:20.350Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:24.847Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:24.848Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:29.345Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:29.346Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:33.848Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:33.849Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:38.341Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:38.342Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:42.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:42.846Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 458ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:54:46.745Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:46.831Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:46.832Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:54:46.845Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:47.342Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:47.344Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:51.838Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:51.840Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:56.332Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:56.333Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 451ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:54:57.460Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:54:57.521Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:54:57.522Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:54:57.533Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:00.844Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:00.846Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:05.346Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:05.347Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:09.830Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:09.831Z"}
+{"message":" \u001b[32m\u001b[1m✓\u001b[22m\u001b[39m Compiled in 446ms (3459 modules)","level":"info","timestamp":"2025-01-17T03:55:10.325Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:10.395Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:10.397Z"}
+{"message":"Database connection successful","level":"info","timestamp":"2025-01-17T03:55:10.407Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:14.346Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:14.348Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:18.834Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:18.835Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:23.344Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:23.345Z"}
+{"message":"Removing tag from plate","level":"info","timestamp":"2025-01-17T03:55:23.670Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:23.700Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:23.701Z"}
+{"message":"Removing tag from plate","level":"info","timestamp":"2025-01-17T03:55:24.708Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:24.733Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:24.734Z"}
+{"message":"Fetching latest plate reads","level":"info","timestamp":"2025-01-17T03:55:27.830Z"}
+{"message":"Fetching tags","level":"info","timestamp":"2025-01-17T03:55:27.831Z"}
