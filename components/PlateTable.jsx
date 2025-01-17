@@ -829,23 +829,67 @@ export default function PlateTable({
               )}
             </div>
             <DialogFooter>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={handleOpenInNewTab}
-                  className="gap-2"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Open in New Tab
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleDownloadImage}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Image
-                </Button>
+              <div className="flex justify-between space-x-2 w-full">
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    // shit...
+                    onClick={() => {
+                      setActivePlate({
+                        ...selectedImage,
+                        plate_number: selectedImage.plateNumber,
+                      });
+                      setIsAddKnownPlateOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add to Known Plates
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">
+                        <Tag className="h-4 w-4" />
+                        Add Tag
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {availableTags.map((tag) => (
+                        <DropdownMenuItem
+                          key={tag.name}
+                          onClick={() =>
+                            onAddTag(selectedImage.plateNumber, tag.name)
+                          }
+                        >
+                          <div className="flex items-center">
+                            <div
+                              className="w-3 h-3 rounded-full mr-2"
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            {tag.name}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleOpenInNewTab}
+                    className="gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open in New Tab
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleDownloadImage}
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download Image
+                  </Button>
+                </div>
               </div>
             </DialogFooter>
           </DialogContent>
