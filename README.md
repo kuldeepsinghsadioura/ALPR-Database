@@ -57,6 +57,7 @@ services:
       - NODE_ENV=production
       - ADMIN_PASSWORD=password  # Change this to a secure password
       - DB_PASSWORD=password  # Change this to match your postgres password
+      - TZ= America/Los_Angeles # Change this to match your time zone. Time zones can be found here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     depends_on:
       - db
     volumes:
