@@ -70,6 +70,7 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password  # Change this to a secure password
+      - TZ= America/Los_Angeles # Change this to match your time zone. Time zones can be found here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
