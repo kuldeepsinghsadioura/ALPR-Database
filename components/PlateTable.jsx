@@ -207,8 +207,8 @@ export default function PlateTable({
 
   const handleDateRangeSelect = (range) => {
     onUpdateFilters({
-      dateFrom: range.from ? format(range.from, "yyyy-MM-dd") : null,
-      dateTo: range.to ? format(range.to, "yyyy-MM-dd") : null,
+      dateFrom: range.from ? range.from.toDateString() : null,
+      dateTo: range.to ? range.to.toDateString() : null,
     });
   };
 
@@ -530,11 +530,23 @@ export default function PlateTable({
                 <Calendar
                   initialFocus
                   mode="range"
+                  defaultMonth={filters.dateRange?.from}
                   selected={{
-                    from: filters.dateRange.from,
-                    to: filters.dateRange.to,
+                    from: filters.dateRange?.from,
+                    to: filters.dateRange?.to,
                   }}
-                  onSelect={handleDateRangeSelect}
+                  onSelect={(range) => {
+                    onUpdateFilters({
+                      dateFrom: range.from ? range.from.toDateString() : null,
+                      // typeof hourRange.from === "number"
+                      //   ? hourRange.from.toString()
+                      //   : undefined,
+                      dateTo: range.to ? range.to.toDateString() : null,
+                      // typeof hourRange.to === "number"
+                      //   ? hourRange.to.toString()
+                      //   : undefined,
+                    });
+                  }}
                   numberOfMonths={2}
                 />
               </PopoverContent>
