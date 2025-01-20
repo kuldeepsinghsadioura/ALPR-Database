@@ -8,7 +8,7 @@ import PlateTableWrapper from "@/components/PlateTableWrapper";
 import DashboardLayout from "@/components/layout/MainLayout";
 import BasicTitle from "@/components/layout/BasicTitle";
 import { Suspense } from "react";
-import liveFeedSkeleton from "@/components/LiveFeedSkeleton";
+import LiveFeedSkeleton from "@/components/LiveFeedSkeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +33,8 @@ export default async function LivePlates(props) {
           }
         : null,
     cameraName: searchParams?.camera,
+    sortField: searchParams?.sortField,
+    sortDirection: searchParams?.sortDirection,
   };
 
   const [platesRes, tagsRes, camerasRes, timeFormat] = await Promise.all([
@@ -45,7 +47,7 @@ export default async function LivePlates(props) {
   return (
     <DashboardLayout>
       <BasicTitle title="ALPR Recognition Feed" recording={true}>
-        <Suspense fallback={<liveFeedSkeleton />}>
+        <Suspense fallback={<LiveFeedSkeleton />}>
           <PlateTableWrapper
             data={platesRes.data}
             total={platesRes.pagination.total}

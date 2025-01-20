@@ -176,11 +176,46 @@ CREATE TABLE public.plates (
     plate_number character varying(10) NOT NULL,
     first_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    flagged boolean DEFAULT false NOT NULL
+    flagged boolean DEFAULT false NOT NULL,
+    occurrence_count integer DEFAULT 0 NOT NULL
 );
 
 
 ALTER TABLE public.plates OWNER TO postgres;
+
+
+
+CREATE FUNCTION public.update_plate_occurrence_count() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        -- Insert into plates if it doesn't exist, increment if it does
+        INSERT INTO plates (plate_number, occurrence_count)
+        VALUES (NEW.plate_number, 1)
+        ON CONFLICT (plate_number)
+        DO UPDATE SET occurrence_count = plates.occurrence_count + 1;
+    ELSIF TG_OP = 'DELETE' THEN
+        -- Decrement count and remove plate if count reaches 0
+        UPDATE plates 
+        SET occurrence_count = occurrence_count - 1
+        WHERE plate_number = OLD.plate_number;
+        
+        DELETE FROM plates
+        WHERE plate_number = OLD.plate_number
+        AND occurrence_count <= 0;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+ALTER FUNCTION public.update_plate_occurrence_count() OWNER TO postgres;
+
+
+CREATE TRIGGER plate_reads_count_trigger AFTER INSERT OR DELETE ON public.plate_reads FOR EACH ROW EXECUTE FUNCTION public.update_plate_occurrence_count();
+
+
+CREATE INDEX idx_plates_occurrence_count ON public.plates(occurrence_count);
 
 --
 -- Name: tags; Type: TABLE; Schema: public; Owner: postgres

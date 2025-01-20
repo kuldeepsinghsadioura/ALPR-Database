@@ -139,7 +139,7 @@ export function KnownPlatesTable({ initialData }) {
       const formData = new FormData();
       formData.append("plateNumber", activePlate.plate_number);
       formData.append("name", editPlateData.name);
-      formData.append("notes", editPlateData.notes);
+      formData.append("notes", editPlateData.notes && editPlateData.notes);
 
       const result = await addKnownPlate(formData);
       if (result.success) {

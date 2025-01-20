@@ -31,6 +31,7 @@ import {
   updateAllPlateReads,
   togglePlateIgnore,
   getPlateImagePreviews,
+  backfillOccurrenceCounts,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -344,6 +345,8 @@ export async function getLatestPlateReads({
   dateRange = null,
   hourRange = null,
   cameraName = "",
+  sortField = "",
+  sortDirection = "",
 } = {}) {
   console.log("Fetching latest plate reads");
   try {
@@ -357,6 +360,10 @@ export async function getLatestPlateReads({
         dateRange,
         hourRange,
         cameraName: cameraName || undefined,
+      },
+      sort: {
+        field: sortField,
+        direction: sortDirection,
       },
     });
 
@@ -849,4 +856,9 @@ export async function getSystemLogs() {
     console.error("Error reading logs:", error);
     return { success: false, error: "Failed to read system logs" };
   }
+}
+
+export async function dbBackfill() {
+  console.warn("Backfilling occurrence counts...");
+  return await backfillOccurrenceCounts();
 }

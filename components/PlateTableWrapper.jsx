@@ -108,6 +108,23 @@ export default function PlateTableWrapper({
     return result;
   };
 
+  const handleSort = (field) => {
+    const currentSortField = params.get("sortField") || "";
+    const currentSortDirection = params.get("sortDirection") || "desc";
+
+    let newDirection = "asc";
+    if (field === currentSortField) {
+      newDirection = currentSortDirection === "desc" ? "asc" : "desc";
+    }
+
+    router.push(
+      `${pathname}?${createQueryString({
+        sortField: field,
+        sortDirection: newDirection,
+      })}`
+    );
+  };
+
   return (
     <PlateTable
       data={data}
@@ -140,6 +157,11 @@ export default function PlateTableWrapper({
             : null,
         cameraName: params.get("camera"),
       }}
+      sort={{
+        field: params.get("sortField") || "timestamp",
+        direction: params.get("sortDirection") || "desc",
+      }}
+      onSort={handleSort}
       onUpdateFilters={handleUpdateFilters}
       onAddTag={handleAddTag}
       onRemoveTag={handleRemoveTag}

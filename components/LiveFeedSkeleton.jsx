@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function liveFeedSkeleton() {
+export default function LiveFeedSkeleton() {
   return (
     <Card>
       <CardContent className="py-4">

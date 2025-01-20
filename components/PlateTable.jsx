@@ -16,6 +16,9 @@ import {
   ExternalLink,
   Maximize2,
   Clock,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +72,28 @@ import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import PlateImage from "@/components/PlateImage";
 
+const SortButton = ({ label, field, sort, onSort }) => {
+  const isActive = sort.field === field;
+  const Icon = isActive
+    ? sort.direction === "asc"
+      ? ChevronUp
+      : ChevronDown
+    : ChevronsUpDown;
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-8 p-0 hover:bg-transparent hover:text-primary data-[active=true]:text-primary flex items-center gap-1"
+      onClick={() => onSort(field)}
+      data-active={isActive}
+    >
+      {label}
+      <Icon className="h-2 w-2" />
+    </Button>
+  );
+};
+
 export default function PlateTable({
   data,
   loading,
@@ -83,6 +108,8 @@ export default function PlateTable({
   availableCameras,
   onCorrectPlate,
   timeFormat = 12,
+  sort = { field: "", direction: "" },
+  onSort = () => {},
 }) {
   console.log("PlateTable rendering with data:", data.length);
 
@@ -629,10 +656,24 @@ export default function PlateTable({
                 {/* <TableHead>Vehicle Description</TableHead> */}
                 <TableHead className="w-24">Image</TableHead>
                 <TableHead className="w-32">Plate Number</TableHead>
-                <TableHead className="w-24">Occurrences</TableHead>
+                <TableHead className="w-24">
+                  <SortButton
+                    label="Occurrences"
+                    field="occurrence_count"
+                    sort={sort}
+                    onSort={onSort}
+                  />
+                </TableHead>
                 <TableHead className="w-40">Tags</TableHead>
                 <TableHead className="w-32">Camera</TableHead>
-                <TableHead className="w-40">Timestamp</TableHead>
+                <TableHead className="w-40">
+                  <SortButton
+                    label="Timestamp"
+                    field="timestamp"
+                    sort={sort}
+                    onSort={onSort}
+                  />
+                </TableHead>
                 <TableHead className="w-32 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
