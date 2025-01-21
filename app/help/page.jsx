@@ -43,9 +43,9 @@ export default function Page() {
                 files.
               </li>
               <li>
-                Create a new directory called "storage" in the same place as
-                your auth and config directories. This is where JPEGs will now
-                be stored.
+                Create a new directory called &quot;storage&quot; in the same
+                place as your auth and config directories. This is where JPEGs
+                will now be stored.
               </li>
               <li>
                 Backfill the new occurrence_count column.{" "}
