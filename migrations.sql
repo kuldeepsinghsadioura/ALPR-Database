@@ -6,7 +6,9 @@ ALTER TABLE IF EXISTS public.plate_notifications
     ADD COLUMN IF NOT EXISTS priority integer DEFAULT 1;
 
 ALTER TABLE IF EXISTS public.plate_reads 
-    ADD COLUMN IF NOT EXISTS camera_name character varying(25); 
+    ADD COLUMN IF NOT EXISTS camera_name character varying(25),
+    ADD COLUMN image_path varchar(255),
+    ADD COLUMN thumbnail_path varchar(255);
      
 ALTER TABLE known_plates ADD COLUMN ignore BOOLEAN DEFAULT FALSE;
 

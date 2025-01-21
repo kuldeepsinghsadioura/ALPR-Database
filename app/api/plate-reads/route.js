@@ -5,6 +5,7 @@ import { getAuthConfig } from "@/lib/auth";
 import { getConfig } from "@/lib/settings";
 import { revalidatePlatesPage } from "@/app/actions";
 import { revalidatePath } from "next/cache";
+import fileStorage from "@/lib/fileStorage";
 
 // Revised to use a blacklist of all other possible AI labels if using the memo
 const EXCLUDED_LABELS = [
@@ -199,6 +200,15 @@ export async function POST(req) {
         continue; //skip to next
       }
 
+      let imagePaths = { imagePath: null, thumbnailPath: null };
+      if (data.Image) {
+        try {
+          imagePaths = await fileStorage.saveImage(data.Image, plate);
+        } catch (error) {
+          console.error(`Error saving image for plate ${plate}:`, error);
+        }
+      }
+
       const result = await dbClient.query(
         `WITH new_plate AS (
           INSERT INTO plates (plate_number)
@@ -206,16 +216,30 @@ export async function POST(req) {
           ON CONFLICT (plate_number) DO NOTHING
         ),
         new_read AS (
-          INSERT INTO plate_reads (plate_number, image_data, timestamp, camera_name)
-          SELECT $1, $2, $3, $4
+          INSERT INTO plate_reads (
+            plate_number, 
+            image_data, 
+            image_path, 
+            thumbnail_path,
+            timestamp, 
+            camera_name
+          )
+          SELECT $1, $2, $3, $4, $5, $6
           WHERE NOT EXISTS (
             SELECT 1 FROM plate_reads 
-            WHERE plate_number = $1 AND timestamp = $3
+            WHERE plate_number = $1 AND timestamp = $5
           )
           RETURNING id
         )
         SELECT id FROM new_read`,
-        [plate, data.Image || null, timestamp, camera]
+        [
+          plate,
+          null, // no longer storing image_data
+          imagePaths.imagePath,
+          imagePaths.thumbnailPath,
+          timestamp,
+          camera,
+        ]
       );
 
       if (result.rows.length === 0) {
@@ -230,8 +254,12 @@ export async function POST(req) {
 
     const config = await getConfig();
     cleanupOldRecords(config.general.maxRecords).catch((err) =>
-      console.error("Background cleanup failed:", err)
+      console.error("Database pruning failed:", err)
     );
+
+    fileStorage.cleanupOldFiles(config.general.retention).catch((error) => {
+      console.error("JPEG pruning failed", error);
+    });
 
     // if (processedPlates.length > 0) {
     //   console.log("New plate(s) processed, notifying clients");

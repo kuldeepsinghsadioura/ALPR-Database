@@ -468,6 +468,15 @@ export default function PlateTable() {
                   </div>
                 </SelectItem>
               ))}
+              <SelectItem value="untagged">
+                <div className="flex gap-3 items-center">
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: "#6B7280" }}
+                  />
+                  Untagged
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
           <Popover>
@@ -992,9 +1001,15 @@ export default function PlateTable() {
                           <TableCell>{read.vehicleDescription}</TableCell>
                           <TableCell>
                             <Image
-                              src={`data:image/jpeg;base64,${read.imageData}`}
+                              src={
+                                read.thumbnail_path
+                                  ? `/images/${read.thumbnail_path}`
+                                  : read.imageData
+                                  ? `data:image/jpeg;base64,${read.imageData}`
+                                  : "/placeholder.jpg"
+                              }
                               alt="Vehicle"
-                              className=" object-cover rounded"
+                              className="object-cover rounded"
                               width={80}
                               height={60}
                             />

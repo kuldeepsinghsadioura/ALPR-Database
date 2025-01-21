@@ -32,6 +32,9 @@ import {
   togglePlateIgnore,
   getPlateImagePreviews,
   backfillOccurrenceCounts,
+  clearImageDataWithPathVerification,
+  updateImagePaths,
+  getRecordsToMigrate,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -55,6 +58,7 @@ import { formatTimeRange } from "@/lib/utils";
 import path from "path";
 import fs from "fs/promises";
 import split2 from "split2";
+import fileStorage from "@/lib/fileStorage";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -861,4 +865,70 @@ export async function getSystemLogs() {
 export async function dbBackfill() {
   console.warn("Backfilling occurrence counts...");
   return await backfillOccurrenceCounts();
+}
+
+export async function migrateImageDataToFiles() {
+  console.log("Starting image data migration...");
+
+  try {
+    const records = await getRecordsToMigrate();
+    console.log(`Found ${records.length} records to migrate`);
+
+    let processed = 0;
+    let errors = 0;
+
+    for (const record of records) {
+      try {
+        const { imagePath, thumbnailPath } =
+          await fileStorage.migrateBase64ToFile(
+            record.image_data,
+            record.plate_number,
+            record.timestamp
+          );
+
+        await updateImagePaths(record.id, imagePath, thumbnailPath);
+        processed++;
+
+        if (processed % 100 === 0) {
+          console.log(`Processed ${processed} records...`);
+        }
+      } catch (error) {
+        console.error(`Error processing record ${record.id}:`, error);
+        errors++;
+      }
+    }
+
+    return {
+      success: true,
+      processed,
+      errors,
+      totalRecords: records.length,
+    };
+  } catch (error) {
+    console.error("Migration failed:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+export async function clearImageData() {
+  console.log("Starting image data cleanup...");
+
+  try {
+    const clearedCount = await clearImageDataWithPathVerification();
+
+    return {
+      success: true,
+      clearedCount,
+      message: `Successfully cleared image data from ${clearedCount} records.`,
+    };
+  } catch (error) {
+    console.error("Cleanup failed:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 }

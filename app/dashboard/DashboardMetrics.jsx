@@ -134,13 +134,19 @@ const PlateImagePreviews = ({ plate, timeFrame }) => {
           className="relative aspect-video bg-muted rounded-sm overflow-hidden"
         >
           <Image
-            src={`data:image/jpeg;base64,${img.image_data}`}
-            alt={`Capture from ${new Date(img.capture_time).toLocaleString()}`}
+            src={
+              img.thumbnail_path
+                ? `/images/${img.thumbnail_path}`
+                : img.image_data
+                ? `data:image/jpeg;base64,${img.image_data}`
+                : "/placeholder.jpg"
+            }
+            alt={`Capture from ${new Date(img.timestamp).toLocaleString()}`}
             fill
             className="object-cover"
           />
           <div className="absolute bottom-0 left-0 right-0 px-2 py-1 text-[10px] bg-black/50 text-white">
-            {new Date(img.capture_time).toLocaleTimeString()}
+            {new Date(img.timestamp).toLocaleTimeString()}
           </div>
         </div>
       ))}

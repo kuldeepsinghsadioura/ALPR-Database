@@ -12,5 +12,7 @@ yarn-error.log*
 .next
 .git
 
-/config/*
-/auth/*
+config/settings.yaml
+auth/auth.json
+logs/app.log
+

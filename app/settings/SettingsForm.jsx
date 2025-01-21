@@ -68,6 +68,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     switch (activeSection) {
       case "general":
         newFormData.append("maxRecords", formData.get("maxRecords"));
+        newFormData.append("retention", formData.get("retention"));
         newFormData.append("ignoreNonPlate", formData.get("ignoreNonPlate"));
         newFormData.append("timeFormat", Number(formData.get("timeFormat")));
         break;
@@ -158,13 +159,24 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
       <h3 className="text-lg font-semibold">General Settings</h3>
       <div className="space-y-2">
         <Label htmlFor="maxRecords">
-          Maximum number of records to keep in live feed
+          Maximum number of records to keep in live feed -{" "}
+          <span className="italic"> (100k records = &lt;100 MB)</span>
         </Label>
         <Input
           id="maxRecords"
           name="maxRecords"
           type="number"
           defaultValue={initialSettings.general.maxRecords}
+          autoComplete="off"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="maxRecords">Image Retention Period (Months)</Label>
+        <Input
+          id="retention"
+          name="retention"
+          type="number"
+          defaultValue={initialSettings.general.retention}
           autoComplete="off"
         />
       </div>

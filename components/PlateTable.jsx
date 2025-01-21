@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import NextImage from "next/image";
 import {
   Search,
   Filter,
@@ -123,6 +123,7 @@ export default function PlateTable({
   const [selectedImage, setSelectedImage] = useState(null);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [isLive, setIsLive] = useState(true);
+  const [prefetchedImages, setPrefetchedImages] = useState(new Set());
 
   const router = useRouter();
 
@@ -145,15 +146,27 @@ export default function PlateTable({
 
   const handleImageClick = (e, plate) => {
     e.preventDefault();
-    if (plate.image_path || plate.image_data) {
-      setSelectedImage({
-        url: plate.image_path
-          ? `/api/images/${encodeURIComponent(plate.image_path)}`
-          : getImageUrl(plate.image_data),
-        plateNumber: plate.plate_number,
-        id: plate.id,
-      });
+    let imageUrl;
+    let thumbnailUrl;
+    if (plate.image_path) {
+      // imageUrl = `/images/images/${plate.image_path.replace(/^images\//, "")}`;
+      imageUrl = `/images/${plate.image_path}`;
+      thumbnailUrl = `/images/${plate.thumbnail_path}`;
+    } else if (plate.image_data) {
+      // Handle legacy base64 data
+      imageUrl = plate.image_data.startsWith("data:image/jpeg;base64,")
+        ? plate.image_data
+        : `data:image/jpeg;base64,${plate.image_data}`;
+    } else {
+      return; // No image available
     }
+
+    setSelectedImage({
+      url: imageUrl,
+      thumbnail: thumbnailUrl,
+      plateNumber: plate.plate_number,
+      id: plate.id,
+    });
   };
 
   const handleDownloadImage = async () => {
@@ -187,18 +200,56 @@ export default function PlateTable({
     }
   };
 
+  useEffect(() => {
+    // Only prefetch if we have data and aren't loading
+    if (!loading && data?.length > 0) {
+      data.forEach((plate) => {
+        if (plate.image_path && !prefetchedImages.has(plate.image_path)) {
+          const fullImageUrl = `/images/${plate.image_path}`;
+          // Create a new Image to prefetch
+          const img = new Image();
+          img.src = fullImageUrl;
+          setPrefetchedImages((prev) => new Set([...prev, plate.image_path]));
+        }
+      });
+    }
+  }, [data, loading]);
+
   const handleOpenInNewTab = () => {
     if (!selectedImage) return;
+
+    // If it's a regular file path just open the URL directly
+    if (!selectedImage.url.startsWith("data:")) {
+      window.open(selectedImage.url, "_blank");
+      return;
+    }
 
     const win = window.open();
     if (win) {
       win.document.write(`
         <html>
-          <head><title>License Plate Image - ${selectedImage.plateNumber}</title></head>
-          <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000;">
+          <head>
+            <title>License Plate Image - ${selectedImage.plateNumber}</title>
+            <style>
+              body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background: #000;
+              }
+              img {
+                max-width: 100%;
+                max-height: 100vh;
+                object-fit: contain;
+              }
+            </style>
+          </head>
+          <body>
             <img src="${selectedImage.url}" 
-                 style="max-width: 100%; max-height: 100vh; object-fit: contain;" 
-                 alt="${selectedImage.plateNumber}" />
+                 alt="${selectedImage.plateNumber}"
+                 onerror="this.onerror=null; this.src='/placeholder.jpg';" />
           </body>
         </html>
       `);
@@ -874,8 +925,9 @@ export default function PlateTable({
             </DialogHeader>
             <div className="relative w-full h-[60vh]">
               {selectedImage && (
-                <Image
+                <NextImage
                   src={selectedImage.url}
+                  priority={true}
                   alt={`License plate ${selectedImage.plateNumber}`}
                   fill
                   className="object-contain"

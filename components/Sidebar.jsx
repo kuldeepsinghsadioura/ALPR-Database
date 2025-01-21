@@ -9,6 +9,7 @@ import {
   Database,
   Settings,
   TerminalSquare,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { BookMarked } from "lucide-react";
 import { Cctv } from "lucide-react";
@@ -78,6 +79,25 @@ export function Sidebar() {
             </TooltipTrigger>
             <TooltipContent side="right" className="border-0 bg-muted">
               System Logs
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/help")}
+                className={cn(
+                  "w-10 h-10 p-0 hover:bg-transparent [&:not(:disabled)]:hover:bg-transparent text-yellow-40 text-2xl font-bold text-yellow-400",
+                  pathname === "/settings"
+                    ? "text-yellow-400"
+                    : "hover:text-yellow-200"
+                )}
+              >
+                ?{/* <MessageCircleQuestion className="h-5 w-5" /> */}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="border-0 bg-muted">
+              Recent Updates Help & Fixes
             </TooltipContent>
           </Tooltip>
           <Tooltip delayDuration={0}>

@@ -2,9 +2,7 @@ import SettingsForm from "./SettingsForm";
 import { getSettings } from "@/app/actions";
 import { getAuthConfig } from "@/lib/auth";
 
-// Force dynamic behavior since config can change
 export const dynamic = "force-dynamic";
-//disable caching
 export const revalidate = 0;
 
 export default async function SettingsPage() {

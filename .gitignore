@@ -42,3 +42,6 @@ next-env.d.ts
 # # config
 config/settings.yaml
 auth/auth.json
+
+#logs
+logs/app.log

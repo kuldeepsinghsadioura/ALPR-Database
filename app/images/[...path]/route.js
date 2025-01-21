@@ -4,8 +4,11 @@ import path from "path";
 
 export async function GET(request, { params }) {
   try {
-    const imagePath = params.path.join("/");
-    const imageData = await fileStorage.getImage(imagePath);
+    const parameters = await params;
+    const [folder, ...rest] = await parameters.path;
+    const filename = rest.join("/");
+
+    const imageData = await fileStorage.getImage(path.join(folder, filename));
 
     if (!imageData) {
       return new NextResponse(null, { status: 404 });
@@ -13,8 +16,7 @@ export async function GET(request, { params }) {
 
     const headers = new Headers();
     headers.set("Content-Type", "image/jpeg");
-    // No caching - always fetch fresh
-    headers.set("Cache-Control", "no-store");
+    headers.set("Cache-Control", "public, max-age=60");
 
     return new NextResponse(imageData, {
       status: 200,
