@@ -1,6 +1,12 @@
 import { verifySession, getSessionInfo } from "@/lib/auth";
+import { ensureInitialized } from "../_startup";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(req) {
+  await ensureInitialized();
+
   try {
     const { sessionId } = await req.json();
 

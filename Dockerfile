@@ -13,4 +13,5 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app /app
 COPY --from=builder /app/package.json ./package.json
 EXPOSE 3000
+RUN mkdir -p /auth
 CMD ["yarn", "start"]

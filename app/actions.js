@@ -35,6 +35,9 @@ import {
   clearImageDataWithPathVerification,
   updateImagePaths,
   getRecordsToMigrate,
+  clearImageDataBatch,
+  updateImagePathsBatch,
+  getTotalRecordsToMigrate,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -871,38 +874,59 @@ export async function migrateImageDataToFiles() {
   console.log("Starting image data migration...");
 
   try {
-    const records = await getRecordsToMigrate();
-    console.log(`Found ${records.length} records to migrate`);
+    const totalRecords = await getTotalRecordsToMigrate();
+    console.log(`Total records to migrate: ${totalRecords}`);
 
     let processed = 0;
     let errors = 0;
+    let lastId = 0;
+    const BATCH_SIZE = 100;
 
-    for (const record of records) {
-      try {
-        const { imagePath, thumbnailPath } =
-          await fileStorage.migrateBase64ToFile(
-            record.image_data,
-            record.plate_number,
-            record.timestamp
-          );
+    while (true) {
+      const records = await getRecordsToMigrate(BATCH_SIZE, lastId);
+      if (records.length === 0) break;
 
-        await updateImagePaths(record.id, imagePath, thumbnailPath);
-        processed++;
+      const updates = [];
 
-        if (processed % 100 === 0) {
-          console.log(`Processed ${processed} records...`);
+      for (const record of records) {
+        try {
+          const { imagePath, thumbnailPath } =
+            await fileStorage.migrateBase64ToFile(
+              record.image_data,
+              record.plate_number,
+              record.timestamp
+            );
+
+          updates.push({ id: record.id, imagePath, thumbnailPath });
+          processed++;
+        } catch (error) {
+          console.error(`Error processing record ${record.id}:`, error);
+          errors++;
         }
-      } catch (error) {
-        console.error(`Error processing record ${record.id}:`, error);
-        errors++;
+
+        lastId = record.id;
       }
+
+      if (updates.length > 0) {
+        try {
+          await updateImagePathsBatch(updates);
+        } catch (error) {
+          console.error("Error updating batch:", error);
+          errors += updates.length;
+          processed -= updates.length;
+        }
+      }
+
+      console.log(
+        `Processed ${processed}/${totalRecords} records (${errors} errors)`
+      );
     }
 
     return {
       success: true,
       processed,
       errors,
-      totalRecords: records.length,
+      totalRecords,
     };
   } catch (error) {
     console.error("Migration failed:", error);
@@ -917,12 +941,18 @@ export async function clearImageData() {
   console.log("Starting image data cleanup...");
 
   try {
-    const clearedCount = await clearImageDataWithPathVerification();
+    let totalCleared = 0;
+    let batchCount;
+
+    do {
+      batchCount = await clearImageDataBatch(1000);
+      totalCleared += batchCount;
+      console.log(`Cleared ${totalCleared} records...`);
+    } while (batchCount > 0);
 
     return {
       success: true,
-      clearedCount,
-      message: `Successfully cleared image data from ${clearedCount} records.`,
+      clearedCount: totalCleared,
     };
   } catch (error) {
     console.error("Cleanup failed:", error);

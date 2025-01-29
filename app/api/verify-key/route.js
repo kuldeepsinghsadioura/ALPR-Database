@@ -1,14 +1,19 @@
-import { getAuthConfig } from "@/lib/auth";
+import { getAuthConfig, verifyApiKey } from "@/lib/auth";
+import { ensureInitialized } from "../_startup";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(request) {
+  await ensureInitialized();
+
   try {
     const { apiKey } = await request.json();
-    const authConfig = await getAuthConfig();
+    const keyInfo = await verifyApiKey(apiKey);
 
-    if (apiKey === authConfig.apiKey) {
-      return Response.json({ valid: true });
+    if (keyInfo) {
+      return Response.json({ valid: true, user: keyInfo.user });
     }
-
     return Response.json({ valid: false }, { status: 401 });
   } catch (error) {
     console.error("Error verifying API key:", error);

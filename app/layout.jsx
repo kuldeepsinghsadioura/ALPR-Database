@@ -24,8 +24,6 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  initializeAuth().catch(console.error);
-
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body

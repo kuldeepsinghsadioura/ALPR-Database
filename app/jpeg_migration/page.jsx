@@ -12,6 +12,8 @@ import {
 import { Loader2 } from "lucide-react";
 import { migrateImageDataToFiles, clearImageData } from "@/app/actions";
 
+export const dynamic = "force-dynamic";
+
 export default function MigrationPage() {
   const [loading1, setLoading1] = useState(false);
   const [loading2, setLoading2] = useState(false);
