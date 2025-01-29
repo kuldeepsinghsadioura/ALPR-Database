@@ -125,8 +125,8 @@ CREATE TABLE public.plate_reads (
     id integer NOT NULL,
     plate_number character varying(10) NOT NULL,
     image_data text,
-    image_path VARCHAR 255,
-    thumbnail_path VARCHAR 255,
+    image_path VARCHAR(255),
+    thumbnail_path VARCHAR(255),
     "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     camera_name character varying(30)
