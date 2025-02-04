@@ -616,6 +616,9 @@ export async function updateSettings(formData) {
         maxRecords: formData.get("maxRecords")
           ? parseInt(formData.get("maxRecords"))
           : currentConfig.general.maxRecords,
+        retention: formData.get("retention")
+          ? parseInt(formData.get("retention"))
+          : currentConfig.general.retention,
         ignoreNonPlate: formData.get("ignoreNonPlate") === "true",
         timeFormat: formData.get("timeFormat")
           ? parseInt(formData.get("timeFormat"))
