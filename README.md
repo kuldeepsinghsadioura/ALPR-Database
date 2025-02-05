@@ -1,126 +1,121 @@
+<div align="center">
+<img src="https://mswebappcdn.azureedge.net/episerverprod/c48c63f7c47c4544bdc361ebc94ce61e/448551dd03a14b6c86f27f8195830b8f.png" width="350px"/>
+
 # ALPR Database
-A Fully-Featured Automated License Plate Recognition Database for Blue Iris + CodeProject AI Server
 
+<h4 align="center">A Fully-Featured Automated License Plate Recognition Database for Blue Iris + CodeProject AI Server</h4>
 
-![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/Hero.jpg)
+[![Feature Requests & Roadmap](https://img.shields.io/badge/Feature%20Requests%20&%20Roadmap-5e5ced?style=for-the-badge&logo=starship&logoColor=white&link=https://alprdatabase.featurebase.app/roadmap)](https://alprdatabase.featurebase.app/roadmap) [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-1D63ED?style=for-the-badge&logo=Docker&logoColor=white&link=https://hub.docker.com/r/algertc/alpr-dashboard)](https://hub.docker.com/r/algertc/alpr-dashboard) ![Plates Processed](https://img.shields.io/badge/Plates%20Processed-1M+-00A1E0?style=for-the-badge&logo=CodeForces&logoColor=white) ![Release](https://img.shields.io/badge/Release-0.1.7-00A1E0?style=for-the-badge&logoColor=white)
 
-## Overview
+<h4 align="center">
+⭐ Please star the repository if you find the project useful ⭐</h4>
 
-I've been using [CodeProject AI](https://github.com/codeproject/CodeProject.AI-Server) with [Mike Lud's](https://github.com/MikeLud) license plate model on [Blue Iris](https://blueirissoftware.com/) for a couple years now, but in this setup, the ALPR doesn't really do a whole lot. Really, you have more of a license plate camera with some AI as a bonus, and no nice way to take advantage the data other than parsing Blue Iris logs or paying $600+/year for PlateMinder or Rekor ALPR.
+<!-- ![Docker Pulls](https://img.shields.io/docker/pulls/algertc/alpr-dashboard?style=for-the-badge&logo=docker&logoColor=white&label=Downloads&labelColor=1D63ED&color=1D63ED&link=https%3A%2F%2Fhub.docker.com%2Frepository%2Fdocker%2Falgertc%2Falpr-dashboard%2Fgeneral) -->
+
+<!-- ![Plates Processed](https://img.shields.io/badge/Plates%20Processed-1M+-gray?labelColor=00A1E0&style=for-the-badge&logo=CodeForces&logoColor=white) -->
+
+</div>
+
+<br>
+
+![App Screens](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/Hero.jpg)
+
+## :star2: Overview
+
+I've been using [CodeProject AI](https://github.com/codeproject/CodeProject.AI-Server) with [Mike Lud's](https://github.com/MikeLud) license plate model on [Blue Iris](https://blueirissoftware.com/) for a couple years now, but in this setup, the ALPR doesn't really do a whole lot. Really, you have more of a license plate camera with some OCR as a bonus, and no nice way to take advantage the data other than parsing Blue Iris logs or paying $600+/year for PlateMinder or Rekor ALPR.
 
 This project serves as a complement to a CodeProject Blue Iris setup, giving you a full-featured database to store and _actually use_ your ALPR data, **completely for free.** Complete with the following it has a very solid initial feature set and is a huge upgrade over the standard setup.
 
-Please star and share the project :)
 #### Features:
 
-- Searchable Database & Fuzzy Search
-- Live recognition feed with images
-- Add vehicles you know to a known plates table
-- Custom tags
+- Searchable database & fuzzy search
+- Build labeled training sets from your traffic
+- Live recognition feed
+- Traffic Analytics
+- Categorization and filtering
+- Store information on known vehicles
+- Push notifications
+- Automation rules
+- Customizable tagging
 - Configurable retention
-- Configurable Push Notifications
 - Flexible API
-- Detailed system insights
-- HomeAssistant Dashboard Integration
+- HomeAssistant integration
+- Permissioned users
 
-## Install
+<br>
 
-Docker is the easiest and fastest way to deploy. Below is a docker-compose.yml file that will create a stack with both the application and a database. Just run the compose and you will have everything you need. If you prefer to use a separate database, you can either just spin up the container on its own from the image or use the docker-compose-without-database.yml in the repository.
+## 🔧 Installation
 
-##### Quick Start:
+![Setup Time](https://img.shields.io/badge/Setup%20Time-%E2%88%BC5%20minutes-0ec423?style=for-the-badge)
 
-1. Ensure you have Docker installed on your system.
+The application is packaged as a Docker image. This is the fastest and most reliable way to deploy. Below is a done-for-you installation script that will create a Docker stack with both the application and a PostgreSQL database. The installation script is recommended and more carefully maintained, but manual installation instructions are also available [here](https://github.com/algertc/ALPR-Database/wiki/Manual-Installation).
 
-2. In a new directory, create a file named `docker-compose.yml` and paste in the content below, changing the variables to the passwords you would like to use.
+<br>
 
-3. Create two new directories / folders in this directory called "config" and "auth". These will ensure that your settings are saved separately and not lost during updates.
+### Prerequisites
 
-4. Download the required database schema:
-   `curl -O https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/schema.sql`
-   Or, if you prefer a download link, click [here](https://github.com/algertc/ALPR-Database/blob/main/schema.sql) to download the schema from this repository. Place it in the same directory as your docker-compose.yml.
+You will need the following installed on your system.
 
-5. Start the application: `docker compose up -d `
+- Docker
+- Docker Compose
+- Docker engine enabled and running
 
-6. Access the application at `http://localhost:3000`
+<br>
 
-### Docker Compose
+> [!TIP]
+> If unfamiliar with Docker, an easy way to check all three of these boxes at once is to install [Docker Desktop](https://docs.docker.com/desktop/), which has a GUI and bunch of nice tools.
 
-```yaml
-version: "3.8"
-services:
-  app:
-    image: algertc/alpr-dashboard:latest
-    restart: unless-stopped
-    ports:
-      - "3000:3000"  # Change the first port to the port you want to expose
-    environment:
-      - NODE_ENV=production
-      - ADMIN_PASSWORD=password  # Change this to a secure password
-      - DB_PASSWORD=password  # Change this to match your postgres password
-      - TZ= America/Los_Angeles # Change this to match your time zone. Time zones can be found here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-    depends_on:
-      - db
-    volumes:
-      - app-auth:/app/auth
-      - app-config:/app/config
+<br>
 
-  db:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password  # Change this to a secure password
-      - TZ= America/Los_Angeles # Change this to match your time zone. Time zones can be found here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - ./migrations.sql:/migrations.sql
+### Linux/Mac
 
-    # Make sure you download the migrations.sql file if you are updating your existing database.
-    # Place it in the same directory as your docker-compose.yml and schema.sql files. If you changed the user or database name, you will need to plug those values into the command below.
-    command: >
-      bash -c "
-        docker-entrypoint.sh postgres &
-        until pg_isready; do sleep 1; done;
-        psql -U postgres -d postgres -f /migrations.sql;
-        wait
-      "
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  db-data:
-  app-auth:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./auth
-  app-config:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./config
+Create a new directory wherever you would like to store your ALPR data. Enter the directory in your terminal and paste in the below command. After that, everything will be set up automatically!
 
 ```
+curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
+```
 
-## Setup
+Or, if you prefer:
 
-There is currently support for both API Posts and MQTT, however, the API is significantly more reliable. Ingestion via MQTT is not recommended.
+```
+wget -qO- https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
+```
 
-#### Get Your API Key
+<br>
 
-To start sending data, spin up the docker containers and log in to the application. **Navigate to settings -> security** in the bottom left hand corner. At the bottom of the page you should see an API key. Click the eye to reveal the key and copy it down for use on Blue Iris.
+### Windows
+
+Running the install script on Windows may require an additional step. I will make a Powershell version at some point, but as of now it is Bash. There are two popular options to use Bash in Windows:
+
+- **Git Bash**
+
+  - Install [Git Desktop](https://git-scm.com/downloads) and use the included Git Bash command prompt.
+
+- **Windows Subsystem for Linux**
+  - Enable WSL, install a [Distro from the Windows Store](https://apps.microsoft.com/detail/9pdxgncfsczv?rtc=1&hl=en-US&gl=US), and run the script from the WSL shell.
+
+<br>
+
+The command is the same:
+
+```
+curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
+```
+
+<br>
+<br>
+
+## ⚙️ Setup
+
+### Get Your API Key
+
+To start sending data, log in to the application and **navigate to settings -> security** in the bottom left hand corner. At the bottom of the page you should see an API key. Click the eye to reveal the key and copy it down for use in Blue Iris.
 
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/apikey.png)
 
-#### Set up an alert action within Blue Iris:
+<br>
+
+### Set up an alert action within Blue Iris:
 
 ALPR recognitions are sent to the `api/plate-reads` endpoint.
 
@@ -133,17 +128,13 @@ We can make use of the built-in macros to dynamically get the alert data and sen
 
 Note: The &PLATE macro will only send one plate number per alert. If you need to detect multiple plates in a single alert/image, you can optionally use the memo instead of the plate number. Your payload should look like this:
 
-    { "memo":"&MEMO", "Image":"&ALERT_JPEG", "timestamp":"&ALERT_TIME" }
-
+    { "memo":"&MEMO", "Image":"&ALERT_JPEG", "camera":"&CAM", "timestamp":"&ALERT_TIME" }
 
 #### Thats it! You're now collecting and storing your ALPR data.
 
-## Future Considerations
+<br>
 
-- Better image storage instead of giant base64 in database.
-- Ability to share your plate database with others
-
-## Screenshots
+## :camera: Screenshots
 
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/4.png)
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/3.png)
@@ -151,6 +142,6 @@ Note: The &PLATE macro will only send one plate number per alert. If you need to
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/1.png)
 ![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/5.png)
 
-## Disclaimer
+## :warning: Disclaimer
 
-This is meant to be a helpful project. It is not an official release. It is not secure and should not be exposed outside your network.
+This is meant to be a helpful hobby project and is still a work-in-progress. There's a good amount of spaghetti code in here and random things left over from the initial release. Not to be relied on for anything critical.
