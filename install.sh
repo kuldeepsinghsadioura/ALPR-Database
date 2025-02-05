@@ -107,10 +107,12 @@ log_info "Downloading required files..."
 COMPOSE_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/docker-compose.yml"
 SCHEMA_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/schema.sql"
 MIGRATIONS_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/migrations.sql"
+UPDATE_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.sh"
 
 download_file "$COMPOSE_URL" "docker-compose.yml"
 download_file "$SCHEMA_URL" "schema.sql"
 download_file "$MIGRATIONS_URL" "migrations.sql"
+download_file "$UPDATE_URL" "update.sh"
 
 log_success "Files downloaded successfully!"
 
