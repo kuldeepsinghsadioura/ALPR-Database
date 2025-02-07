@@ -66,6 +66,7 @@ import path from "path";
 import fs from "fs/promises";
 import split2 from "split2";
 import fileStorage from "@/lib/fileStorage";
+import { getLocalVersionInfo } from "@/lib/version";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -971,6 +972,7 @@ export async function clearImageData() {
 }
 
 export async function sendMetricsUpdate() {
+  console.log("[Metrics] Reporting usage metrics...");
   try {
     const [earliestPlate, totalPlates] = await Promise.all([
       getEarliestPlateData(),
@@ -1000,10 +1002,10 @@ export async function sendMetricsUpdate() {
     const payload = {
       fingerprint,
       totalPlates,
-      version: process.env.CONTAINER_VERSION || "1.0.0",
+      version: await getLocalVersionInfo(),
     };
 
-    const response = await fetch("https://your-worker-url.workers.dev", {
+    const response = await fetch("https://alpr-metrics.algertc.workers.dev/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
