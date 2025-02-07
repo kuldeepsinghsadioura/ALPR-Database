@@ -1,5 +1,3 @@
-name: ALPR-Database
-
 services:
   app:
     image: algertc/alpr-dashboard:latest
