@@ -38,6 +38,8 @@ import {
   clearImageDataBatch,
   updateImagePathsBatch,
   getTotalRecordsToMigrate,
+  getTotalPlatesCount,
+  getEarliestPlateData,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -50,6 +52,8 @@ import { revalidatePath, revalidateTag, unstable_noStore } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
+import { createHash } from "crypto";
+import { execSync } from "child_process";
 import { getConfig, saveConfig } from "@/lib/settings";
 import {
   getAuthConfig,
@@ -963,5 +967,57 @@ export async function clearImageData() {
       success: false,
       error: error.message,
     };
+  }
+}
+
+export async function sendMetricsUpdate() {
+  try {
+    const [earliestPlate, totalPlates] = await Promise.all([
+      getEarliestPlateData(),
+      getTotalPlatesCount(),
+    ]);
+
+    if (!earliestPlate) return null;
+
+    // Get system identifier that should be stable
+    let systemId;
+    try {
+      systemId = execSync("cat /etc/machine-id").toString().trim();
+    } catch {
+      try {
+        systemId = execSync("cat /etc/hostname").toString().trim();
+      } catch {
+        systemId = execSync("uname -a").toString().trim();
+      }
+    }
+
+    const fingerprint = createHash("sha256")
+      .update(
+        `${earliestPlate.plate_number}:${earliestPlate.first_seen_at}:${systemId}`
+      )
+      .digest("hex");
+
+    const payload = {
+      fingerprint,
+      totalPlates,
+      version: process.env.CONTAINER_VERSION || "1.0.0",
+    };
+
+    const response = await fetch("https://your-worker-url.workers.dev", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error sending metrics:", error);
+    return false;
   }
 }
