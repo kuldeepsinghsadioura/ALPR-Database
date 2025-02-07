@@ -48,6 +48,7 @@ const navigation = [
   { title: "Push Notifications", id: "push" },
   { title: "HomeAssistant", id: "homeassistant" },
   { title: "Security", id: "security" },
+  { title: "Sharing & Privacy", id: "privacy" },
 ];
 
 export default function SettingsForm({ initialSettings, initialApiKey }) {
@@ -104,6 +105,12 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
         if (formData.get("haWhitelist")) {
           newFormData.append("haWhitelist", formData.get("haWhitelist"));
         }
+        break;
+      case "privacy":
+        newFormData.append(
+          "metricsEnabled",
+          formData.get("metricsEnabled") === "on"
+        );
         break;
     }
 
@@ -534,6 +541,37 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     </div>
   );
 
+  const renderPrivacySection = () => (
+    <div key="privacy-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">Sharing &amp; Privacy</h3>
+      <div className="flex items-center justify-between py-2 gap-4">
+        <div className="space-y-3 w-3/4">
+          <Label htmlFor="metricsEnabled" className="font-semibold text-md">
+            Participate in Anonymous System Reporting
+          </Label>
+          <p className="text-muted-foreground">
+            Reporting is 100% optional, but greatly encouraged. This helps me
+            understand how people use the app and improve the code.
+          </p>
+        </div>
+        <Switch
+          id="metricsEnabled"
+          name="metricsEnabled"
+          defaultChecked={initialSettings.privacy?.metrics}
+        />
+      </div>
+      <div className="flex flex-col gap-2 text-semibold">
+        <h4 className="text-lg font-semibold">Data sent in reports:</h4>
+        <ul className="list-disc list-inside">
+          <li>Release version</li>
+          <li>Earliest date recorded in database</li>
+          <li>Total records in database</li>
+          <li>A hashed unique identifier for your installation</li>
+        </ul>
+      </div>
+    </div>
+  );
+
   const renderSection = () => (
     <div key={activeSection}>
       {(() => {
@@ -550,6 +588,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             return renderHomeAssistantSection();
           case "security":
             return renderSecuritySection();
+          case "privacy":
+            return renderPrivacySection();
           default:
             return null;
         }

@@ -695,6 +695,12 @@ export async function updateSettings(formData) {
           : currentConfig.homeassistant?.whitelist || [],
       };
     }
+    if (updateIfExists("metricsEnabled")) {
+      newConfig.privacy = {
+        ...currentConfig.privacy,
+        metrics: formData.get("metricsEnabled") === "true",
+      };
+    }
     const result = await saveConfig(newConfig);
     if (!result.success) {
       return { success: false, error: result.error };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { sendMetrics } from "@/lib/actions/metrics";
+import { sendMetricsUpdate } from "@/app/actions";
 
 export function MetricsHandler() {
   useEffect(() => {
@@ -12,7 +12,7 @@ export function MetricsHandler() {
 
       if (!lastSent || now - Number(lastSent) > 7 * 24 * 60 * 60 * 1000) {
         // More than a week since last send (or never sent)
-        await sendMetrics();
+        await sendMetricsUpdate();
         localStorage.setItem("metricsLastSent", now.toString());
       }
     };
@@ -21,5 +21,5 @@ export function MetricsHandler() {
     checkAndSendMetrics();
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 }
