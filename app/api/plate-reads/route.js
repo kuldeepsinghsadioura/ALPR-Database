@@ -209,6 +209,24 @@ export async function POST(req) {
         }
       }
 
+      let biPath = null;
+      if (data.ALERT_CLIP && data.ALERT_PATH && camera) {
+        try {
+          // Extract offset from ALERT_PATH (format: CAMERAID.YYYYMMDD_HHMMSS.OFFSET.3-1.jpg)
+          const parts = data.ALERT_PATH.split(".");
+          const msOffset = parts[2];
+          // Remove @ from ALERT_CLIP and construct path
+          const recId = data.ALERT_CLIP.replace("@", "");
+          biPath = `ui3.htm?rec=${recId}-${msOffset}&cam=${camera}`;
+        } catch (error) {
+          console.error("Error constructing bi_path:", error);
+        }
+      } else {
+        console.warn(
+          "[Blue Iris] Incomplete request. Your alert action is not sending the ALERT_PATH and ALERT_CLIP macros. These values are needed for BI integration. See readme for more info."
+        );
+      }
+
       const result = await dbClient.query(
         `WITH new_plate AS (
           INSERT INTO plates (plate_number)
@@ -222,9 +240,10 @@ export async function POST(req) {
             image_path, 
             thumbnail_path,
             timestamp, 
-            camera_name
+            camera_name,
+            bi_path
           )
-          SELECT $1, $2, $3, $4, $5, $6
+          SELECT $1, $2, $3, $4, $5, $6, $7
           WHERE NOT EXISTS (
             SELECT 1 FROM plate_reads 
             WHERE plate_number = $1 AND timestamp = $5
@@ -239,6 +258,7 @@ export async function POST(req) {
           imagePaths.thumbnailPath,
           timestamp,
           camera,
+          biPath, // Add biPath parameter here
         ]
       );
 

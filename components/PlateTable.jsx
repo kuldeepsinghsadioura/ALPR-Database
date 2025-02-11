@@ -19,6 +19,7 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  Pencil,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import PlateImage from "@/components/PlateImage";
+import { getSettings } from "@/app/actions";
 
 const SortButton = ({ label, field, sort, onSort }) => {
   const isActive = sort.field === field;
@@ -125,11 +127,20 @@ export default function PlateTable({
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [isLive, setIsLive] = useState(true);
   const [prefetchedImages, setPrefetchedImages] = useState(new Set());
+  const [biHost, setBiHost] = useState(null);
 
   const router = useRouter();
 
   // Cycle through images without clicking out with arrow keys
   const handleKeyPress = (e) => {
+    // Don't handle arrow keys if any input element is focused
+    if (
+      document.activeElement?.tagName === "INPUT" ||
+      document.activeElement?.tagName === "TEXTAREA"
+    ) {
+      return;
+    }
+
     if (selectedImage === null) return;
 
     if (e.key === "ArrowRight") {
@@ -153,6 +164,17 @@ export default function PlateTable({
       return () => window.removeEventListener("keydown", handleKeyPress);
     }
   }, [selectedImage, selectedIndex, data]);
+
+  useEffect(() => {
+    async function fetchBiHost() {
+      const config = await getSettings();
+      console.log(config.blueiris.host);
+      if (config?.blueiris?.host) {
+        setBiHost(config.blueiris.host);
+      }
+    }
+    fetchBiHost();
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -841,6 +863,7 @@ export default function PlateTable({
                         hour12: timeFormat === 12,
                       })}
                     </TableCell>
+
                     <TableCell>
                       <div className="flex space-x-2 justify-end">
                         <DropdownMenu>
@@ -893,8 +916,22 @@ export default function PlateTable({
                             setIsCorrectPlateOpen(true);
                           }}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
+                        {biHost && plate.bi_path && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              window.open(
+                                `http://${biHost}/${plate.bi_path}`,
+                                "_blank"
+                              )
+                            }
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

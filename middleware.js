@@ -23,6 +23,7 @@ export async function middleware(request) {
     "/api/verify-whitelist",
     "/api/check-update",
     "/update",
+    "/api/test",
   ];
 
   // Check for API key in query parameters for iframe embeds (insecure)

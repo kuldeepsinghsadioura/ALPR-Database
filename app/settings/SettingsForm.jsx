@@ -47,6 +47,7 @@ const navigation = [
   { title: "Database", id: "database" },
   { title: "Push Notifications", id: "push" },
   { title: "HomeAssistant", id: "homeassistant" },
+  { title: "Blue Iris", id: "blueiris" },
   { title: "Security", id: "security" },
   { title: "Sharing & Privacy", id: "privacy" },
 ];
@@ -105,6 +106,9 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
         if (formData.get("haWhitelist")) {
           newFormData.append("haWhitelist", formData.get("haWhitelist"));
         }
+        break;
+      case "blueiris":
+        newFormData.append("bihost", formData.get("bihost"));
         break;
       case "privacy":
         newFormData.append(
@@ -572,6 +576,26 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     </div>
   );
 
+  const renderBlueirisSection = () => (
+    <div key="mqtt-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">Blue Iris Configuration</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="bihost">
+            Blue Iris Hostname or IP address (Include :port if not port 80)
+          </Label>
+          <Input
+            id="bihost"
+            name="bihost"
+            defaultValue={initialSettings.blueiris.host}
+            placeholder="192.168.1.68"
+            autoComplete="off"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderSection = () => (
     <div key={activeSection}>
       {(() => {
@@ -590,6 +614,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             return renderSecuritySection();
           case "privacy":
             return renderPrivacySection();
+          case "blueiris":
+            return renderBlueirisSection();
           default:
             return null;
         }

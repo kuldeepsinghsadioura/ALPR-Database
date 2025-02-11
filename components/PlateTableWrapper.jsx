@@ -17,6 +17,7 @@ export default function PlateTableWrapper({
   tags,
   cameras,
   timeFormat,
+  biHost,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -131,6 +132,7 @@ export default function PlateTableWrapper({
       availableTags={[{ name: "untagged", color: "#6B7280" }, ...tags]}
       availableCameras={cameras}
       timeFormat={timeFormat}
+      biHost={biHost}
       pagination={{
         page: parseInt(params.get("page") || "1"),
         pageSize: parseInt(params.get("pageSize") || "25"),

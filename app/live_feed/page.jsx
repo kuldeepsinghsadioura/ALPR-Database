@@ -1,9 +1,11 @@
 import {
+  getSettings,
   getLatestPlateReads,
   getTags,
   getCameraNames,
   getTimeFormat,
 } from "@/app/actions";
+
 import PlateTableWrapper from "@/components/PlateTableWrapper";
 import DashboardLayout from "@/components/layout/MainLayout";
 import BasicTitle from "@/components/layout/BasicTitle";
@@ -37,12 +39,14 @@ export default async function LivePlates(props) {
     sortDirection: searchParams?.sortDirection,
   };
 
-  const [platesRes, tagsRes, camerasRes, timeFormat] = await Promise.all([
-    getLatestPlateReads(params),
-    getTags(),
-    getCameraNames(),
-    getTimeFormat(),
-  ]);
+  const [platesRes, tagsRes, camerasRes, timeFormat, config] =
+    await Promise.all([
+      getLatestPlateReads(params),
+      getTags(),
+      getCameraNames(),
+      getTimeFormat(),
+      getSettings(),
+    ]);
 
   return (
     <DashboardLayout>
@@ -54,6 +58,7 @@ export default async function LivePlates(props) {
             tags={tagsRes.success ? tagsRes.data : []}
             cameras={camerasRes.success ? camerasRes.data : []}
             timeFormat={timeFormat}
+            biHost={config?.blueiris?.host} // Add this line
           />
         </Suspense>
       </BasicTitle>

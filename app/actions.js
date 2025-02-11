@@ -704,6 +704,12 @@ export async function updateSettings(formData) {
         metrics: formData.get("metricsEnabled") === "true",
       };
     }
+    if (updateIfExists("bihost")) {
+      newConfig.blueiris = {
+        ...currentConfig.blueiris,
+        host: formData.get("bihost"),
+      };
+    }
     const result = await saveConfig(newConfig);
     if (!result.success) {
       return { success: false, error: result.error };
