@@ -228,8 +228,8 @@ export default function VersionAlert() {
                 </p>
               </div>
               <p className="mb-2">
-                3. Create the a directory called "storage" in the same location
-                as your auth and config directories.
+                3. Create the a directory called &quot;storage&quot; in the same
+                location as your auth and config directories.
               </p>
               <div>
                 <p className="mb-2">
