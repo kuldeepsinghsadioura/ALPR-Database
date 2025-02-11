@@ -121,11 +121,38 @@ export default function PlateTable({
   const [correction, setCorrection] = useState(null);
   const [isCorrectPlateOpen, setIsCorrectPlateOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [isLive, setIsLive] = useState(true);
   const [prefetchedImages, setPrefetchedImages] = useState(new Set());
 
   const router = useRouter();
+
+  // Cycle through images without clicking out with arrow keys
+  const handleKeyPress = (e) => {
+    if (selectedImage === null) return;
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const nextIndex = (selectedIndex + 1) % data.length;
+      const nextPlate = data[nextIndex];
+      handleImageClick(e, nextPlate);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prevIndex =
+        selectedIndex <= 0 ? data.length - 1 : selectedIndex - 1;
+      const prevPlate = data[prevIndex];
+      handleImageClick(e, prevPlate);
+    }
+  };
+
+  // Add keyboard listener when modal is open
+  useEffect(() => {
+    if (selectedImage) {
+      window.addEventListener("keydown", handleKeyPress);
+      return () => window.removeEventListener("keydown", handleKeyPress);
+    }
+  }, [selectedImage, selectedIndex, data]);
 
   useEffect(() => {
     let interval;
@@ -146,6 +173,7 @@ export default function PlateTable({
 
   const handleImageClick = (e, plate) => {
     e.preventDefault();
+    const plateIndex = data.findIndex((p) => p.id === plate.id);
     let imageUrl;
     let thumbnailUrl;
     if (plate.image_path) {
@@ -161,6 +189,7 @@ export default function PlateTable({
       return; // No image available
     }
 
+    setSelectedIndex(plateIndex);
     setSelectedImage({
       url: imageUrl,
       thumbnail: thumbnailUrl,
@@ -915,7 +944,12 @@ export default function PlateTable({
         </div>
         <Dialog
           open={selectedImage !== null}
-          onOpenChange={(open) => !open && setSelectedImage(null)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedImage(null);
+              setSelectedIndex(-1);
+            }
+          }}
         >
           <DialogContent className="max-w-7xl">
             <DialogHeader>

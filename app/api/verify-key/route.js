@@ -9,6 +9,7 @@ export async function POST(request) {
 
   try {
     const { apiKey } = await request.json();
+    console.log("Checking API key");
     const keyInfo = await verifyApiKey(apiKey);
 
     if (keyInfo) {

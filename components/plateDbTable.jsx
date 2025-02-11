@@ -266,6 +266,20 @@ export default function PlateTable() {
   //   setFilteredData(sorted);
   // }, [data, searchTerm, selectedTag, selectedDateRange, sortConfig]);
 
+  const formatLastSeen = (timestamp) => {
+    if (timeFormat == 24) {
+      return new Date(timestamp).toLocaleString("en-GB");
+    }
+    return new Date(timestamp).toLocaleString("en-US");
+  };
+
+  const formatFirstSeen = (timestamp) => {
+    if (timeFormat == 24) {
+      return new Date(timestamp).toLocaleDateString("en-GB");
+    }
+    return new Date(timestamp).toLocaleDateString("en-US");
+  };
+
   const requestSort = (key) => {
     setSortConfig((prevConfig) => {
       const newConfig = {
@@ -569,7 +583,7 @@ export default function PlateTable() {
               </TableHead>
               <TableHead className="w-56 2xl:w-96">Name</TableHead>
               <TableHead>Notes</TableHead>
-              <TableHead className="w-[140px]">
+              <TableHead className="w-[180px]">
                 <Button
                   variant="ghost"
                   onClick={() => requestSort("first_seen_at")}
@@ -579,7 +593,7 @@ export default function PlateTable() {
                   {getSortIcon("first_seen_at")}
                 </Button>
               </TableHead>
-              <TableHead className="w-[140px]">
+              <TableHead className="w-[240px]">
                 <Button
                   variant="ghost"
                   onClick={() => requestSort("last_seen_at")}
@@ -609,12 +623,8 @@ export default function PlateTable() {
                 <TableCell>{plate.occurrence_count}</TableCell>
                 <TableCell>{plate.name}</TableCell>
                 <TableCell>{plate.notes}</TableCell>
-                <TableCell>
-                  {new Date(plate.first_seen_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {formatDaysAgo(plate.days_since_last_seen)}
-                </TableCell>
+                <TableCell>{formatFirstSeen(plate.first_seen_at)}</TableCell>
+                <TableCell>{formatLastSeen(plate.last_seen_at)}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {plate.tags?.length > 0 ? (

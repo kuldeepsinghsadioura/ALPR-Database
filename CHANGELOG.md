@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.7] - 02-11-2025
+
+- Complete overhaul of image storage system
+- Tables UI improved with more advanced filtering and sorting
+- Manually add known plates without prior detection
+- Plate image viewer with integrated actions
+- System logs page
+- Improved timestamp display and time zone handling
+- Automatic install and update scripts
+- A variety of other bug fixes and performance improvements
+- **This update is a major change and will require existing users to complete the update process within the app to migrate their images**
+
 ## [0.1.6] - 01-03-2025
 
 - Live update of recognition feed

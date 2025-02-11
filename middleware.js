@@ -21,6 +21,8 @@ export async function middleware(request) {
     "/api/health-check",
     "/api/verify-key",
     "/api/verify-whitelist",
+    "/api/check-update",
+    "/update",
   ];
 
   // Check for API key in query parameters for iframe embeds (insecure)
@@ -139,6 +141,27 @@ export async function middleware(request) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       res.cookies.delete("session");
       return res;
+    }
+
+    // After authentication succeeds, check for required updates
+    // Only check on main app pages, not API routes
+    if (!request.nextUrl.pathname.startsWith("/api/")) {
+      try {
+        const updateResponse = await fetch(
+          new URL("/api/check-update", request.url)
+        );
+        if (!updateResponse.ok) {
+          throw new Error(`Update check failed: ${updateResponse.status}`);
+        }
+
+        const updateData = await updateResponse.json();
+        if (updateData.updateRequired) {
+          return NextResponse.redirect(new URL("/update", request.url));
+        }
+      } catch (error) {
+        console.error("Update check error:", error);
+        // Continue if update check fails
+      }
     }
 
     return NextResponse.next();
