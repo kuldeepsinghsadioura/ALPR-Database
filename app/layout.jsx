@@ -23,7 +23,7 @@ export const metadata = {
   description: "Your ALPR Database",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body

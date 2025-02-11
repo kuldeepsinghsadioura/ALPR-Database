@@ -40,6 +40,9 @@ import {
   getTotalRecordsToMigrate,
   getTotalPlatesCount,
   getEarliestPlateData,
+  verifyImageMigration,
+  checkUpdateStatus,
+  markUpdateComplete,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -1027,5 +1030,51 @@ export async function sendMetricsUpdate() {
   } catch (error) {
     console.error("Error sending metrics:", error);
     return false;
+  }
+}
+
+export async function checkUpdateRequired() {
+  try {
+    const updateStatus = await checkUpdateStatus();
+    return !updateStatus;
+  } catch (error) {
+    console.error("Error checking update status:", error);
+    return false;
+  }
+}
+
+export async function completeUpdate() {
+  try {
+    await markUpdateComplete();
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking update complete:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function skipImageMigration() {
+  try {
+    const verificationResult = await verifyImageMigration();
+
+    if (!verificationResult.success) {
+      return {
+        success: false,
+        error: "Could not verify migration status",
+      };
+    }
+
+    if (!verificationResult.isComplete) {
+      return {
+        success: false,
+        error: `Cannot skip migration: ${verificationResult.incompleteCount} records still need migration`,
+      };
+    }
+
+    await completeUpdate();
+    return { success: true };
+  } catch (error) {
+    console.error("Error in skipImageMigration:", error);
+    return { success: false, error: error.message };
   }
 }

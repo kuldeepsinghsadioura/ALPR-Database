@@ -45,3 +45,13 @@ CREATE TRIGGER plate_reads_count_trigger
 AFTER INSERT OR DELETE ON plate_reads
 FOR EACH ROW
 EXECUTE FUNCTION update_plate_occurrence_count();
+
+-- Tiny table for clerical stuff
+CREATE TABLE devmgmt (
+    id SERIAL PRIMARY KEY,
+    update1 BOOLEAN DEFAULT FALSE
+);
+
+INSERT INTO devmgmt (id, update1)
+SELECT 1, false
+WHERE NOT EXISTS (SELECT 1 FROM devmgmt);
