@@ -24,8 +24,6 @@ export default function VersionAlert() {
   const [isAlertVisible, setIsAlertVisible] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
-  const [changelog, setChangelog] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -89,7 +87,6 @@ export default function VersionAlert() {
 
   const handleDismiss = () => {
     try {
-      // Save dismissal time and version to localStorage
       localStorage.setItem(
         "versionAlertDismissed",
         JSON.stringify({
@@ -160,66 +157,94 @@ export default function VersionAlert() {
             <DialogTitle>Update Instructions</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            <div>
-              <p className="mb-8">
-                In the same directory you originally deployed from:
-              </p>
-              <p className="mb-2">
-                1. Get the migrations.sql file to update your database schema:
-              </p>
-              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
-                curl -O
-                https://raw.githubusercontent.com/algertc/ALPR-Database/main/migrations.sql
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                This file should be in the same directory as your
-                docker-compose.yml file. Alternatively, you can
-                <a
-                  href="https://github.com/algertc/ALPR-Database/blob/main/migrations.sql"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 ml-1"
-                >
-                  download it manually from GitHub
-                </a>
-                .
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2">
-                2. Check for updates to the
-                <a
-                  href="https://github.com/algertc/ALPR-Database/blob/main/docker-compose.yml"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 ml-1"
-                >
-                  docker-compose.yml
-                </a>
-                {"  "}
-                file on GitHub. Ensure your file is up-to-date with the latest
-                version.
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2">
-                2. Restart the application with the latest version:
+            {/* Option 1: Automatic Update */}
+            <div className="space-y-4 border rounded-lg p-4">
+              <h3 className="text-lg font-semibold">
+                Option 1: Automatic Update (Linux/MacOS only)
+              </h3>
+              <p className="text-sm">
+                In the same directory you originally deployed from, run these
+                commands to download and execute the automatic update script:
               </p>
               <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
-                docker compose pull
+                curl -O
+                https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.sh
+              </div>
+              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
+                chmod +x update.sh
               </div>
               <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
-                docker compose up -d
+                ./update.sh
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Run these commands in the directory containing your
-                docker-compose.yml file.
+              <p className="text-sm text-muted-foreground">
+                Follow the on-screen instructions after running the update
+                script.
               </p>
             </div>
 
-            <p className="text-sm text-muted-foreground mt-4">
+            {/* Option 2: Manual Update */}
+            <div className="space-y-4 border rounded-lg p-4">
+              <h3 className="text-lg font-semibold">Option 2: Manual Update</h3>
+              <div>
+                <p className="text-sm">
+                  In the same directory you originally deployed from:
+                </p>
+                <p className="mb-2">
+                  1. Get the migrations.sql file to update your database schema:
+                </p>
+                <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+                  curl -O
+                  https://raw.githubusercontent.com/algertc/ALPR-Database/main/migrations.sql
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  This file should be in the same directory as your
+                  docker-compose.yml file. Alternatively, you can
+                  <a
+                    href="https://github.com/algertc/ALPR-Database/blob/main/migrations.sql"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 ml-1"
+                  >
+                    download it manually from GitHub
+                  </a>
+                  .
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2">
+                  2. Check for updates to the
+                  <a
+                    href="https://github.com/algertc/ALPR-Database/blob/main/docker-compose.yml"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 ml-1"
+                  >
+                    docker-compose.yml
+                  </a>
+                  {"  "}
+                  file on GitHub. Ensure your file is up-to-date with the latest
+                  version.
+                </p>
+              </div>
+              <p className="mb-2">
+                3. Create the a directory called "storage" in the same location
+                as your auth and config directories.
+              </p>
+              <div>
+                <p className="mb-2">
+                  4. Restart the application with the latest version:
+                </p>
+                <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
+                  docker compose pull
+                </div>
+                <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+                  docker compose up -d
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground mt-2">
               Note: Your existing data will be preserved during the update.
             </p>
           </div>
@@ -232,36 +257,38 @@ export default function VersionAlert() {
             <DialogTitle>Changelog</DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[60vh] pr-4">
-            {!versionInfo?.changelog ? (
+            {!versionInfo || !versionInfo.changelog ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-muted-foreground">No changelog available</p>
               </div>
             ) : (
               <div className="space-y-6">
-                {versionInfo.changelog.map((version) => (
-                  <div key={version.version} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">
-                        Version {version.version}
-                      </h3>
-                      {version.version === versionInfo.current && (
-                        <Badge variant="outline" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
+                {Array.isArray(versionInfo.changelog) &&
+                  versionInfo.changelog.map((version) => (
+                    <div key={version.version} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">
+                          Version {version.version}
+                        </h3>
+                        {version.version === versionInfo.current && (
+                          <Badge variant="outline" className="text-xs">
+                            Current
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {version.date}
+                      </p>
+                      <ul className="space-y-1 list-disc list-inside">
+                        {version.changes &&
+                          version.changes.map((change, index) => (
+                            <li key={index} className="text-sm">
+                              {change}
+                            </li>
+                          ))}
+                      </ul>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {version.date}
-                    </p>
-                    <ul className="space-y-1 list-disc list-inside">
-                      {version.changes.map((change, index) => (
-                        <li key={index} className="text-sm">
-                          {change}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </ScrollArea>
