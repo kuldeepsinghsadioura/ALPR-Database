@@ -107,10 +107,12 @@ log_info "Downloading required files..."
 COMPOSE_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/docker-compose.yml"
 SCHEMA_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/schema.sql"
 MIGRATIONS_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/migrations.sql"
+UPDATE_URL="https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.sh"
 
 download_file "$COMPOSE_URL" "docker-compose.yml"
 download_file "$SCHEMA_URL" "schema.sql"
 download_file "$MIGRATIONS_URL" "migrations.sql"
+download_file "$UPDATE_URL" "update.sh"
 
 log_success "Files downloaded successfully!"
 
@@ -119,14 +121,14 @@ log_info "Configure your installation (Leave blank and hit enter to use default)
 echo ""
 
 echo -en "${BOLD}Create an admin password to log into the web app${NC} (You can change this later): "
-read -s ADMIN_PASSWORD
+read -s ADMIN_PASSWORD </dev/tty
 echo
 echo
 
 echo ""
 
 echo -en "${BOLD}Create a secure password for your SQL database${NC} (You won't need to remember this): "
-read -s DB_PASSWORD
+read -s DB_PASSWORD </dev/tty
 echo
 echo
 
@@ -143,7 +145,7 @@ echo "9) Other - manual entry (Must be an official TZ formatted as COUNTRY/REGIO
 
 while true; do
     echo -en "${BOLD}Enter a number from the list above (1-9):${NC} "
-    read tz_choice
+    read tz_choice </dev/tty
     case $tz_choice in
         1) TZ="America/Los_Angeles"; break;;
         2) TZ="America/Denver"; break;;
@@ -153,7 +155,8 @@ while true; do
         6) TZ="Europe/Paris"; break;;
         7) TZ="Asia/Tokyo"; break;;
         8) TZ="Australia/Sydney"; break;;
-        9) read -p "Enter your timezone (e.g., America/Los_Angeles): " TZ
+        9) echo -en "Enter your timezone (e.g., America/Los_Angeles): "
+           read TZ </dev/tty
            if [ -n "$TZ" ]; then
                break
            else
@@ -193,7 +196,7 @@ is_port_in_use() {
 # Ensure port is available
 while true; do
     echo -en "${BOLD}Enter the port you want to expose the application on (default: 3000):${NC} "
-    read APP_PORT
+    read APP_PORT </dev/tty
     APP_PORT=${APP_PORT:-3000}
     
     if ! [[ "$APP_PORT" =~ ^[0-9]+$ ]]; then
@@ -219,7 +222,7 @@ echo ""
 # Allow alternate expose port to route to internal postgres
 while true; do
     echo -en "Alternate Postgres port ${BOLD}(Only recommended if you already have a database running on port 5432 on this host, otherwise hit enter to continue.):${NC} "
-    read DB_PORT 
+    read DB_PORT </dev/tty
     DB_PORT=${DB_PORT:-5432}
     
     if ! [[ "$DB_PORT" =~ ^[0-9]+$ ]]; then

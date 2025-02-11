@@ -67,7 +67,7 @@ You will need the following installed on your system.
 
 <br>
 
-### Linux/Mac
+### Linux/MacOS
 
 Create a new directory wherever you would like to store your ALPR data. Enter the directory in your terminal and paste in the below command. After that, everything will be set up automatically!
 
@@ -79,6 +79,16 @@ Or, if you prefer:
 
 ```
 wget -qO- https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
+```
+
+<br>
+
+#### :bangbang: Note for Linux:
+
+If your user is not in the Docker group, you will need to run with sudo using the command below:
+
+```
+curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | sudo bash
 ```
 
 <br>
@@ -96,7 +106,7 @@ Running the install script on Windows may require an additional step. I will mak
 
 <br>
 
-The command is the same:
+Using one of these shells, create a new directory on your Windows file system. Cd into the directory and paste in the below command. After that, everything will be set up automatically!
 
 ```
 curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
