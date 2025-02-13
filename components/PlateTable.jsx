@@ -601,17 +601,19 @@ export default function PlateTable({
   };
 
   return (
-    <Card className="rounded-md">
-      <CardContent className="py-4">
+    <div className="">
+      <div className="py-4">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
           <div className="flex items-center justify-start space-x-2">
             <div className="flex items-center space-x-2">
-              <Search className="text-gray-400 dark:text-gray-500" />
               <Input
                 placeholder="Search plates..."
+                icon={
+                  <Search className="text-gray-400 dark:text-gray-500 absolute left-1.5 top-1/2 transform -translate-y-1/2 h-4 w-4" />
+                }
                 value={searchInput}
                 onChange={handleSearchChange}
-                className="w-64"
+                className="w-64 "
               />
               <div className="flex items-center border rounded-md px-3 py-2 bg-background">
                 <div className="flex items-center space-x-2">
@@ -622,7 +624,7 @@ export default function PlateTable({
                   />
                   <label
                     htmlFor="fuzzy-search"
-                    className="text-sm cursor-pointer"
+                    className="text-sm cursor-pointer text-nowrap"
                   >
                     Fuzzy Search
                   </label>
@@ -794,9 +796,9 @@ export default function PlateTable({
           </div>
         </div>
 
-        <div className="rounded-md border dark:border-gray-700">
+        <div className="rounded-md border dark:bg-[#0e0e10]">
           <Table>
-            <TableHeader>
+            <TableHeader className="dark:bg-[#161618]">
               <TableRow>
                 {/* <TableHead>Vehicle Description</TableHead> */}
                 <TableHead className="w-24">Image</TableHead>
@@ -1150,7 +1152,7 @@ export default function PlateTable({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </CardContent>
+      </div>
 
       <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>
         <DialogContent>
@@ -1313,6 +1315,6 @@ export default function PlateTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }

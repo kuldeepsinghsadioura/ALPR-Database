@@ -27,7 +27,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-neutral-950`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <Suspense fallback={<DashboardSkeleton />}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

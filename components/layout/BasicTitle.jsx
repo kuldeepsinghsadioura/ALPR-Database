@@ -2,7 +2,7 @@ import { Radio } from "lucide-react";
 
 export default function BasicTitle({ title, recording, children }) {
   return (
-    <div className="flex min-h-screen flex-col py-4 px-6">
+    <div className="flex min-h-screen flex-col p-5">
       <header className="border-b backdrop-blur">
         <div className="container flex h-14 items-center">
           <div className="flex items-center space-x-2">
