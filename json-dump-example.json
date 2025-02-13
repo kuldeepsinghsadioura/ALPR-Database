@@ -1,0 +1,77 @@
+[
+  {
+    "api": "alpr",
+    "found": {
+      "success": true,
+      "processMs": 65,
+      "inferenceMs": 62,
+      "predictions": [
+        {
+          "confidence": 0.9400946199893951,
+          "label": "Plate: SGX 7923G",
+          "plate": "SGX 7923G",
+          "x_min": 195,
+          "y_min": 169,
+          "x_max": 298,
+          "y_max": 233,
+          "plate_annotation": "0 0.504090 0.598214 0.210634 0.190476",
+          "ocr_annotation": [
+            [
+              [
+                [10.0, 0.0],
+                [89.0, 5.0],
+                [86.0, 37.0],
+                [8.0, 31.0]
+              ],
+              ["SGX", 0.9637429118156433]
+            ],
+            [
+              [
+                [0.0, 22.0],
+                [102.0, 25.0],
+                [101.0, 60.0],
+                [0.0, 57.0]
+              ],
+              ["7923G", 0.916446328163147]
+            ]
+          ],
+          "valid_ocr_annotation": true
+        },
+        {
+          "confidence": 0.9081299901008606,
+          "label": "Plate: HF7499",
+          "plate": "HF7499",
+          "x_min": 1705,
+          "y_min": 398,
+          "x_max": 1827,
+          "y_max": 483,
+          "plate_annotation": "1 0.919792 0.407870 0.063542 0.078704",
+          "ocr_annotation": [
+            [
+              [
+                [10.0, 0.0],
+                [89.0, 5.0],
+                [86.0, 37.0],
+                [8.0, 31.0]
+              ],
+              ["HF7499", 0.7667529218456391]
+            ]
+          ],
+
+          "valid_ocr_annotation": true
+        }
+      ],
+
+      "message": "Found Plate: SGX 7923G",
+      "moduleId": "ALPR",
+      "moduleName": "License Plate Reader",
+      "code": 200,
+      "command": "alpr",
+      "requestId": "ad98962a-3db6-4d61-978f-e268548daf0f",
+      "inferenceDevice": "GPU",
+      "analysisRoundTripMs": 69,
+      "processedBy": "localhost",
+      "timestampUTC": "Sun 09 Feb 2025 03:46:58 GMT"
+    }
+  }
+]

@@ -10,8 +10,14 @@ ALTER TABLE IF EXISTS public.plate_reads
     ADD COLUMN IF NOT EXISTS camera_name character varying(25),
     ADD COLUMN IF NOT EXISTS image_path varchar(255),
     ADD COLUMN IF NOT EXISTS thumbnail_path varchar(255),
-    ADD COLUMN IF NOT EXISTS bi_path varchar(100);
-     
+    ADD COLUMN IF NOT EXISTS bi_path varchar(100),
+    ADD COLUMN IF NOT EXISTS plate_annotation varchar(255),
+    ADD COLUMN IF NOT EXISTS crop_coordinates int[],
+    ADD COLUMN IF NOT EXISTS ocr_annotation jsonb,
+    ADD COLUMN IF NOT EXISTS confidence decimal,
+    ADD COLUMN IF NOT EXISTS bi_zone varchar(30),
+    ADD COLUMN IF NOT EXISTS validated boolean DEFAULT false;
+
 -- Modify known_plates
 ALTER TABLE IF EXISTS public.known_plates 
     ADD COLUMN IF NOT EXISTS ignore BOOLEAN DEFAULT FALSE;

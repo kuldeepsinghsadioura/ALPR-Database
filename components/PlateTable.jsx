@@ -20,11 +20,14 @@ import {
   ChevronDown,
   ChevronsUpDown,
   Pencil,
+  ZoomIn,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+
 import {
   Select,
   SelectContent,
@@ -73,6 +76,7 @@ import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import PlateImage from "@/components/PlateImage";
 import { getSettings } from "@/app/actions";
+import ImageViewer from "./ImageViewer";
 
 const SortButton = ({ label, field, sort, onSort }) => {
   const isActive = sort.field === field;
@@ -128,6 +132,11 @@ export default function PlateTable({
   const [isLive, setIsLive] = useState(true);
   const [prefetchedImages, setPrefetchedImages] = useState(new Set());
   const [biHost, setBiHost] = useState(null);
+
+  //zoom/crop stuff
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef(null);
 
   const router = useRouter();
 
@@ -198,6 +207,8 @@ export default function PlateTable({
     const plateIndex = data.findIndex((p) => p.id === plate.id);
     let imageUrl;
     let thumbnailUrl;
+    let bi_url = null;
+    let crop_coordinates = null;
     if (plate.image_path) {
       // imageUrl = `/images/images/${plate.image_path.replace(/^images\//, "")}`;
       imageUrl = `/images/${plate.image_path}`;
@@ -211,13 +222,27 @@ export default function PlateTable({
       return; // No image available
     }
 
+    if (plate.bi_path) {
+      bi_url = plate.bi_path;
+    }
+
+    if (plate.crop_coordinates) {
+      crop_coordinates = plate.crop_coordinates;
+    }
+
     setSelectedIndex(plateIndex);
     setSelectedImage({
       url: imageUrl,
       thumbnail: thumbnailUrl,
       plateNumber: plate.plate_number,
       id: plate.id,
+      bi_path: bi_url,
+      crop_coordinates: plate.crop_coordinates,
     });
+
+    // Reset zoom and position when opening new image
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const handleDownloadImage = async () => {
@@ -389,6 +414,24 @@ export default function PlateTable({
       hourTo: null,
       camera: null,
     });
+  };
+
+  const formatConfidence = (confidence) => {
+    if (
+      confidence === null ||
+      confidence === undefined ||
+      isNaN(Number(confidence))
+    ) {
+      return "N/A";
+    }
+
+    const numericConfidence = Number(confidence); // Ensure it's a number
+
+    if (numericConfidence.toFixed(0) == 100) {
+      return "100%";
+    }
+
+    return `${numericConfidence * 100}%`; // Keep formatting consistent
   };
 
   const HourRangeFilter = ({ timeFormat, value = {}, onChange }) => {
@@ -757,7 +800,8 @@ export default function PlateTable({
               <TableRow>
                 {/* <TableHead>Vehicle Description</TableHead> */}
                 <TableHead className="w-24">Image</TableHead>
-                <TableHead className="w-32">Plate Number</TableHead>
+                <TableHead className="w-16">Plate Number</TableHead>
+                <TableHead className="w-28">%</TableHead>
                 <TableHead className="w-24">
                   <SortButton
                     label="Occurrences"
@@ -811,11 +855,12 @@ export default function PlateTable({
                     >
                       {plate.plate_number}
                       {plate.known_name && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400 font-sans">
+                        <div className="text-gray-500 dark:text-gray-400 font-sans">
                           {plate.known_name}
                         </div>
                       )}
                     </TableCell>
+                    <TableCell>{formatConfidence(plate.confidence)}</TableCell>
                     {/* <TableCell>{plate.vehicle_description}</TableCell> */}
                     <TableCell>{plate.occurrence_count}</TableCell>
                     <TableCell>
@@ -918,7 +963,7 @@ export default function PlateTable({
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        {biHost && plate.bi_path && (
+                        {biHost && plate.bi_path ? (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -931,7 +976,12 @@ export default function PlateTable({
                           >
                             <ExternalLink className="h-4 w-4" />
                           </Button>
+                        ) : (
+                          <Button variant="ghost" size="icon" disabled>
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
                         )}
+
                         <Button
                           variant="ghost"
                           size="icon"
@@ -995,13 +1045,19 @@ export default function PlateTable({
               </DialogTitle>
             </DialogHeader>
             <div className="relative w-full h-[60vh]">
-              {selectedImage && (
+              {/* {selectedImage && (
                 <NextImage
                   src={selectedImage.url}
                   priority={true}
                   alt={`License plate ${selectedImage.plateNumber}`}
                   fill
                   className="object-contain"
+                />
+              )} */}
+              {selectedImage && (
+                <ImageViewer
+                  image={selectedImage}
+                  onClose={() => setSelectedImage(null)}
                 />
               )}
             </div>
@@ -1066,14 +1122,21 @@ export default function PlateTable({
                   </DropdownMenu>
                 </div>
                 <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleOpenInNewTab}
-                    className="gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Open in New Tab
-                  </Button>
+                  {biHost && selectedImage?.bi_path && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        window.open(
+                          `http://${biHost}/${selectedImage.bi_path}`,
+                          "_blank"
+                        )
+                      }
+                      className="gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in Blue Iris
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     onClick={handleDownloadImage}
