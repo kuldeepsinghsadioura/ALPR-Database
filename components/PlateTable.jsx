@@ -503,13 +503,13 @@ export default function PlateTable({
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 dark:bg-[#161618]">
             <Clock className="h-4 w-4" />
             {getTimeRangeLabel()}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-4">
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             <div className="space-y-2">
               <h4 className="font-medium">Filter by Hour</h4>
               <div className="grid grid-cols-2 gap-4">
@@ -613,10 +613,10 @@ export default function PlateTable({
                 }
                 value={searchInput}
                 onChange={handleSearchChange}
-                className="w-64 "
+                className="w-64 dark:bg-[#161618]"
               />
-              <div className="flex items-center border rounded-md px-3 py-2 bg-background">
-                <div className="flex items-center space-x-2">
+              <div className="flex items-center border rounded-md px-3 py-2 dark:bg-[#161618]">
+                <div className="flex items-center space-x-2 ">
                   <Switch
                     checked={filters.fuzzySearch}
                     onCheckedChange={handleFuzzySearchToggle}
@@ -647,7 +647,7 @@ export default function PlateTable({
               </div>
             </div>
             <Select value={filters.tag} onValueChange={handleTagChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] dark:bg-[#161618]">
                 <SelectValue placeholder="Filter by tag" />
               </SelectTrigger>
               <SelectContent>
@@ -669,7 +669,7 @@ export default function PlateTable({
               value={filters.cameraName || "all"}
               onValueChange={handleCameraChange}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] dark:bg-[#161618]">
                 <SelectValue placeholder="Filter by camera" />
               </SelectTrigger>
               <SelectContent>
@@ -684,7 +684,7 @@ export default function PlateTable({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 dark:bg-[#161618]">
                   <CalendarDays className="h-4 w-4" />
                   {filters.dateRange.from ? (
                     filters.dateRange.to ? (
@@ -742,8 +742,8 @@ export default function PlateTable({
                 })
               }
             />
-            <div className="flex items-center border rounded-md px-3 py-2 bg-background">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center border rounded-md px-3 py-2 dark:bg-[#161618]">
+              <div className="flex items-center space-x-2 ">
                 <Switch
                   checked={isLive}
                   onCheckedChange={setIsLive}
@@ -781,7 +781,7 @@ export default function PlateTable({
               value={pagination.pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="w-[80px]">
+              <SelectTrigger className="w-[80px] dark:bg-[#161618]">
                 <SelectValue>{pagination.pageSize}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -1022,6 +1022,7 @@ export default function PlateTable({
             <Button
               variant="outline"
               size="sm"
+              className="dark:bg-[#161618]"
               onClick={pagination.onNextPage}
               disabled={
                 pagination.page * pagination.pageSize >= pagination.total

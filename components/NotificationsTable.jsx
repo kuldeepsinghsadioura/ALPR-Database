@@ -35,7 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Trash2, Bell } from "lucide-react";
+import { Trash2, Bell, Search } from "lucide-react";
 
 const priorityOptions = [
   { value: -2, label: "Lowest", description: "No notification or alert" },
@@ -151,14 +151,17 @@ export function NotificationsTable({ initialData }) {
   };
 
   return (
-    <Card>
-      <CardContent className="py-4">
+    <div className="flex flex-col gap-4">
+      <div className="py-4 ">
         <form onSubmit={handleAdd} className="flex gap-2 mb-4">
           <Input
             placeholder="Enter plate number..."
             value={newPlate}
             onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
-            className="w-64"
+            className="w-80 dark:bg-[#0e0e10]"
+            icon={
+              <Search size={16} className="text-gray-400 dark:text-gray-500 " />
+            }
           />
           <Button type="submit">Create Notification</Button>
         </form>
@@ -177,7 +180,7 @@ export function NotificationsTable({ initialData }) {
           </Alert>
         )}
 
-        <div className="rounded-md border dark:border-gray-700">
+        <div className="rounded-md border dark:bg-[#0e0e10] px-2">
           <Table>
             <TableHeader>
               <TableRow>
@@ -287,7 +290,7 @@ export function NotificationsTable({ initialData }) {
             </TableBody>
           </Table>
         </div>
-      </CardContent>
+      </div>
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
@@ -311,6 +314,6 @@ export function NotificationsTable({ initialData }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }

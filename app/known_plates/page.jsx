@@ -11,7 +11,12 @@ export default async function KnownPlatesPage() {
 
   return (
     <DashboardLayout>
-      <BasicTitle title="Known Plates">
+      <BasicTitle
+        title="Known Plates"
+        subtitle={
+          "Store information and keep track of vehicles you're familiar with"
+        }
+      >
         {knownPlates.length > 0 ? (
           <KnownPlatesTable initialData={knownPlates} />
         ) : (

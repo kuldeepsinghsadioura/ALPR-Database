@@ -13,11 +13,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { getTags, addTag, removeTag, updateTag } from "@/app/actions";
 import DashboardLayout from "@/components/layout/MainLayout";
 import TitleNavbar from "@/components/layout/TitleNav";
+import { cn } from "@/lib/utils";
 
 const TagDialog = ({
   isOpen,
@@ -97,6 +108,8 @@ const ElegantTagManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTag, setEditingTag] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState(null);
 
   useEffect(() => {
     const loadTags = async () => {
@@ -137,25 +150,35 @@ const ElegantTagManagement = () => {
     }
   };
 
-  const onDeleteTag = async (tagName) => {
+  const handleDeleteClick = (tag) => {
+    setTagToDelete(tag);
+    setDeleteDialogOpen(true);
+  };
+
+  const onDeleteTag = async () => {
+    if (!tagToDelete) return;
+
     try {
       const formData = new FormData();
-      formData.append("name", tagName);
+      formData.append("name", tagToDelete.name);
       const result = await removeTag(formData);
       if (result.success) {
-        setTags(tags.filter((tag) => tag.name !== tagName));
+        setTags(tags.filter((tag) => tag.name !== tagToDelete.name));
       }
     } catch (error) {
       console.error("Failed to delete tag:", error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setTagToDelete(null);
     }
   };
 
   return (
     <DashboardLayout>
       <TitleNavbar title="Plate Database">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Tags</h3>
+        <ScrollArea className="h-[300px] w-full rounded-md border p-4 dark:bg-[#0e0e10]">
+          <div className="flex justify-between pb-4 border-b">
+            <h3 className="text-xl font-semibold">Tags</h3>
             <Dialog
               open={isCreateDialogOpen}
               onOpenChange={setIsCreateDialogOpen}
@@ -176,47 +199,45 @@ const ElegantTagManagement = () => {
             </Dialog>
           </div>
 
-          <ScrollArea className="h-[300px] w-full rounded-md border p-4">
-            <div className="flex flex-wrap gap-3">
-              {tags?.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="text-sm py-2 px-4 flex items-center space-x-2 hover:shadow-sm transition-shadow"
-                >
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: tag.color }}
-                  />
-                  <span>{tag.name}</span>
-                  <div className="flex items-center space-x-1 ml-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 p-0 hover:bg-secondary rounded-full"
-                      onClick={() => {
-                        setEditingTag(tag);
-                        setIsEditDialogOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-3 w-3" />
-                      <span className="sr-only">Edit {tag.name} tag</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
-                      onClick={() => onDeleteTag(tag.name)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Delete {tag.name} tag</span>
-                    </Button>
-                  </div>
-                </Badge>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
+          <div className="flex flex-wrap gap-3 pt-8">
+            {tags?.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="secondary"
+                className="text-sm py-2 px-4 flex items-center space-x-2 hover:shadow-sm transition-shadow"
+              >
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: tag.color }}
+                />
+                <span>{tag.name}</span>
+                <div className="flex items-center space-x-1 ml-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 p-0 hover:bg-secondary rounded-full"
+                    onClick={() => {
+                      setEditingTag(tag);
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    <span className="sr-only">Edit {tag.name} tag</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
+                    onClick={() => handleDeleteClick(tag)}
+                  >
+                    <X className="h-3 w-3" />
+                    <span className="sr-only">Delete {tag.name} tag</span>
+                  </Button>
+                </div>
+              </Badge>
+            ))}
+          </div>
+        </ScrollArea>
 
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <TagDialog
@@ -230,6 +251,26 @@ const ElegantTagManagement = () => {
             mode="edit"
           />
         </Dialog>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the tag "{tagToDelete?.name}". This
+                action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={onDeleteTag}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TitleNavbar>
     </DashboardLayout>
   );

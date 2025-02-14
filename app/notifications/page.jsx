@@ -11,7 +11,12 @@ export default async function NotificationsPage() {
 
   return (
     <DashboardLayout>
-      <BasicTitle title="Push Notifications">
+      <BasicTitle
+        title="Push Notifications"
+        subtitle={
+          "Configure push notifications to receive alerts on recognition of specific plates"
+        }
+      >
         <NotificationsTable initialData={notificationPlates} />
       </BasicTitle>
     </DashboardLayout>

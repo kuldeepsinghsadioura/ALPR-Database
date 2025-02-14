@@ -50,7 +50,13 @@ export default async function LivePlates(props) {
 
   return (
     <DashboardLayout>
-      <BasicTitle title="ALPR Recognition Feed" recording={true}>
+      <BasicTitle
+        title="ALPR Recognition Feed"
+        recording={true}
+        subtitle={
+          "Monitor and manage the traffic on your ALPR system in real time."
+        }
+      >
         <Suspense fallback={<LiveFeedSkeleton />}>
           <PlateTableWrapper
             data={platesRes.data}

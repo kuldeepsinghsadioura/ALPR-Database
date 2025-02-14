@@ -450,18 +450,20 @@ export default function PlateTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center space-x-2">
-        <div className="flex items-center space-x-2">
-          <Search className="text-gray-400 dark:text-gray-500" />
+      <div className="flex justify-between items-center space-x-2 ">
+        <div className="flex items-center space-x-2 ">
           <Input
             placeholder="Search plates, names, or notes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
+            className="w-64 dark:bg-[#161618]"
+            icon={
+              <Search size={16} className="text-gray-400 dark:text-gray-500 " />
+            }
           />
 
           <Select value={selectedTag} onValueChange={setSelectedTag}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className=" dark:bg-[#161618]">
               <SelectValue placeholder="Filter by tag" />
             </SelectTrigger>
             <SelectContent>
@@ -497,7 +499,7 @@ export default function PlateTable() {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-[240px] justify-start text-left font-normal"
+                className="w-[240px] justify-start text-left font-normal dark:bg-[#161618]"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {selectedDateRange &&
@@ -537,13 +539,13 @@ export default function PlateTable() {
               </Button>
             )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <span className="text-sm text-muted-foreground">Show</span>
           <Select
             value={pageSize.toString()}
             onValueChange={handlePageSizeChange}
           >
-            <SelectTrigger className="w-[80px]">
+            <SelectTrigger className="w-[80px] dark:bg-[#161618]">
               <SelectValue>{pageSize}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -557,7 +559,7 @@ export default function PlateTable() {
           <span className="text-sm text-muted-foreground">per page</span>
         </div>
       </div>
-      <div className="rounded-md border dark:border-gray-700">
+      <div className="rounded-md border dark:bg-[#0e0e10]">
         <Table>
           <TableHeader>
             <TableRow>
