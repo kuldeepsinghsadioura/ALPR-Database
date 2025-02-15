@@ -176,6 +176,7 @@ export async function POST(req) {
         if (aiData?.found?.predictions) {
           // Get all plate annotations for this batch
           const allPlateAnnotations = aiData.found.predictions
+            .filter((pred) => pred.valid_ocr_annotation)
             .map((pred) => pred.plate_annotation)
             .filter(Boolean)
             .join("&");
@@ -190,16 +191,24 @@ export async function POST(req) {
               prediction.x_max,
               prediction.y_max,
             ],
-            ocr_annotation: {
-              ocr_annotation: prediction.ocr_annotation,
-            },
-            plate_annotation: allPlateAnnotations,
+            ...(prediction.valid_ocr_annotation && {
+              ocr_annotation: {
+                ocr_annotation: prediction.ocr_annotation,
+              },
+              plate_annotation: allPlateAnnotations,
+            }),
           }));
         }
       } catch (error) {
-        console.error("Error processing AI dump:", error);
+        console.error(
+          "Malformed data from Blue Iris. Your JSON macro is missing the required properties from codeproject. Please update your AI to the newest ALPR model or use plate instead of json macro.",
+          error
+        );
         return Response.json(
-          { error: "Invalid AI dump format" },
+          {
+            error:
+              "Outdated AI. Update Model in CodeProject or use plate or memo instead of json",
+          },
           { status: 400 }
         );
       }
