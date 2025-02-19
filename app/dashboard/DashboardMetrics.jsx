@@ -317,7 +317,7 @@ export default function DashboardMetrics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="h-full md:max-h-[600px] 2xl:max-h-[800px] flex flex-col">
+        <Card className="h-full md:max-h-[600px] 2xl:max-h-[800px] flex flex-col dark:bg-[#0e0e10]">
           <CardHeader>
             <CardTitle>Time Distribution</CardTitle>
             <CardDescription>
@@ -448,7 +448,7 @@ export default function DashboardMetrics() {
           </CardFooter>
         </Card>
 
-        <Card className="md:max-h-[600px] 2xl:max-h-[800px] overflow-auto">
+        <Card className="md:max-h-[600px] 2xl:max-h-[800px] overflow-auto dark:bg-[#0e0e10]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Top 10 Plates
@@ -610,8 +610,8 @@ export default function DashboardMetrics() {
 
 function MetricCard({ title, value, icon, description, loading }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="dark:bg-[#0e0e10]">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 ">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon}
       </CardHeader>
