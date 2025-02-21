@@ -75,3 +75,6 @@ CREATE TABLE IF NOT EXISTS devmgmt (
 INSERT INTO devmgmt (id, update1)
 SELECT 1, false
 WHERE NOT EXISTS (SELECT 1 FROM devmgmt);
+
+ALTER TABLE IF EXISTS public.devmgmt
+    ADD COLUMN IF NOT EXISTS training_last_record INTEGER DEFAULT 0;

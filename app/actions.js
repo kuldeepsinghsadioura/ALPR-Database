@@ -66,10 +66,12 @@ import {
 } from "@/lib/auth";
 import { formatTimeRange } from "@/lib/utils";
 import path from "path";
+import os from "os";
 import fs from "fs/promises";
 import split2 from "split2";
 import fileStorage from "@/lib/fileStorage";
 import { getLocalVersionInfo } from "@/lib/version";
+import TrainingDataGenerator from "@/lib/training";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -710,6 +712,13 @@ export async function updateSettings(formData) {
         host: formData.get("bihost"),
       };
     }
+    if (updateIfExists("trainingEnabled") || updateIfExists("trainingName")) {
+      newConfig.training = {
+        ...currentConfig.training,
+        enabled: formData.get("trainingEnabled") === "true",
+        name: formData.get("trainingName"),
+      };
+    }
     const result = await saveConfig(newConfig);
     if (!result.success) {
       return { success: false, error: result.error };
@@ -1082,5 +1091,23 @@ export async function skipImageMigration() {
   } catch (error) {
     console.error("Error in skipImageMigration:", error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function generateTrainingData() {
+  try {
+    const tmpDir = path.join(os.tmpdir(), "alpr-training-" + Date.now());
+    const generator = new TrainingDataGenerator(tmpDir);
+    await generator.generateAndUpload();
+
+    return {
+      success: true,
+      ocrCount: generator.stats.ocr.totalCount,
+      licensePlateCount: generator.stats.licensePlate.totalCount,
+      message: "Training data generated and uploaded successfully",
+    };
+  } catch (error) {
+    console.error("Error generating training data:", error);
+    throw new Error(error.message || "Failed to generate training data");
   }
 }

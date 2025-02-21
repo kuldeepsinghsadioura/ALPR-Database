@@ -491,7 +491,7 @@ export default function DashboardMetrics() {
                               )}
                             </div>
                           </HoverCardTrigger>
-                          <HoverCardContent className="w-96">
+                          <HoverCardContent className="w-96 rounded-lg">
                             <div className="space-y-4">
                               <div>
                                 <h4 className="font-semibold mb-1">

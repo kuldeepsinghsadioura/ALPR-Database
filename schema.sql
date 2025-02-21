@@ -129,7 +129,15 @@ CREATE TABLE public.plate_reads (
     thumbnail_path VARCHAR(255),
     "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    camera_name character varying(30)
+    camera_name character varying(30),
+    image_path varchar(255),
+    bi_path varchar(100),
+    plate_annotation varchar(255),
+    crop_coordinates int[],
+    ocr_annotation jsonb,
+    confidence decimal,
+    bi_zone varchar(30),
+    validated boolean DEFAULT false
 );
 
 
