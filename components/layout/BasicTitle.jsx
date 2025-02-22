@@ -7,8 +7,8 @@ export default function BasicTitle({
   children,
 }) {
   return (
-    <div className="flex min-h-screen flex-col p-6">
-      <header className="border-b backdrop-blur pb-4">
+    <div className="flex min-h-screen flex-col px-4 sm:p-6">
+      <header className="hidden sm:block border-b backdrop-blur pb-4">
         <div className="container flex h-14 items-center">
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-semibold">
@@ -24,7 +24,7 @@ export default function BasicTitle({
         )}
       </header>
       <div className="flex-1">
-        <div className="py-6">{children}</div>
+        <div className="sm:py-6">{children}</div>
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <aside className="flex flex-col justify-between h-screen bg-background border-r w-14">
+      <aside className="hidden sm:flex flex-col justify-between h-screen bg-background border-r w-14">
         <nav className="flex flex-col items-center pt-4 space-y-2">
           {topSidebarItems.map((item) => (
             <Tooltip key={item.href} delayDuration={0}>

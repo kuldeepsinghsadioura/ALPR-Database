@@ -503,7 +503,10 @@ export default function PlateTable({
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2 dark:bg-[#161618]">
+          <Button
+            variant="outline"
+            className="hidden sm:flex gap-2 dark:bg-[#161618]"
+          >
             <Clock className="h-4 w-4" />
             {getTimeRangeLabel()}
           </Button>
@@ -603,9 +606,9 @@ export default function PlateTable({
   return (
     <div className="">
       <div className="py-4">
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-          <div className="flex items-center justify-start space-x-2">
-            <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+          <div className="flex w-full flex-wrap items-start sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Input
                 placeholder="Search plates..."
                 icon={
@@ -613,9 +616,9 @@ export default function PlateTable({
                 }
                 value={searchInput}
                 onChange={handleSearchChange}
-                className="w-64 dark:bg-[#161618]"
+                className="w-[23rem] sm:w-64 h-9 dark:bg-[#161618]"
               />
-              <div className="flex items-center border rounded-md px-3 py-2 dark:bg-[#161618]">
+              <div className="hidden sm:flex items-center border rounded-md px-3 h-9 dark:bg-[#161618]">
                 <div className="flex items-center space-x-2 ">
                   <Switch
                     checked={filters.fuzzySearch}
@@ -647,7 +650,7 @@ export default function PlateTable({
               </div>
             </div>
             <Select value={filters.tag} onValueChange={handleTagChange}>
-              <SelectTrigger className="w-[180px] dark:bg-[#161618]">
+              <SelectTrigger className="w-[180px] h-9 dark:bg-[#161618]">
                 <SelectValue placeholder="Filter by tag" />
               </SelectTrigger>
               <SelectContent>
@@ -684,7 +687,10 @@ export default function PlateTable({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2 dark:bg-[#161618]">
+                <Button
+                  variant="outline"
+                  className="hidden sm:flex gap-2 dark:bg-[#161618]"
+                >
                   <CalendarDays className="h-4 w-4" />
                   {filters.dateRange.from ? (
                     filters.dateRange.to ? (
@@ -742,7 +748,7 @@ export default function PlateTable({
                 })
               }
             />
-            <div className="flex items-center border rounded-md px-3 py-2 dark:bg-[#161618]">
+            <div className="flex items-center border rounded-md px-3 h-9 dark:bg-[#161618]">
               <div className="flex items-center space-x-2 ">
                 <Switch
                   checked={isLive}
@@ -775,13 +781,13 @@ export default function PlateTable({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Show</span>
             <Select
               value={pagination.pageSize.toString()}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="w-[80px] dark:bg-[#161618]">
+              <SelectTrigger className="w-[6rem] dark:bg-[#161618]">
                 <SelectValue>{pagination.pageSize}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -792,7 +798,9 @@ export default function PlateTable({
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-sm text-muted-foreground">per page</span>
+            <span className="text-sm text-muted-foreground text-nowrap">
+              per page
+            </span>
           </div>
         </div>
 
@@ -802,9 +810,9 @@ export default function PlateTable({
               <TableRow>
                 {/* <TableHead>Vehicle Description</TableHead> */}
                 <TableHead className="w-24">Image</TableHead>
-                <TableHead className="w-16">Plate Number</TableHead>
-                <TableHead className="w-28">%</TableHead>
-                <TableHead className="w-24">
+                <TableHead className="w-28 sm:w-16">Plate Number</TableHead>
+                <TableHead className="w-28 hidden sm:table-cell">%</TableHead>
+                <TableHead className="w-24 hidden sm:table-cell">
                   <SortButton
                     label="Occurrences"
                     field="occurrence_count"
@@ -812,9 +820,11 @@ export default function PlateTable({
                     onSort={onSort}
                   />
                 </TableHead>
-                <TableHead className="w-40">Tags</TableHead>
-                <TableHead className="w-32">Camera</TableHead>
-                <TableHead className="w-40">
+                <TableHead className="w-18 sm:w-40">Tags</TableHead>
+                <TableHead className="w-32 hidden sm:table-cell">
+                  Camera
+                </TableHead>
+                <TableHead className="w-24 sm:w-40">
                   <SortButton
                     label="Timestamp"
                     field="timestamp"
@@ -822,7 +832,9 @@ export default function PlateTable({
                     onSort={onSort}
                   />
                 </TableHead>
-                <TableHead className="w-32 text-right">Actions</TableHead>
+                <TableHead className="w-32 text-right hidden sm:table-cell">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -862,9 +874,13 @@ export default function PlateTable({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>{formatConfidence(plate.confidence)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {formatConfidence(plate.confidence)}
+                    </TableCell>
                     {/* <TableCell>{plate.vehicle_description}</TableCell> */}
-                    <TableCell>{plate.occurrence_count}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {plate.occurrence_count}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
                         {plate.tags?.length > 0 ? (
@@ -898,20 +914,20 @@ export default function PlateTable({
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {plate.camera_name || (
                         <span className="text-sm text-gray-500 dark:text-gray-400 italic">
                           Unknown
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs sm:text-sm">
                       {new Date(plate.timestamp).toLocaleString("en-US", {
                         hour12: timeFormat === 12,
                       })}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <div className="flex space-x-2 justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -1065,8 +1081,8 @@ export default function PlateTable({
               )}
             </div>
             <DialogFooter>
-              <div className="flex justify-between space-x-2 w-full">
-                <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row justify-between w-full gap-4 sm:gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     onClick={() => {
