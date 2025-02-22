@@ -95,7 +95,7 @@ curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.s
 
 ### Windows
 
-Create a new directory wherever you would like to store your ALPR data. Open PowerShell with administrator priveleges and cd into your new install directory.
+Create a new directory wherever you would like to store your ALPR data. **Open PowerShell with administrator priveleges and cd into your new install directory.**
 
 Paste in the below commands. After that, everything will be set up automatically!
 
