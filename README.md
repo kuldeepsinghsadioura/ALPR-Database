@@ -71,13 +71,13 @@ You will need the following installed on your system.
 
 Create a new directory wherever you would like to store your ALPR data. Enter the directory in your terminal and paste in the below command. After that, everything will be set up automatically!
 
-```
+```bash
 curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
 ```
 
 Or, if you prefer:
 
-```
+```bash
 wget -qO- https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
 ```
 
@@ -87,7 +87,7 @@ wget -qO- https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.s
 
 If your user is not in the Docker group, you will need to run with sudo using the command below:
 
-```
+```bash
 curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | sudo bash
 ```
 
@@ -95,21 +95,12 @@ curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.s
 
 ### Windows
 
-Running the install script on Windows may require an additional step. I will make a Powershell version at some point, but as of now it is Bash. There are two popular options to use Bash in Windows:
+Create a new directory wherever you would like to store your ALPR data. Open PowerShell with administrator priveleges and cd into your new install directory.
 
-- **Git Bash**
+Paste in the below command. After that, everything will be set up automatically!
 
-  - Install [Git Desktop](https://git-scm.com/downloads) and use the included Git Bash command prompt.
-
-- **Windows Subsystem for Linux**
-  - Enable WSL, install a [Distro from the Windows Store](https://apps.microsoft.com/detail/9pdxgncfsczv?rtc=1&hl=en-US&gl=US), and run the script from the WSL shell.
-
-<br>
-
-Using one of these shells, create a new directory on your Windows file system. Cd into the directory and paste in the below command. After that, everything will be set up automatically!
-
-```
-curl -sSL https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.sh | bash
+```shell
+irm https://raw.githubusercontent.com/algertc/ALPR-Database/main/install.ps1 | iex
 ```
 
 <br>
