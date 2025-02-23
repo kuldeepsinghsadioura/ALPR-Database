@@ -130,7 +130,6 @@ CREATE TABLE public.plate_reads (
     "timestamp" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     camera_name character varying(30),
-    image_path varchar(255),
     bi_path varchar(100),
     plate_annotation varchar(255),
     crop_coordinates int[],
@@ -240,6 +239,20 @@ CREATE TABLE public.tags (
 
 
 ALTER TABLE public.tags OWNER TO postgres;
+
+CREATE TABLE public.devmgmt (
+    id SERIAL PRIMARY KEY,
+    update1 BOOLEAN DEFAULT FALSE,
+    training_last_record INTEGER DEFAULT 0
+);
+
+ALTER TABLE public.devmgmt OWNER TO postgres;
+
+INSERT INTO devmgmt (id, update1)
+SELECT 1, false
+WHERE NOT EXISTS (SELECT 1 FROM devmgmt);
+
+
 
 --
 -- Name: tags_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
