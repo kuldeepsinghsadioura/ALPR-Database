@@ -45,3 +45,7 @@ auth/auth.json
 
 #logs
 logs/app.log
+
+#storage
+
+storage/*
