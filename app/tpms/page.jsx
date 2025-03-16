@@ -368,7 +368,7 @@ export default function TPMSDashboard() {
             <Card className="shadow-sm dark:bg-[#0e0e10]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Sensor CPU Usage
+                  Receiver CPU Usage
                 </CardTitle>
                 <Cpu className="h-4 w-4 " />
               </CardHeader>
