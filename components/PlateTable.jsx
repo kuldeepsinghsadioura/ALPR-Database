@@ -21,6 +21,8 @@ import {
   ChevronsUpDown,
   Pencil,
   ZoomIn,
+  MoreHorizontal,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,6 +79,14 @@ import { useRouter } from "next/navigation";
 import PlateImage from "@/components/PlateImage";
 import { getSettings } from "@/app/actions";
 import ImageViewer from "./ImageViewer";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 const SortButton = ({ label, field, sort, onSort }) => {
   const isActive = sort.field === field;
@@ -132,6 +142,7 @@ export default function PlateTable({
   const [isLive, setIsLive] = useState(true);
   const [prefetchedImages, setPrefetchedImages] = useState(new Set());
   const [biHost, setBiHost] = useState(null);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   //zoom/crop stuff
   const [zoom, setZoom] = useState(1);
@@ -603,21 +614,255 @@ export default function PlateTable({
     );
   };
 
+  // Mobile filter sheet content
+  const MobileFilters = () => (
+    <div className="space-y-6 py-4">
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Filter by Tag</h4>
+        <Select value={filters.tag} onValueChange={handleTagChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select tag" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All tags</SelectItem>
+            {availableTags.map((tag) => (
+              <SelectItem key={tag.name} value={tag.name}>
+                <div className="flex items-center">
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: tag.color }}
+                  />
+                  {tag.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Filter by Camera</h4>
+        <Select
+          value={filters.cameraName || "all"}
+          onValueChange={handleCameraChange}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select camera" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All cameras</SelectItem>
+            {availableCameras.map((camera) => (
+              <SelectItem key={camera} value={camera}>
+                {camera}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium">Date Range</h4>
+        <Calendar
+          mode="range"
+          defaultMonth={filters.dateRange?.from}
+          selected={{
+            from: filters.dateRange?.from,
+            to: filters.dateRange?.to,
+          }}
+          onSelect={(range) => {
+            onUpdateFilters({
+              dateFrom: range?.from ? range.from.toDateString() : null,
+              dateTo: range?.to ? range.to.toDateString() : null,
+            });
+          }}
+          className="rounded-md border"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Hour Range</h4>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs">From</Label>
+            <Select
+              value={filters.hourRange?.from?.toString()}
+              onValueChange={(val) =>
+                onUpdateFilters({
+                  hourFrom: val,
+                  hourTo: filters.hourRange?.to?.toString(),
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Start hour" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => {
+                  const period = i < 12 ? "AM" : "PM";
+                  const hour = i === 0 ? 12 : i > 12 ? i - 12 : i;
+                  return (
+                    <SelectItem key={i} value={i.toString()}>
+                      {timeFormat === 12
+                        ? `${hour}${period}`
+                        : `${i.toString().padStart(2, "0")}:00`}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">To</Label>
+            <Select
+              value={filters.hourRange?.to?.toString()}
+              onValueChange={(val) =>
+                onUpdateFilters({
+                  hourFrom: filters.hourRange?.from?.toString(),
+                  hourTo: val,
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="End hour" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => {
+                  const period = i < 12 ? "AM" : "PM";
+                  const hour = i === 0 ? 12 : i > 12 ? i - 12 : i;
+                  return (
+                    <SelectItem key={i} value={i.toString()}>
+                      {timeFormat === 12
+                        ? `${hour}${period}`
+                        : `${i.toString().padStart(2, "0")}:00`}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Other Options</h4>
+        <div className="flex items-center space-x-2 border rounded-md p-3">
+          <Switch
+            checked={filters.fuzzySearch}
+            onCheckedChange={handleFuzzySearchToggle}
+            id="mobile-fuzzy-search"
+          />
+          <label htmlFor="mobile-fuzzy-search" className="text-sm">
+            Fuzzy Search
+          </label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">
+                  Fuzzy search helps find plates with potential OCR misreads.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        <div className="flex items-center space-x-2 border rounded-md p-3">
+          <Switch
+            checked={isLive}
+            onCheckedChange={setIsLive}
+            id="mobile-live-updates"
+          />
+          <label htmlFor="mobile-live-updates" className="text-sm">
+            Live Updates
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Results Per Page</h4>
+        <Select
+          value={pagination.pageSize.toString()}
+          onValueChange={handlePageSizeChange}
+        >
+          <SelectTrigger>
+            <SelectValue>{pagination.pageSize}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 25, 50, 100].map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                {size} results per page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="pt-4 flex space-x-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => {
+            clearFilters();
+            setIsFilterSheetOpen(false);
+          }}
+        >
+          Clear Filters
+        </Button>
+        <Button className="flex-1" onClick={() => setIsFilterSheetOpen(false)}>
+          Apply Filters
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="">
       <div className="py-4">
+        {/* Search and Filters section - Desktop and Mobile */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
           <div className="flex w-full flex-wrap items-start sm:items-center gap-2">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <Input
-                placeholder="Search plates..."
-                icon={
-                  <Search className="text-gray-400 dark:text-gray-500 absolute left-1.5 top-1/2 transform -translate-y-1/2 h-4 w-4" />
-                }
-                value={searchInput}
-                onChange={handleSearchChange}
-                className="w-[23rem] sm:w-64 h-9 dark:bg-[#161618]"
-              />
+            {/* Search bar - Full Width on Mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center w-full sm:w-auto">
+                <Input
+                  placeholder="Search plates..."
+                  icon={
+                    <Search className="text-gray-400 dark:text-gray-500 absolute left-1.5 top-1/2 transform -translate-y-1/2 h-4 w-4" />
+                  }
+                  value={searchInput}
+                  onChange={handleSearchChange}
+                  className="w-full sm:w-64 h-9 dark:bg-[#161618]"
+                />
+
+                {/* Mobile Filter Button */}
+                <Sheet
+                  open={isFilterSheetOpen}
+                  onOpenChange={setIsFilterSheetOpen}
+                >
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="ml-2 sm:hidden h-9 w-9 dark:bg-[#161618]"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="bottom"
+                    className="h-[80vh] px-4 pt-0 pb-8 overflow-y-auto"
+                  >
+                    <SheetHeader className="sticky top-0 bg-background pt-4 pb-2 z-10">
+                      <SheetTitle>Filter Results</SheetTitle>
+                    </SheetHeader>
+                    <MobileFilters />
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* Fuzzy Search - Desktop only */}
               <div className="hidden sm:flex items-center border rounded-md px-3 h-9 dark:bg-[#161618]">
                 <div className="flex items-center space-x-2 ">
                   <Switch
@@ -649,138 +894,137 @@ export default function PlateTable({
                 </div>
               </div>
             </div>
-            <Select value={filters.tag} onValueChange={handleTagChange}>
-              <SelectTrigger className="w-[180px] h-9 dark:bg-[#161618]">
-                <SelectValue placeholder="Filter by tag" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All tags</SelectItem>
-                {availableTags.map((tag) => (
-                  <SelectItem key={tag.name} value={tag.name}>
-                    <div className="flex items-center">
-                      <div
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: tag.color }}
-                      />
-                      {tag.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.cameraName || "all"}
-              onValueChange={handleCameraChange}
-            >
-              <SelectTrigger className="w-[180px] dark:bg-[#161618]">
-                <SelectValue placeholder="Filter by camera" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All cameras</SelectItem>
-                {availableCameras.map((camera) => (
-                  <SelectItem key={camera} value={camera}>
-                    {camera}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="hidden sm:flex gap-2 dark:bg-[#161618]"
-                >
-                  <CalendarDays className="h-4 w-4" />
-                  {filters.dateRange.from ? (
-                    filters.dateRange.to ? (
-                      <>
-                        {format(filters.dateRange.from, "LLL dd")} -{" "}
-                        {format(filters.dateRange.to, "LLL dd")}
-                      </>
-                    ) : (
-                      format(filters.dateRange.from, "LLL dd")
-                    )
-                  ) : (
-                    "Date Range"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={filters.dateRange?.from}
-                  selected={{
-                    from: filters.dateRange?.from,
-                    to: filters.dateRange?.to,
-                  }}
-                  onSelect={(range) => {
-                    onUpdateFilters({
-                      dateFrom: range.from ? range.from.toDateString() : null,
-                      // typeof hourRange.from === "number"
-                      //   ? hourRange.from.toString()
-                      //   : undefined,
-                      dateTo: range.to ? range.to.toDateString() : null,
-                      // typeof hourRange.to === "number"
-                      //   ? hourRange.to.toString()
-                      //   : undefined,
-                    });
-                  }}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <HourRangeFilter
-              timeFormat={timeFormat}
-              value={filters.hourRange || {}}
-              onChange={(hourRange) =>
-                onUpdateFilters({
-                  hourFrom:
-                    typeof hourRange.from === "number"
-                      ? hourRange.from.toString()
-                      : undefined,
-                  hourTo:
-                    typeof hourRange.to === "number"
-                      ? hourRange.to.toString()
-                      : undefined,
-                })
-              }
-            />
-            <div className="flex items-center border rounded-md px-3 h-9 dark:bg-[#161618]">
-              <div className="flex items-center space-x-2 ">
-                <Switch
-                  checked={isLive}
-                  onCheckedChange={setIsLive}
-                  id="live-updates"
-                />
-                <label
-                  htmlFor="live-updates"
-                  className="text-sm cursor-pointer"
-                >
-                  Live Updates
-                </label>
-              </div>
-            </div>
-
-            {(filters.search ||
-              filters.tag !== "all" ||
-              filters.dateRange.from ||
-              (filters.hourRange?.from !== undefined &&
-                filters.hourRange?.to !== undefined)) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="gap-2"
+            {/* Desktop Filters */}
+            <div className="hidden sm:flex flex-wrap gap-2">
+              <Select value={filters.tag} onValueChange={handleTagChange}>
+                <SelectTrigger className="w-[180px] h-9 dark:bg-[#161618]">
+                  <SelectValue placeholder="Filter by tag" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tags</SelectItem>
+                  {availableTags.map((tag) => (
+                    <SelectItem key={tag.name} value={tag.name}>
+                      <div className="flex items-center">
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.cameraName || "all"}
+                onValueChange={handleCameraChange}
               >
-                <X className="h-4 w-4" />
-                Clear Filters
-              </Button>
-            )}
+                <SelectTrigger className="w-[180px] dark:bg-[#161618]">
+                  <SelectValue placeholder="Filter by camera" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All cameras</SelectItem>
+                  {availableCameras.map((camera) => (
+                    <SelectItem key={camera} value={camera}>
+                      {camera}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="hidden sm:flex gap-2 dark:bg-[#161618]"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    {filters.dateRange.from ? (
+                      filters.dateRange.to ? (
+                        <>
+                          {format(filters.dateRange.from, "LLL dd")} -{" "}
+                          {format(filters.dateRange.to, "LLL dd")}
+                        </>
+                      ) : (
+                        format(filters.dateRange.from, "LLL dd")
+                      )
+                    ) : (
+                      "Date Range"
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={filters.dateRange?.from}
+                    selected={{
+                      from: filters.dateRange?.from,
+                      to: filters.dateRange?.to,
+                    }}
+                    onSelect={(range) => {
+                      onUpdateFilters({
+                        dateFrom: range.from ? range.from.toDateString() : null,
+                        dateTo: range.to ? range.to.toDateString() : null,
+                      });
+                    }}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <HourRangeFilter
+                timeFormat={timeFormat}
+                value={filters.hourRange || {}}
+                onChange={(hourRange) =>
+                  onUpdateFilters({
+                    hourFrom:
+                      typeof hourRange.from === "number"
+                        ? hourRange.from.toString()
+                        : undefined,
+                    hourTo:
+                      typeof hourRange.to === "number"
+                        ? hourRange.to.toString()
+                        : undefined,
+                  })
+                }
+              />
+              <div className="flex items-center border rounded-md px-3 h-9 dark:bg-[#161618]">
+                <div className="flex items-center space-x-2 ">
+                  <Switch
+                    checked={isLive}
+                    onCheckedChange={setIsLive}
+                    id="live-updates"
+                  />
+                  <label
+                    htmlFor="live-updates"
+                    className="text-sm cursor-pointer"
+                  >
+                    Live Updates
+                  </label>
+                </div>
+              </div>
+
+              {(filters.search ||
+                filters.tag !== "all" ||
+                filters.dateRange.from ||
+                (filters.hourRange?.from !== undefined &&
+                  filters.hourRange?.to !== undefined)) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Clear Filters
+                </Button>
+              )}
+            </div>
           </div>
 
+          {/* Results per page - Desktop only */}
           <div className="hidden sm:flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Show</span>
             <Select
@@ -804,227 +1048,536 @@ export default function PlateTable({
           </div>
         </div>
 
+        {/* Active filters display on mobile */}
+        {(filters.search ||
+          filters.tag !== "all" ||
+          filters.dateRange.from ||
+          filters.cameraName ||
+          (filters.hourRange?.from !== undefined &&
+            filters.hourRange?.to !== undefined)) && (
+          <div className="flex sm:hidden items-center gap-2 mb-4 overflow-x-auto pb-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              Active filters:
+            </span>
+
+            {filters.search && (
+              <Badge
+                variant="outline"
+                className="text-xs h-6 whitespace-nowrap"
+              >
+                Search: {filters.search}
+              </Badge>
+            )}
+
+            {filters.tag !== "all" && (
+              <Badge
+                variant="outline"
+                className="text-xs h-6 whitespace-nowrap"
+              >
+                Tag: {filters.tag}
+              </Badge>
+            )}
+
+            {filters.cameraName && (
+              <Badge
+                variant="outline"
+                className="text-xs h-6 whitespace-nowrap"
+              >
+                Camera: {filters.cameraName}
+              </Badge>
+            )}
+
+            {filters.dateRange.from && (
+              <Badge
+                variant="outline"
+                className="text-xs h-6 whitespace-nowrap"
+              >
+                Date: {format(filters.dateRange.from, "MMM d")}
+                {filters.dateRange.to &&
+                  ` - ${format(filters.dateRange.to, "MMM d")}`}
+              </Badge>
+            )}
+
+            {filters.hourRange?.from !== undefined &&
+              filters.hourRange?.to !== undefined && (
+                <Badge
+                  variant="outline"
+                  className="text-xs h-6 whitespace-nowrap"
+                >
+                  Hours: {filters.hourRange.from} - {filters.hourRange.to}
+                </Badge>
+              )}
+          </div>
+        )}
+
+        {/* Table - Desktop view and Mobile cards */}
         <div className="rounded-md border dark:bg-[#0e0e10]">
-          <Table>
-            <TableHeader className="dark:bg-[#161618]">
-              <TableRow>
-                {/* <TableHead>Vehicle Description</TableHead> */}
-                <TableHead className="w-24">Image</TableHead>
-                <TableHead className="w-28 sm:w-16">Plate Number</TableHead>
-                <TableHead className="w-28 hidden sm:table-cell">%</TableHead>
-                <TableHead className="w-24 hidden sm:table-cell">
-                  <SortButton
-                    label="Occurrences"
-                    field="occurrence_count"
-                    sort={sort}
-                    onSort={onSort}
-                  />
-                </TableHead>
-                <TableHead className="w-18 sm:w-40">Tags</TableHead>
-                <TableHead className="w-32 hidden sm:table-cell">
-                  Camera
-                </TableHead>
-                <TableHead className="w-24 sm:w-40">
-                  <SortButton
-                    label="Timestamp"
-                    field="timestamp"
-                    sort={sort}
-                    onSort={onSort}
-                  />
-                </TableHead>
-                <TableHead className="w-32 text-right hidden sm:table-cell">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+          {/* Desktop Table */}
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader className="dark:bg-[#161618]">
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
-                    Loading...
-                  </TableCell>
+                  <TableHead className="w-24">Image</TableHead>
+                  <TableHead className="w-28 sm:w-16">Plate Number</TableHead>
+                  <TableHead className="w-28 hidden sm:table-cell">%</TableHead>
+                  <TableHead className="w-24 hidden sm:table-cell">
+                    <SortButton
+                      label="Occurrences"
+                      field="occurrence_count"
+                      sort={sort}
+                      onSort={onSort}
+                    />
+                  </TableHead>
+                  <TableHead className="w-18 sm:w-40">Tags</TableHead>
+                  <TableHead className="w-32 hidden sm:table-cell">
+                    Camera
+                  </TableHead>
+                  <TableHead className="w-24 sm:w-40">
+                    <SortButton
+                      label="Timestamp"
+                      field="timestamp"
+                      sort={sort}
+                      onSort={onSort}
+                    />
+                  </TableHead>
+                  <TableHead className="w-32 text-right hidden sm:table-cell">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
-                    No results found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                data.map((plate) => (
-                  <TableRow key={plate.id}>
-                    <TableCell>
-                      {/* <button onClick={(e) => handleImageClick(e, plate)}> */}
-                      <PlateImage
-                        plate={plate}
-                        onClick={(e) => handleImageClick(e, plate)}
-                        className=""
-                      />
-                      {/* </button> */}
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-4">
+                      Loading...
                     </TableCell>
-                    <TableCell
-                      className={`font-medium font-mono ${
-                        plate.flagged && "text-[#F31260]"
-                      }`}
-                    >
-                      {plate.plate_number}
-                      {plate.known_name && (
-                        <div className="text-gray-500 dark:text-gray-400 font-sans">
-                          {plate.known_name}
-                        </div>
-                      )}
+                  </TableRow>
+                ) : data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-4">
+                      No results found
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {formatConfidence(plate.confidence)}
-                    </TableCell>
-                    {/* <TableCell>{plate.vehicle_description}</TableCell> */}
-                    <TableCell className="hidden sm:table-cell">
-                      {plate.occurrence_count}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {plate.tags?.length > 0 ? (
-                          plate.tags.map((tag) => (
-                            <Badge
-                              key={tag.name}
-                              variant="secondary"
-                              className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
-                              style={{
-                                backgroundColor: tag.color,
-                                color: "#fff",
-                              }}
-                            >
-                              <span>{tag.name}</span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
-                                onClick={() =>
-                                  onRemoveTag(plate.plate_number, tag.name)
-                                }
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))
-                        ) : (
-                          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                            No tags
+                  </TableRow>
+                ) : (
+                  data.map((plate) => (
+                    <TableRow key={plate.id}>
+                      <TableCell>
+                        <PlateImage
+                          plate={plate}
+                          onClick={(e) => handleImageClick(e, plate)}
+                          className=""
+                        />
+                      </TableCell>
+                      <TableCell
+                        className={`font-medium font-mono ${
+                          plate.flagged && "text-[#F31260]"
+                        }`}
+                      >
+                        {plate.plate_number}
+                        {plate.known_name && (
+                          <div className="text-gray-500 dark:text-gray-400 font-sans">
+                            {plate.known_name}
                           </div>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {plate.camera_name || (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 italic">
-                          Unknown
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs sm:text-sm">
-                      {new Date(plate.timestamp).toLocaleString("en-US", {
-                        hour12: timeFormat === 12,
-                      })}
-                    </TableCell>
-
-                    <TableCell className="hidden sm:table-cell">
-                      <div className="flex space-x-2 justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Tag className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            {availableTags.map((tag) => (
-                              <DropdownMenuItem
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {formatConfidence(plate.confidence)}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {plate.occurrence_count}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {plate.tags?.length > 0 ? (
+                            plate.tags.map((tag) => (
+                              <Badge
                                 key={tag.name}
-                                onClick={() =>
-                                  onAddTag(plate.plate_number, tag.name)
-                                }
+                                variant="secondary"
+                                className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
+                                style={{
+                                  backgroundColor: tag.color,
+                                  color: "#fff",
+                                }}
                               >
-                                <div className="flex items-center">
-                                  <div
-                                    className="w-3 h-3 rounded-full mr-2"
-                                    style={{ backgroundColor: tag.color }}
-                                  />
-                                  {tag.name}
-                                </div>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setActivePlate(plate);
-                            setIsAddKnownPlateOpen(true);
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className=""
-                          onClick={() => {
-                            setCorrection({
-                              id: plate.id,
-                              plateNumber: plate.plate_number,
-                              newPlateNumber: plate.plate_number,
-                              correctAll: false,
-                              removePlate: false,
-                            });
-                            setIsCorrectPlateOpen(true);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        {biHost && plate.bi_path ? (
+                                <span>{tag.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                                  onClick={() =>
+                                    onRemoveTag(plate.plate_number, tag.name)
+                                  }
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </Badge>
+                            ))
+                          ) : (
+                            <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                              No tags
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {plate.camera_name || (
+                          <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                            Unknown
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {new Date(plate.timestamp).toLocaleString("en-US", {
+                          hour12: timeFormat === 12,
+                        })}
+                      </TableCell>
+
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="flex space-x-2 justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <Tag className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              {availableTags.map((tag) => (
+                                <DropdownMenuItem
+                                  key={tag.name}
+                                  onClick={() =>
+                                    onAddTag(plate.plate_number, tag.name)
+                                  }
+                                >
+                                  <div className="flex items-center">
+                                    <div
+                                      className="w-3 h-3 rounded-full mr-2"
+                                      style={{ backgroundColor: tag.color }}
+                                    />
+                                    {tag.name}
+                                  </div>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              window.open(
-                                `http://${biHost}/${plate.bi_path}`,
-                                "_blank"
-                              )
-                            }
+                            onClick={() => {
+                              setActivePlate(plate);
+                              setIsAddKnownPlateOpen(true);
+                            }}
                           >
-                            <ExternalLink className="h-4 w-4" />
+                            <Plus className="h-4 w-4" />
                           </Button>
-                        ) : (
-                          <Button variant="ghost" size="icon" disabled>
-                            <ExternalLink className="h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className=""
+                            onClick={() => {
+                              setCorrection({
+                                id: plate.id,
+                                plateNumber: plate.plate_number,
+                                newPlateNumber: plate.plate_number,
+                                correctAll: false,
+                                removePlate: false,
+                              });
+                              setIsCorrectPlateOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                        )}
+                          {biHost && plate.bi_path ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                window.open(
+                                  `http://${biHost}/${plate.bi_path}`,
+                                  "_blank"
+                                )
+                              }
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button variant="ghost" size="icon" disabled>
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => {
-                            setActivePlate(plate);
-                            setIsDeleteConfirmOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => {
+                              setActivePlate(plate);
+                              setIsDeleteConfirmOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="sm:hidden">
+            {loading ? (
+              <div className="p-4 text-center">Loading...</div>
+            ) : data.length === 0 ? (
+              <div className="p-4 text-center">No results found</div>
+            ) : (
+              <div className="divide-y">
+                {data.map((plate) => (
+                  <div key={plate.id} className="p-3">
+                    <div className="flex items-start gap-3">
+                      {/* Image and basic info */}
+                      <div className="flex-shrink-0" style={{ width: "80px" }}>
+                        <PlateImage
+                          plate={plate}
+                          onClick={(e) => handleImageClick(e, plate)}
+                        />
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+
+                      <div className="flex-1 min-w-0">
+                        {/* Top row - Plate number and actions */}
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <div
+                              className={`font-medium font-mono text-sm ${
+                                plate.flagged && "text-[#F31260]"
+                              }`}
+                            >
+                              {plate.plate_number}
+                            </div>
+                            {plate.known_name && (
+                              <div className="text-xs text-muted-foreground">
+                                {plate.known_name}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Mobile actions dropdown */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setActivePlate(plate);
+                                  setIsAddKnownPlateOpen(true);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add to Known Plates
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setCorrection({
+                                    id: plate.id,
+                                    plateNumber: plate.plate_number,
+                                    newPlateNumber: plate.plate_number,
+                                    correctAll: false,
+                                    removePlate: false,
+                                  });
+                                  setIsCorrectPlateOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Correct Plate
+                              </DropdownMenuItem>
+                              {biHost && plate.bi_path ? (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    window.open(
+                                      `http://${biHost}/${plate.bi_path}`,
+                                      "_blank"
+                                    )
+                                  }
+                                >
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  Open in Blue Iris
+                                </DropdownMenuItem>
+                              ) : null}
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onClick={() => {
+                                  setActivePlate(plate);
+                                  setIsDeleteConfirmOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Record
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {/* Middle row - Tags */}
+                        <div className="mb-2">
+                          {plate.tags?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mb-1">
+                              {plate.tags.map((tag) => (
+                                <Badge
+                                  key={tag.name}
+                                  variant="secondary"
+                                  className="text-[10px] py-0.5 pl-1.5 pr-1 flex items-center gap-1"
+                                  style={{
+                                    backgroundColor: tag.color,
+                                    color: "#fff",
+                                  }}
+                                >
+                                  <span>{tag.name}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-3 w-3 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                                    onClick={() =>
+                                      onRemoveTag(plate.plate_number, tag.name)
+                                    }
+                                  >
+                                    <X className="h-2 w-2" />
+                                  </Button>
+                                </Badge>
+                              ))}
+
+                              {/* Add tag button */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-5 text-[10px] px-1.5"
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Tag
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  {availableTags.map((tag) => (
+                                    <DropdownMenuItem
+                                      key={tag.name}
+                                      onClick={() =>
+                                        onAddTag(plate.plate_number, tag.name)
+                                      }
+                                    >
+                                      <div className="flex items-center">
+                                        <div
+                                          className="w-3 h-3 rounded-full mr-2"
+                                          style={{ backgroundColor: tag.color }}
+                                        />
+                                        {tag.name}
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                No tags
+                              </span>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-5 text-[10px] px-1.5"
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Tag
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  {availableTags.map((tag) => (
+                                    <DropdownMenuItem
+                                      key={tag.name}
+                                      onClick={() =>
+                                        onAddTag(plate.plate_number, tag.name)
+                                      }
+                                    >
+                                      <div className="flex items-center">
+                                        <div
+                                          className="w-3 h-3 rounded-full mr-2"
+                                          style={{ backgroundColor: tag.color }}
+                                        />
+                                        {tag.name}
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bottom row - Camera, confidence, time */}
+                        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                          <div>
+                            <span className="font-medium">Camera: </span>
+                            {plate.camera_name || "Unknown"}
+                          </div>
+                          <div>
+                            <span className="font-medium">Confidence: </span>
+                            {formatConfidence(plate.confidence)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Occurrences: </span>
+                            {plate.occurrence_count}
+                          </div>
+                          <div>
+                            <span className="font-medium">Time: </span>
+                            {new Date(plate.timestamp).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour12: timeFormat === 12,
+                                hour: "numeric",
+                                minute: "numeric",
+                              }
+                            )}
+                          </div>
+                          <div className="col-span-2">
+                            <span className="font-medium">Date: </span>
+                            {new Date(plate.timestamp).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Pagination - Mobile & Desktop */}
         <div className="flex items-center justify-between pt-4">
-          <div className="text-sm text-muted-foreground">
-            Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
-            {Math.min(pagination.page * pagination.pageSize, pagination.total)}{" "}
-            of {pagination.total} results
+          <div className="text-xs sm:text-sm text-muted-foreground">
+            {pagination.total > 0 ? (
+              <>
+                Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+                {Math.min(
+                  pagination.page * pagination.pageSize,
+                  pagination.total
+                )}{" "}
+                of {pagination.total} results
+              </>
+            ) : (
+              "No results"
+            )}
           </div>
           <div className="flex gap-2">
             <Button
@@ -1048,6 +1601,8 @@ export default function PlateTable({
             </Button>
           </div>
         </div>
+
+        {/* Modals - These work on both mobile and desktop */}
         <Dialog
           open={selectedImage !== null}
           onOpenChange={(open) => {
@@ -1057,22 +1612,13 @@ export default function PlateTable({
             }
           }}
         >
-          <DialogContent className="max-w-7xl">
+          <DialogContent className="max-w-7xl sm:max-w-7xl w-[calc(100vw-32px)] sm:w-auto">
             <DialogHeader>
               <DialogTitle>
                 License Plate Image - {selectedImage?.plateNumber}
               </DialogTitle>
             </DialogHeader>
-            <div className="relative w-full h-[60vh]">
-              {/* {selectedImage && (
-                <NextImage
-                  src={selectedImage.url}
-                  priority={true}
-                  alt={`License plate ${selectedImage.plateNumber}`}
-                  fill
-                  className="object-contain"
-                />
-              )} */}
+            <div className="relative w-full h-[40vh] sm:h-[60vh]">
               {selectedImage && (
                 <ImageViewer
                   image={selectedImage}
@@ -1085,6 +1631,8 @@ export default function PlateTable({
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
+                    size="sm"
+                    className="text-xs sm:text-sm"
                     onClick={() => {
                       setCorrection({
                         id: selectedImage.id,
@@ -1096,12 +1644,13 @@ export default function PlateTable({
                       setIsCorrectPlateOpen(true);
                     }}
                   >
-                    <Edit className="h-4 w-4" />
-                    Correct Plate Number
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="whitespace-nowrap">Correct Plate</span>
                   </Button>
                   <Button
                     variant="outline"
-                    // shit...
+                    size="sm"
+                    className="text-xs sm:text-sm"
                     onClick={() => {
                       setActivePlate({
                         ...selectedImage,
@@ -1110,13 +1659,17 @@ export default function PlateTable({
                       setIsAddKnownPlateOpen(true);
                     }}
                   >
-                    <Plus className="h-4 w-4" />
-                    Add to Known Plates
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="whitespace-nowrap">Add to Known</span>
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline">
-                        <Tag className="h-4 w-4" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs sm:text-sm"
+                      >
+                        <Tag className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Add Tag
                       </Button>
                     </DropdownMenuTrigger>
@@ -1144,194 +1697,219 @@ export default function PlateTable({
                   {biHost && selectedImage?.bi_path && (
                     <Button
                       variant="outline"
+                      size="sm"
+                      className="text-xs sm:text-sm"
                       onClick={() =>
                         window.open(
                           `http://${biHost}/${selectedImage.bi_path}`,
                           "_blank"
                         )
                       }
-                      className="gap-2"
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      Open in Blue Iris
+                      <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span className="whitespace-nowrap">Blue Iris</span>
                     </Button>
                   )}
                   <Button
                     variant="outline"
+                    size="sm"
+                    className="text-xs sm:text-sm"
                     onClick={handleDownloadImage}
-                    className="gap-2"
                   >
-                    <Download className="h-4 w-4" />
-                    Download Image
+                    <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="whitespace-nowrap">Download</span>
                   </Button>
                 </div>
               </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
 
-      <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add to Known Plates</DialogTitle>
-            <DialogDescription>
-              Add details for the plate {activePlate?.plate_number}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                value={newKnownPlate.name}
-                onChange={(e) =>
-                  setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-right">
-                Notes
-              </Label>
-              <Textarea
-                id="notes"
-                value={newKnownPlate.notes}
-                onChange={(e) =>
-                  setNewKnownPlate({ ...newKnownPlate, notes: e.target.value })
-                }
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" onClick={handleAddKnownPlateSubmit}>
-              Add to Known Plates
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this record? This will not delete
-              the plate from the known plates table.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteConfirmOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteSubmit}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={correction !== null}
-        onOpenChange={(open) => !open && setCorrection(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Correct Plate Number</DialogTitle>
-            <DialogDescription>
-              Update the incorrect plate number recognition.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="current-plate" className="text-right">
-                Current
-              </Label>
-              <Input
-                id="current-plate"
-                value={correction?.plateNumber || ""}
-                disabled
-                className="col-span-3 font-mono"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="new-plate" className="text-right">
-                New
-              </Label>
-              <Input
-                id="new-plate"
-                value={correction?.newPlateNumber || ""}
-                onChange={(e) =>
-                  setCorrection((curr) => ({
-                    ...curr,
-                    newPlateNumber: e.target.value.toUpperCase(),
-                  }))
-                }
-                className="col-span-3 font-mono"
-                placeholder="ENTER NEW PLATE NUMBER"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="correct-all"
-                checked={correction?.correctAll || false}
-                onCheckedChange={(checked) =>
-                  setCorrection((curr) => ({
-                    ...curr,
-                    correctAll: checked,
-                  }))
-                }
-              />
-              <Label htmlFor="correct-all">
-                Correct all occurrences of this plate number
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="remove-plate"
-                checked={correction?.removePlate || false}
-                onCheckedChange={(checked) =>
-                  setCorrection((curr) => ({
-                    ...curr,
-                    removePlate: checked,
-                  }))
-                }
-              />
-              <Label htmlFor="remove-plate">
-                Remove previous plate number from database
-              </Label>
-            </div>
-            {correction?.removePlate && (
-              <div className="text-sm text-amber-500 dark:text-amber-400">
-                Warning: This is a destructive action. Ensure the previous plate
-                number does not belong to any real vehicles to avoid loss of
-                data.
+        <Dialog
+          open={isAddKnownPlateOpen}
+          onOpenChange={setIsAddKnownPlateOpen}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add to Known Plates</DialogTitle>
+              <DialogDescription>
+                Add details for the plate {activePlate?.plate_number}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={newKnownPlate.name}
+                  onChange={(e) =>
+                    setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
+                  }
+                  className="col-span-3"
+                />
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCorrection(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCorrectSubmit}
-              disabled={
-                !correction?.newPlateNumber ||
-                correction.newPlateNumber === correction.plateNumber
-              }
-            >
-              Update Plate Number
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-right">
+                  Notes
+                </Label>
+                <Textarea
+                  id="notes"
+                  value={newKnownPlate.notes}
+                  onChange={(e) =>
+                    setNewKnownPlate({
+                      ...newKnownPlate,
+                      notes: e.target.value,
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                onClick={handleAddKnownPlateSubmit}
+                className="w-full sm:w-auto"
+              >
+                Add to Known Plates
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isDeleteConfirmOpen}
+          onOpenChange={setIsDeleteConfirmOpen}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this record? This will not
+                delete the plate from the known plates table.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                className="w-full sm:w-auto order-2 sm:order-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteSubmit}
+                className="w-full sm:w-auto order-1 sm:order-2"
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={correction !== null}
+          onOpenChange={(open) => !open && setCorrection(null)}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Correct Plate Number</DialogTitle>
+              <DialogDescription>
+                Update the incorrect plate number recognition.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="current-plate" className="text-right">
+                  Current
+                </Label>
+                <Input
+                  id="current-plate"
+                  value={correction?.plateNumber || ""}
+                  disabled
+                  className="col-span-3 font-mono"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-plate" className="text-right">
+                  New
+                </Label>
+                <Input
+                  id="new-plate"
+                  value={correction?.newPlateNumber || ""}
+                  onChange={(e) =>
+                    setCorrection((curr) => ({
+                      ...curr,
+                      newPlateNumber: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  className="col-span-3 font-mono"
+                  placeholder="ENTER NEW PLATE NUMBER"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="correct-all"
+                  checked={correction?.correctAll || false}
+                  onCheckedChange={(checked) =>
+                    setCorrection((curr) => ({
+                      ...curr,
+                      correctAll: checked,
+                    }))
+                  }
+                />
+                <Label htmlFor="correct-all">
+                  Correct all occurrences of this plate number
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="remove-plate"
+                  checked={correction?.removePlate || false}
+                  onCheckedChange={(checked) =>
+                    setCorrection((curr) => ({
+                      ...curr,
+                      removePlate: checked,
+                    }))
+                  }
+                />
+                <Label htmlFor="remove-plate">
+                  Remove previous plate number from database
+                </Label>
+              </div>
+              {correction?.removePlate && (
+                <div className="text-sm text-amber-500 dark:text-amber-400">
+                  Warning: This is a destructive action. Ensure the previous
+                  plate number does not belong to any real vehicles to avoid
+                  loss of data.
+                </div>
+              )}
+            </div>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setCorrection(null)}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCorrectSubmit}
+                disabled={
+                  !correction?.newPlateNumber ||
+                  correction.newPlateNumber === correction.plateNumber
+                }
+                className="w-full sm:w-auto"
+              >
+                Update Plate Number
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ export function FlaggedPlatesTable({ initialData }) {
   const [data] = useState(initialData);
 
   return (
-    <Card>
+    <Card className="mt-4 sm:mt-0">
       <CardContent className="py-4 dark:bg-[#0e0e10]">
         <Table>
           <TableHeader>

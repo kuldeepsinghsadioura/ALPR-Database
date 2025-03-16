@@ -152,18 +152,24 @@ export function NotificationsTable({ initialData }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="py-4 ">
-        <form onSubmit={handleAdd} className="flex gap-2 mb-4">
+      <div className="py-4">
+        {/* Responsive form layout */}
+        <form
+          onSubmit={handleAdd}
+          className="flex flex-col sm:flex-row gap-2 mb-4"
+        >
           <Input
             placeholder="Enter plate number..."
             value={newPlate}
             onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
-            className="w-80 dark:bg-[#0e0e10]"
+            className="w-full sm:w-80 dark:bg-[#0e0e10]"
             icon={
-              <Search size={16} className="text-gray-400 dark:text-gray-500 " />
+              <Search size={16} className="text-gray-400 dark:text-gray-500" />
             }
           />
-          <Button type="submit">Create Notification</Button>
+          <Button type="submit" className="w-full sm:w-auto">
+            Create Notification
+          </Button>
         </form>
 
         {testStatus && (
@@ -180,20 +186,22 @@ export function NotificationsTable({ initialData }) {
           </Alert>
         )}
 
-        <div className="rounded-md border dark:bg-[#0e0e10] px-2">
+        {/* Desktop Table View */}
+        <div className="rounded-md border dark:bg-[#0e0e10] px-2 hidden sm:block">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Plate Number</TableHead>
                 <TableHead>Tags</TableHead>
                 <TableHead>Notifications</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     No notification plates configured
                   </TableCell>
                 </TableRow>
@@ -290,9 +298,120 @@ export function NotificationsTable({ initialData }) {
             </TableBody>
           </Table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="sm:hidden space-y-4">
+          {data.length === 0 ? (
+            <div className="text-center py-4 border rounded-md dark:bg-[#0e0e10]">
+              No notification plates configured
+            </div>
+          ) : (
+            data.map((plate) => (
+              <Card key={plate.plate_number} className="dark:bg-[#0e0e10]">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-medium font-mono">
+                      {plate.plate_number}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs">Active:</span>
+                      <Switch
+                        checked={plate.enabled}
+                        onCheckedChange={() =>
+                          handleToggle(plate.plate_number, plate.enabled)
+                        }
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground mr-1">
+                        Tags:
+                      </span>
+                      {plate.tags?.length > 0 ? (
+                        plate.tags.map((tag) => (
+                          <Badge
+                            key={tag.name}
+                            variant="secondary"
+                            className="text-[10px] py-0.5 px-2"
+                            style={{
+                              backgroundColor: tag.color,
+                              color: "#fff",
+                            }}
+                          >
+                            {tag.name}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground italic">
+                          No tags
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground mr-2">
+                        Priority:
+                      </span>
+                      <Select
+                        value={String(plate.priority ?? 1)}
+                        onValueChange={(value) =>
+                          handlePriorityChange(plate.plate_number, value)
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-xs w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map((option) => (
+                            <SelectItem
+                              key={option.value}
+                              value={String(option.value)}
+                            >
+                              <div>
+                                <div className="text-sm">{option.label}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {option.description}
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 mt-2 border-t pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-blue-500"
+                      onClick={() => handleTestNotification(plate.plate_number)}
+                    >
+                      <Bell className="h-3 w-3 mr-1" />
+                      Test
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-red-500"
+                      onClick={() => handleDeleteClick(plate)}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
+
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Remove Notification</DialogTitle>
             <DialogDescription>
@@ -301,14 +420,19 @@ export function NotificationsTable({ initialData }) {
               for this plate.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setIsDeleteConfirmOpen(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               Remove
             </Button>
           </DialogFooter>

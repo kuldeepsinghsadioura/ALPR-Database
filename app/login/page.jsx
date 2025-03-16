@@ -35,31 +35,31 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95">
+    <div className="h-[100dvh] flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95 overflow-hidden">
       <img
         src="/grid.svg"
         className="absolute bottom-0 w-full -z-10 invert"
         alt="Background grid"
       />
 
-      <div className="w-full max-w-md px-8 z-10">
-        <div className="mb-10 text-center">
-          <div className="flex justify-center mb-6">
+      <div className="w-full max-w-md px-6 sm:px-8 z-10">
+        <div className="mb-6 sm:mb-10 text-center">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <div className="bg-primary/10 p-3 rounded-full">
-              <Shield className="h-8 w-8 text-primary" />
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight mb-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-2">
             ALPR Database
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Enter your password to continue
           </p>
         </div>
 
         <div className="bg-card border border-border rounded-xl shadow-lg overflow-hidden">
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <Input
                   id="password"
@@ -68,19 +68,19 @@ export default function LoginPage() {
                   required
                   autoFocus
                   placeholder="Enter your password"
-                  className="h-12 px-4 bg-background/50"
+                  className="h-10 sm:h-12 px-4 bg-background/50"
                 />
               </div>
 
               {error && (
-                <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+                <div className="p-3 sm:p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
                   {error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium"
+                className="w-full h-10 sm:h-12 text-base font-medium"
                 disabled={isPending}
               >
                 {isPending ? (
@@ -96,7 +96,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-muted-foreground">
           <p>Administrator Login</p>
         </div>
       </div>

@@ -95,9 +95,19 @@ const TagDialog = ({
             />
           </div>
         </div>
-        <Button type="submit" className="w-full">
-          {mode === "create" ? "Create Tag" : "Save Changes"}
-        </Button>
+        <div className="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="w-full sm:w-auto order-2 sm:order-1 sm:mr-2"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" className="w-full sm:w-auto order-1 sm:order-2">
+            {mode === "create" ? "Create Tag" : "Save Changes"}
+          </Button>
+        </div>
       </form>
     </DialogContent>
   );
@@ -176,17 +186,17 @@ const ElegantTagManagement = () => {
   return (
     <DashboardLayout>
       <TitleNavbar title="Plate Database">
-        <ScrollArea className="h-[300px] w-full rounded-md border p-4 dark:bg-[#0e0e10]">
+        <div className="w-full rounded-md border p-4 dark:bg-[#0e0e10]">
           <div className="flex justify-between pb-4 border-b">
-            <h3 className="text-xl font-semibold">Tags</h3>
+            <h3 className="text-lg sm:text-xl font-semibold">Tags</h3>
             <Dialog
               open={isCreateDialogOpen}
               onOpenChange={setIsCreateDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Tag
+                <Button size="sm" className="sm:size-default">
+                  <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Add Tag</span>
                 </Button>
               </DialogTrigger>
               <TagDialog
@@ -199,45 +209,54 @@ const ElegantTagManagement = () => {
             </Dialog>
           </div>
 
-          <div className="flex flex-wrap gap-3 pt-8">
-            {tags?.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="text-sm py-2 px-4 flex items-center space-x-2 hover:shadow-sm transition-shadow"
-              >
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: tag.color }}
-                />
-                <span>{tag.name}</span>
-                <div className="flex items-center space-x-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 p-0 hover:bg-secondary rounded-full"
-                    onClick={() => {
-                      setEditingTag(tag);
-                      setIsEditDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="h-3 w-3" />
-                    <span className="sr-only">Edit {tag.name} tag</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
-                    onClick={() => handleDeleteClick(tag)}
-                  >
-                    <X className="h-3 w-3" />
-                    <span className="sr-only">Delete {tag.name} tag</span>
-                  </Button>
+          <ScrollArea className="h-[250px] sm:h-[300px] mt-4 pr-2">
+            <div className="flex flex-wrap gap-2 sm:gap-3 pt-2 sm:pt-4">
+              {tags?.length === 0 ? (
+                <div className="w-full text-center py-6 text-muted-foreground">
+                  No tags available. Create your first tag with the "Add Tag"
+                  button.
                 </div>
-              </Badge>
-            ))}
-          </div>
-        </ScrollArea>
+              ) : (
+                tags?.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-4 flex items-center space-x-1 sm:space-x-2 hover:shadow-sm transition-shadow"
+                  >
+                    <div
+                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
+                      style={{ backgroundColor: tag.color }}
+                    />
+                    <span>{tag.name}</span>
+                    <div className="flex items-center space-x-1 ml-1 sm:ml-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-secondary rounded-full"
+                        onClick={() => {
+                          setEditingTag(tag);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                        <span className="sr-only">Edit {tag.name} tag</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
+                        onClick={() => handleDeleteClick(tag)}
+                      >
+                        <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                        <span className="sr-only">Delete {tag.name} tag</span>
+                      </Button>
+                    </div>
+                  </Badge>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
 
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <TagDialog
@@ -261,11 +280,17 @@ const ElegantTagManagement = () => {
                 action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <AlertDialogCancel
+                onClick={() => setDeleteDialogOpen(false)}
+                className="w-full sm:w-auto order-2 sm:order-1"
+              >
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction onClick={onDeleteTag}>
+              <AlertDialogAction
+                onClick={onDeleteTag}
+                className="w-full sm:w-auto order-1 sm:order-2"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
