@@ -19,7 +19,7 @@ export function TagDistributionChart({ data, loading }) {
   };
 
   return (
-    <Card className="dark:bg-[#0e0e10]">
+    <Card className="dark:bg-[#0e0e10] h-full">
       <CardHeader>
         <CardTitle>Tag Distribution</CardTitle>
         <CardDescription>

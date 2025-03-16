@@ -359,11 +359,11 @@ export async function POST(req) {
     // }
     if (processedPlates.length > 0) {
       try {
-        console.log("⭐ Starting revalidation");
+        console.log("⭐ Plate Received");
         await revalidatePlatesPage();
         // Ensure revalidation completes
         await new Promise((resolve) => setTimeout(resolve, 100));
-        console.log("⭐ Revalidation completed");
+        // console.log("⭐ Revalidation completed");
       } catch (error) {
         console.error("⭐ Revalidation failed:", error);
         throw error;

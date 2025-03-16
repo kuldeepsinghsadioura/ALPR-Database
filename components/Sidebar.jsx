@@ -16,6 +16,10 @@ import { Cctv } from "lucide-react";
 import { Flag } from "lucide-react";
 import { BellPlus } from "lucide-react";
 import { SquareTerminal } from "lucide-react";
+import { GiCartwheel } from "react-icons/gi";
+import { Antenna } from "lucide-react";
+import TPMS from "@/components/icons/tpms";
+
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +34,7 @@ const topSidebarItems = [
   { icon: BookMarked, label: "Known Plates", href: "/known_plates" },
   { icon: Flag, label: "Watchlist", href: "/flagged" },
   { icon: BellPlus, label: "Notifications", href: "/notifications" },
+  { icon: TPMS, label: "TPMS", href: "/tpms" },
 ];
 
 export function Sidebar() {
