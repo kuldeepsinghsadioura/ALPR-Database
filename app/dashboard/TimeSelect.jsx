@@ -17,7 +17,7 @@ export function TimeFrameSelector({ value, onValueChange }) {
 
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px] dark:bg-[#161618]">
         <SelectValue placeholder="Select time frame" />
       </SelectTrigger>
       <SelectContent>

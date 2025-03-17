@@ -162,12 +162,70 @@ export async function POST(req) {
       return Response.json({ error: "Invalid API key" }, { status: 401 });
     }
 
-    // Extract plates either from memo or plate_number
-    const plates = data.memo
-      ? extractPlatesFromMemo(data.memo)
-      : data.plate_number
-      ? [data.plate_number.toUpperCase()]
-      : [];
+    // Initialize common values
+    const timestamp = data.timestamp || new Date().toISOString();
+    const camera = data.camera || null;
+    let plates = [];
+
+    // Handle AI dump format if present
+    if (data.ai_dump) {
+      try {
+        const aiData = Array.isArray(data.ai_dump)
+          ? data.ai_dump[0]
+          : data.ai_dump;
+        if (aiData?.found?.predictions) {
+          // Get all plate annotations for this batch
+          const allPlateAnnotations = aiData.found.predictions
+            .filter((pred) => pred.valid_ocr_annotation)
+            .map((pred) => pred.plate_annotation)
+            .filter(Boolean)
+            .join("&");
+
+          // Process each prediction
+          plates = aiData.found.predictions.map((prediction) => ({
+            plate_number: prediction.plate?.toUpperCase(),
+            confidence: prediction.confidence.toFixed(2),
+            crop_coordinates: [
+              prediction.x_min,
+              prediction.y_min,
+              prediction.x_max,
+              prediction.y_max,
+            ],
+            ...(prediction.valid_ocr_annotation && {
+              ocr_annotation: {
+                ocr_annotation: prediction.ocr_annotation,
+              },
+              plate_annotation: allPlateAnnotations,
+            }),
+          }));
+        }
+      } catch (error) {
+        console.error(
+          "Malformed data from Blue Iris. Your JSON macro is missing the required properties from codeproject. Please update your AI to the newest ALPR model or use plate instead of json macro.",
+          error
+        );
+        return Response.json(
+          {
+            error:
+              "Outdated AI. Update Model in CodeProject or use plate or memo instead of json",
+          },
+          { status: 400 }
+        );
+      }
+    }
+    // Backwards compatibility for older formats
+    else if (data.memo) {
+      //extract plates from memo
+      plates = extractPlatesFromMemo(data.memo).map((plate) => ({
+        plate_number: plate,
+      }));
+    } else if (data.plate_number) {
+      plates = [
+        {
+          plate_number: data.plate_number.toUpperCase(),
+        },
+      ];
+    }
 
     if (plates.length === 0) {
       return Response.json(
@@ -176,55 +234,59 @@ export async function POST(req) {
       );
     }
 
-    // Get database connection with retries
+    // Get database connection
     const pool = await getPool();
     dbClient = await pool.connect();
     console.log("Database connection established");
 
-    const timestamp = data.timestamp || new Date().toISOString();
     const processedPlates = [];
     const duplicatePlates = [];
-    const camera = data.camera || null;
     const ignoredPlates = [];
 
-    for (const plate of plates) {
+    for (const plateData of plates) {
       // Check notifications
-      const shouldNotify = await checkPlateForNotification(plate);
+      const shouldNotify = await checkPlateForNotification(
+        plateData.plate_number
+      );
       if (shouldNotify) {
-        await sendPushoverNotification(plate, null, data.Image);
+        await sendPushoverNotification(
+          plateData.plate_number,
+          null,
+          data.Image
+        );
       }
 
-      const isIgnored = await isPlateIgnored(plate);
+      const isIgnored = await isPlateIgnored(plateData.plate_number);
       if (isIgnored) {
-        ignoredPlates.push(plate);
-        continue; //skip to next
+        ignoredPlates.push(plateData.plate_number);
+        continue;
       }
 
       let imagePaths = { imagePath: null, thumbnailPath: null };
       if (data.Image) {
         try {
-          imagePaths = await fileStorage.saveImage(data.Image, plate);
+          imagePaths = await fileStorage.saveImage(
+            data.Image,
+            plateData.plate_number
+          );
         } catch (error) {
-          console.error(`Error saving image for plate ${plate}:`, error);
+          console.error(
+            `Error saving image for plate ${plateData.plate_number}:`,
+            error
+          );
         }
       }
 
       let biPath = null;
       if (data.ALERT_CLIP && data.ALERT_PATH && camera) {
         try {
-          // Extract offset from ALERT_PATH (format: CAMERAID.YYYYMMDD_HHMMSS.OFFSET.3-1.jpg)
           const parts = data.ALERT_PATH.split(".");
           const msOffset = parts[2];
-          // Remove @ from ALERT_CLIP and construct path
           const recId = data.ALERT_CLIP.replace("@", "");
           biPath = `ui3.htm?rec=${recId}-${msOffset}&cam=${camera}`;
         } catch (error) {
           console.error("Error constructing bi_path:", error);
         }
-      } else {
-        console.warn(
-          "[Blue Iris] Incomplete request. Your alert action is not sending the ALERT_PATH and ALERT_CLIP macros. These values are needed for BI integration. See readme for more info."
-        );
       }
 
       const result = await dbClient.query(
@@ -241,9 +303,13 @@ export async function POST(req) {
             thumbnail_path,
             timestamp, 
             camera_name,
-            bi_path
+            bi_path,
+            confidence,
+            crop_coordinates,
+            ocr_annotation,
+            plate_annotation
           )
-          SELECT $1, $2, $3, $4, $5, $6, $7
+          SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
           WHERE NOT EXISTS (
             SELECT 1 FROM plate_reads 
             WHERE plate_number = $1 AND timestamp = $5
@@ -252,21 +318,25 @@ export async function POST(req) {
         )
         SELECT id FROM new_read`,
         [
-          plate,
-          null, // no longer storing image_data
+          plateData.plate_number,
+          null,
           imagePaths.imagePath,
           imagePaths.thumbnailPath,
           timestamp,
           camera,
-          biPath, // Add biPath parameter here
+          biPath,
+          plateData.confidence || null,
+          plateData.crop_coordinates || null,
+          plateData.ocr_annotation || null,
+          plateData.plate_annotation || null,
         ]
       );
 
       if (result.rows.length === 0) {
-        duplicatePlates.push(plate);
+        duplicatePlates.push(plateData.plate_number);
       } else {
         processedPlates.push({
-          plate,
+          plate: plateData.plate_number,
           id: result.rows[0].id,
         });
       }
@@ -289,11 +359,11 @@ export async function POST(req) {
     // }
     if (processedPlates.length > 0) {
       try {
-        console.log("⭐ Starting revalidation");
+        console.log("⭐ Plate Received");
         await revalidatePlatesPage();
         // Ensure revalidation completes
         await new Promise((resolve) => setTimeout(resolve, 100));
-        console.log("⭐ Revalidation completed");
+        // console.log("⭐ Revalidation completed");
       } catch (error) {
         console.error("⭐ Revalidation failed:", error);
         throw error;

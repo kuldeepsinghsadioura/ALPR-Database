@@ -11,6 +11,10 @@ import DashboardLayout from "@/components/layout/MainLayout";
 import BasicTitle from "@/components/layout/BasicTitle";
 import { Suspense } from "react";
 import LiveFeedSkeleton from "@/components/LiveFeedSkeleton";
+import Link from "next/link";
+import TitleNavbar from "@/components/layout/LiveFeedNav";
+
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +54,34 @@ export default async function LivePlates(props) {
 
   return (
     <DashboardLayout>
-      <BasicTitle title="ALPR Recognition Feed" recording={true}>
+      <TitleNavbar title="ALPR Recognition Feed">
+        {/* <BasicTitle
+        title="ALPR Recognition Feed"
+        recording={true}
+        subtitle={
+          "Monitor and manage the traffic on your ALPR system in real time."
+        }
+      >
+        <div className="flex gap-2 items-center">
+          <Link href="/live_feed">
+            <Button
+              variant="outline"
+              size="sm"
+              className={usePathname === "/live_feed" ? "bg-muted" : ""}
+            >
+              Table View
+            </Button>
+          </Link>
+          <Link href="/live_feed/viewer">
+            <Button
+              variant="outline"
+              size="sm"
+              className={pathname === "/live_feed/viewer" ? "bg-muted" : ""}
+            >
+              Live Viewer
+            </Button>
+          </Link>
+        </div> */}
         <Suspense fallback={<LiveFeedSkeleton />}>
           <PlateTableWrapper
             data={platesRes.data}
@@ -61,7 +92,7 @@ export default async function LivePlates(props) {
             biHost={config?.blueiris?.host} // Add this line
           />
         </Suspense>
-      </BasicTitle>
+      </TitleNavbar>
     </DashboardLayout>
   );
 }

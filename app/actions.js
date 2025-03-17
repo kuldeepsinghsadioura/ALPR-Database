@@ -43,6 +43,8 @@ import {
   verifyImageMigration,
   checkUpdateStatus,
   markUpdateComplete,
+  updateTagName,
+  getTrainingRecordCount,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -66,10 +68,12 @@ import {
 } from "@/lib/auth";
 import { formatTimeRange } from "@/lib/utils";
 import path from "path";
+import os from "os";
 import fs from "fs/promises";
 import split2 from "split2";
 import fileStorage from "@/lib/fileStorage";
 import { getLocalVersionInfo } from "@/lib/version";
+import TrainingDataGenerator from "@/lib/training";
 
 export async function handleGetTags() {
   return await dbGetTags();
@@ -113,9 +117,13 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
     const tagStats = metrics.tag_stats || [];
     const totalTaggedPlates = tagStats.reduce((sum, tag) => sum + tag.count, 0);
 
+    // Process camera stats
+    const cameraData = metrics.camera_counts || [];
+
     return {
       ...metrics,
       time_distribution: timeDistribution,
+      camera_counts: cameraData,
       tag_stats: tagStats.map((tag) => ({
         ...tag,
         percentage: ((tag.count / totalTaggedPlates) * 100).toFixed(1),
@@ -125,6 +133,7 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
     console.error("Error fetching dashboard metrics:", error);
     return {
       time_distribution: [],
+      camera_counts: [],
       total_plates_count: 0,
       total_reads: 0,
       unique_plates: 0,
@@ -710,6 +719,13 @@ export async function updateSettings(formData) {
         host: formData.get("bihost"),
       };
     }
+    if (updateIfExists("trainingEnabled") || updateIfExists("trainingName")) {
+      newConfig.training = {
+        ...currentConfig.training,
+        enabled: formData.get("trainingEnabled") === "true",
+        name: formData.get("trainingName"),
+      };
+    }
     const result = await saveConfig(newConfig);
     if (!result.success) {
       return { success: false, error: result.error };
@@ -1081,6 +1097,55 @@ export async function skipImageMigration() {
     return { success: true };
   } catch (error) {
     console.error("Error in skipImageMigration:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function generateTrainingData() {
+  try {
+    const config = await getConfig();
+
+    console.log("Starting training data generation and upload process");
+    const tmpDir = path.join(os.tmpdir(), "alpr-training-" + Date.now());
+    const generator = new TrainingDataGenerator(tmpDir);
+    await generator.generateAndUpload();
+
+    return {
+      success: true,
+      ocrCount: generator.stats.ocr.totalCount,
+      licensePlateCount: generator.stats.licensePlate.totalCount,
+      message: "Training data generated and uploaded successfully",
+    };
+  } catch (error) {
+    console.error("Error generating training data:", error);
+    throw new Error(error.message || "Failed to generate training data");
+  }
+}
+
+export async function processTrainingData() {
+  try {
+    // Check if training is enabled in settings
+    const config = await getConfig();
+    if (!config?.training?.enabled) {
+      return { success: false, message: "Training not enabled" };
+    }
+
+    // Check if we have enough records
+    const { newRecordsCount } = await getTrainingRecordCount();
+    if (newRecordsCount < 500) {
+      return { success: false, message: "Not enough new records" };
+    }
+
+    // Create temp directory
+    const tempDir = path.join(os.tmpdir(), `alpr-training-${Date.now()}`);
+
+    // Start the generator
+    const generator = new TrainingDataGenerator(tempDir);
+    await generator.generateAndUpload();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error processing training data:", error);
     return { success: false, error: error.message };
   }
 }

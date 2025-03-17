@@ -18,6 +18,8 @@ import {
   ChevronsUpDown,
   Eye,
   EyeOff,
+  MoreHorizontal,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,6 +67,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
   Card,
@@ -138,13 +142,6 @@ const isWithinDateRange = (firstSeenDate, selectedDateRange) => {
   );
   const formattedFirstSeenDate = formatTimestamp(firstSeenDate);
 
-  // Print the formatted dates for debugging
-  // console.log("Comparing dates...");
-  // console.log("Formatted First Seen Date:", formattedFirstSeenDate);
-  // console.log("Formatted Start Date:", startDate);
-  // console.log("Formatted End Date:", endDate);
-
-  // Compare formatted date strings lexicographically
   return (
     formattedFirstSeenDate >= startDate && formattedFirstSeenDate <= endDate
   );
@@ -164,6 +161,7 @@ export default function PlateTable() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [plateInsights, setPlateInsights] = useState(null);
   const [date, setDate] = useState({ from: undefined, to: undefined });
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({
     key: "last_seen_at",
@@ -218,53 +216,6 @@ export default function PlateTable() {
     };
     fetchTimeFormat();
   }, []);
-
-  // useEffect(() => {
-  //   // console.log("Filtering data...");
-  //   const filtered = data.filter((plate) => {
-  //     const firstSeenDate = new Date(plate.first_seen_at);
-  //     const withinDateRange = isWithinDateRange(
-  //       firstSeenDate,
-  //       selectedDateRange
-  //     );
-  //     // console.log("Is within date range:", withinDateRange);
-
-  //     return (
-  //       withinDateRange &&
-  //       (searchTerm === "" ||
-  //         plate.plate_number
-  //           .toLowerCase()
-  //           .includes(searchTerm.toLowerCase())) &&
-  //       (selectedTag === "all" ||
-  //         plate.tags?.some((tag) => tag.name === selectedTag))
-  //     );
-  //   });
-
-  //   const sorted = [...filtered].sort((a, b) => {
-  //     switch (sortConfig.key) {
-  //       case "occurrence_count":
-  //         return sortConfig.direction === "asc"
-  //           ? a.occurrence_count - b.occurrence_count
-  //           : b.occurrence_count - a.occurrence_count;
-  //       case "first_seen_at":
-  //         return sortConfig.direction === "asc"
-  //           ? new Date(a.first_seen_at) - new Date(b.first_seen_at)
-  //           : new Date(b.first_seen_at) - new Date(a.first_seen_at);
-  //       case "last_seen_at":
-  //         return sortConfig.direction === "asc"
-  //           ? a.days_since_last_seen - b.days_since_last_seen
-  //           : b.days_since_last_seen - a.days_since_last_seen;
-  //       case "plate_number":
-  //         return sortConfig.direction === "asc"
-  //           ? a.plate_number.localeCompare(b.plate_number)
-  //           : b.plate_number.localeCompare(a.plate_number);
-  //       default:
-  //         return 0;
-  //     }
-  //   });
-
-  //   setFilteredData(sorted);
-  // }, [data, searchTerm, selectedTag, selectedDateRange, sortConfig]);
 
   const formatLastSeen = (timestamp) => {
     if (timeFormat == 24) {
@@ -448,102 +399,218 @@ export default function PlateTable() {
     setPage((prev) => Math.min(pageCount, prev + 1));
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center space-x-2">
-        <div className="flex items-center space-x-2">
-          <Search className="text-gray-400 dark:text-gray-500" />
-          <Input
-            placeholder="Search plates, names, or notes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
-          />
-
-          <Select value={selectedTag} onValueChange={setSelectedTag}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                <div className="flex gap-3 items-center">
-                  <Filter className=" w-4 h-4" />
-                  All tags
-                </div>
-              </SelectItem>
-              {availableTags.map((tag) => (
-                <SelectItem key={tag.name} value={tag.name}>
-                  <div className="flex items-center">
-                    <div
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    {tag.name}
-                  </div>
-                </SelectItem>
-              ))}
-              <SelectItem value="untagged">
-                <div className="flex gap-3 items-center">
+  // Mobile filter sheet content
+  const MobileFilters = () => (
+    <div className="space-y-6 py-4">
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Filter by Tag</h4>
+        <Select value={selectedTag} onValueChange={setSelectedTag}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select tag" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <div className="flex gap-3 items-center">
+                <Filter className="w-4 h-4" />
+                All tags
+              </div>
+            </SelectItem>
+            {availableTags.map((tag) => (
+              <SelectItem key={tag.name} value={tag.name}>
+                <div className="flex items-center">
                   <div
                     className="w-3 h-3 rounded-full mr-2"
-                    style={{ backgroundColor: "#6B7280" }}
+                    style={{ backgroundColor: tag.color }}
                   />
-                  Untagged
+                  {tag.name}
                 </div>
               </SelectItem>
-            </SelectContent>
-          </Select>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[240px] justify-start text-left font-normal"
+            ))}
+            <SelectItem value="untagged">
+              <div className="flex gap-3 items-center">
+                <div
+                  className="w-3 h-3 rounded-full mr-2"
+                  style={{ backgroundColor: "#6B7280" }}
+                />
+                Untagged
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium">Date Range</h4>
+        <CalendarComponent
+          mode="range"
+          defaultMonth={date?.from}
+          selected={date}
+          onSelect={(range) => {
+            if (range && range.from) {
+              setDate({ from: range.from, to: range.to || undefined });
+            }
+          }}
+          className="rounded-md border"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium">Results Per Page</h4>
+        <Select
+          value={pageSize.toString()}
+          onValueChange={handlePageSizeChange}
+        >
+          <SelectTrigger>
+            <SelectValue>{pageSize}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 25, 50, 100].map((size) => (
+              <SelectItem key={size} value={size.toString()}>
+                {size} results per page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="pt-4 flex space-x-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => {
+            setSearchTerm("");
+            setSelectedTag("all");
+            setDate({ from: undefined, to: undefined });
+            setIsFilterSheetOpen(false);
+          }}
+        >
+          Clear Filters
+        </Button>
+        <Button className="flex-1" onClick={() => setIsFilterSheetOpen(false)}>
+          Apply Filters
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Search and Filters - Desktop & Mobile */}
+      <div className="flex justify-between items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="flex w-full sm:w-auto">
+            <Input
+              placeholder="Search plates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-64 dark:bg-[#161618]"
+              icon={
+                <Search
+                  size={16}
+                  className="text-gray-400 dark:text-gray-500"
+                />
+              }
+            />
+            {/* Mobile Filter Button */}
+            <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="ml-2 sm:hidden h-9 w-9 dark:bg-[#161618]"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="bottom"
+                className="h-[80vh] px-4 pt-0 pb-8 overflow-y-auto"
               >
-                <Calendar className="mr-2 h-4 w-4" />
-                {selectedDateRange &&
-                selectedDateRange[0] &&
-                selectedDateRange[1] ? (
-                  `${selectedDateRange[0].toDateString()} - ${selectedDateRange[1].toDateString()}`
-                ) : (
-                  <span>Filter by date range</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={(range) => {
-                  if (range && range.from) {
-                    // Ensure range.to is optional and correctly handled
-                    setDate({ from: range.from, to: range.to || undefined });
-                  }
-                }}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
-          {selectedDateRange &&
-            selectedDateRange[0] &&
-            selectedDateRange[1] && (
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedDateRange([null, null])}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Clear date range</span>
-              </Button>
-            )}
+                <SheetHeader className="sticky top-0 bg-background pt-4 pb-2 z-10">
+                  <SheetTitle>Filter Results</SheetTitle>
+                </SheetHeader>
+                <MobileFilters />
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Desktop Filters */}
+          <div className="hidden sm:flex space-x-2">
+            <Select value={selectedTag} onValueChange={setSelectedTag}>
+              <SelectTrigger className="dark:bg-[#161618]">
+                <SelectValue placeholder="Filter by tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex gap-3 items-center">
+                    <Filter className="w-4 h-4" />
+                    All tags
+                  </div>
+                </SelectItem>
+                {availableTags.map((tag) => (
+                  <SelectItem key={tag.name} value={tag.name}>
+                    <div className="flex items-center">
+                      <div
+                        className="w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      {tag.name}
+                    </div>
+                  </SelectItem>
+                ))}
+                <SelectItem value="untagged">
+                  <div className="flex gap-3 items-center">
+                    <div
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: "#6B7280" }}
+                    />
+                    Untagged
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-[240px] justify-start text-left font-normal dark:bg-[#161618]"
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {selectedDateRange &&
+                  selectedDateRange[0] &&
+                  selectedDateRange[1] ? (
+                    `${selectedDateRange[0].toDateString()} - ${selectedDateRange[1].toDateString()}`
+                  ) : (
+                    <span>Filter by date range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={(range) => {
+                    if (range && range.from) {
+                      setDate({ from: range.from, to: range.to || undefined });
+                    }
+                  }}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Results per page - Desktop only */}
+        <div className="hidden sm:flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Show</span>
           <Select
             value={pageSize.toString()}
             onValueChange={handlePageSizeChange}
           >
-            <SelectTrigger className="w-[80px]">
+            <SelectTrigger className="w-[80px] dark:bg-[#161618]">
               <SelectValue>{pageSize}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -557,117 +624,420 @@ export default function PlateTable() {
           <span className="text-sm text-muted-foreground">per page</span>
         </div>
       </div>
-      <div className="rounded-md border dark:border-gray-700">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("plate_number")}
-                  className="h-8 flex items-center font-semibold p-0"
-                >
-                  Plate Number
-                  {getSortIcon("plate_number")}
-                </Button>
-              </TableHead>
-              <TableHead className="w-[140px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("occurrence_count")}
-                  className="h-8 flex items-center font-semibold p-0"
-                >
-                  Seen
-                  {getSortIcon("occurrence_count")}
-                </Button>
-              </TableHead>
-              <TableHead className="w-56 2xl:w-96">Name</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="w-[180px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("first_seen_at")}
-                  className="h-8 flex items-center font-semibold p-0"
-                >
-                  First Seen
-                  {getSortIcon("first_seen_at")}
-                </Button>
-              </TableHead>
-              <TableHead className="w-[240px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => requestSort("last_seen_at")}
-                  className="h-8 flex items-center font-semibold p-0"
-                >
-                  Last Seen
-                  {getSortIcon("last_seen_at")}
-                </Button>
-              </TableHead>
-              <TableHead className="w-[150px]">Tags</TableHead>
-              <TableHead className="w-[120px] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((plate) => (
-              <TableRow key={plate.plate_number}>
-                <TableCell className="font-mono text-lg font-medium">
-                  <span
-                    className={`px-2 cursor-pointer transition-colors duration-200
-                        ${plate.flagged ? "text-[#F31260]" : "text-primary"}
-                        hover:underline`}
-                    onClick={() => handleOpenInsights(plate.plate_number)}
+
+      {/* Active filters display on mobile */}
+      {(searchTerm || selectedTag !== "all" || date.from) && (
+        <div className="flex sm:hidden items-center gap-2 mb-4 overflow-x-auto pb-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            Active filters:
+          </span>
+
+          {searchTerm && (
+            <Badge variant="outline" className="text-xs h-6 whitespace-nowrap">
+              Search: {searchTerm}
+            </Badge>
+          )}
+
+          {selectedTag !== "all" && (
+            <Badge variant="outline" className="text-xs h-6 whitespace-nowrap">
+              Tag: {selectedTag}
+            </Badge>
+          )}
+
+          {date.from && (
+            <Badge variant="outline" className="text-xs h-6 whitespace-nowrap">
+              Date: {date.from.toLocaleDateString()}
+              {date.to && ` - ${date.to.toLocaleDateString()}`}
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* Desktop Table View */}
+      <div className="rounded-md border dark:bg-[#0e0e10]">
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[180px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort("plate_number")}
+                    className="h-8 flex items-center font-semibold p-0"
                   >
-                    {plate.plate_number}
-                  </span>
-                </TableCell>
-                <TableCell>{plate.occurrence_count}</TableCell>
-                <TableCell>{plate.name}</TableCell>
-                <TableCell>{plate.notes}</TableCell>
-                <TableCell>{formatFirstSeen(plate.first_seen_at)}</TableCell>
-                <TableCell>{formatLastSeen(plate.last_seen_at)}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {plate.tags?.length > 0 ? (
-                      plate.tags.map((tag) => (
-                        <Badge
-                          key={tag.name}
-                          variant="secondary"
-                          className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
-                          style={{ backgroundColor: tag.color, color: "#fff" }}
+                    Plate Number
+                    {getSortIcon("plate_number")}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[140px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort("occurrence_count")}
+                    className="h-8 flex items-center font-semibold p-0"
+                  >
+                    Seen
+                    {getSortIcon("occurrence_count")}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-56 2xl:w-96">Name</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead className="w-[180px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort("first_seen_at")}
+                    className="h-8 flex items-center font-semibold p-0"
+                  >
+                    First Seen
+                    {getSortIcon("first_seen_at")}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[240px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => requestSort("last_seen_at")}
+                    className="h-8 flex items-center font-semibold p-0"
+                  >
+                    Last Seen
+                    {getSortIcon("last_seen_at")}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[150px]">Tags</TableHead>
+                <TableHead className="w-[120px] text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-4">
+                    No results found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((plate) => (
+                  <TableRow key={plate.plate_number}>
+                    <TableCell className="font-mono text-lg font-medium">
+                      <span
+                        className={`px-2 cursor-pointer transition-colors duration-200
+                            ${plate.flagged ? "text-[#F31260]" : "text-primary"}
+                            hover:underline`}
+                        onClick={() => handleOpenInsights(plate.plate_number)}
+                      >
+                        {plate.plate_number}
+                      </span>
+                    </TableCell>
+                    <TableCell>{plate.occurrence_count}</TableCell>
+                    <TableCell>{plate.name}</TableCell>
+                    <TableCell>{plate.notes}</TableCell>
+                    <TableCell>
+                      {formatFirstSeen(plate.first_seen_at)}
+                    </TableCell>
+                    <TableCell>{formatLastSeen(plate.last_seen_at)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {plate.tags?.length > 0 ? (
+                          plate.tags.map((tag) => (
+                            <Badge
+                              key={tag.name}
+                              variant="secondary"
+                              className="text-xs py-0.5 pl-2 pr-1 flex items-center space-x-1"
+                              style={{
+                                backgroundColor: tag.color,
+                                color: "#fff",
+                              }}
+                            >
+                              <span>{tag.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                                onClick={() =>
+                                  handleRemoveTag(plate.plate_number, tag.name)
+                                }
+                              >
+                                <X className="h-3 w-3" />
+                                <span className="sr-only">
+                                  Remove {tag.name} tag
+                                </span>
+                              </Button>
+                            </Badge>
+                          ))
+                        ) : (
+                          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                            No tags
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Tag className="h-4 w-4" />
+                              <span className="sr-only">Add tag</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {availableTags.map((tag) => (
+                              <DropdownMenuItem
+                                key={tag.name}
+                                onClick={() =>
+                                  handleAddTag(plate.plate_number, tag.name)
+                                }
+                              >
+                                <div className="flex items-center">
+                                  <div
+                                    className="w-3 h-3 rounded-full mr-2"
+                                    style={{ backgroundColor: tag.color }}
+                                  />
+                                  {tag.name}
+                                </div>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setActivePlate(plate);
+                            setIsAddKnownPlateOpen(true);
+                          }}
                         >
-                          <span>{tag.name}</span>
+                          <Plus className="h-4 w-4" />
+                          <span className="sr-only">Add to known plates</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={
+                            plate.flagged
+                              ? "text-red-500 hover:text-red-700"
+                              : ""
+                          }
+                          onClick={() =>
+                            handleToggleFlag(plate.plate_number, !plate.flagged)
+                          }
+                        >
+                          <Flag
+                            className={`h-4 w-4 ${
+                              plate.flagged ? "fill-current" : ""
+                            }`}
+                          />
+                          <span className="sr-only">
+                            {plate.flagged ? "Remove flag" : "Add flag"}
+                          </span>
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => {
+                            setActivePlate(plate);
+                            setIsDeleteConfirmOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete record</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="sm:hidden">
+          {data.length === 0 ? (
+            <div className="p-4 text-center">No results found</div>
+          ) : (
+            <div className="divide-y">
+              {data.map((plate) => (
+                <div
+                  key={plate.plate_number}
+                  className="p-4 group hover:bg-muted/30 transition-colors"
+                >
+                  {/* Header: Plate Number + Flag Status + Actions */}
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-mono text-lg font-medium cursor-pointer
+                        ${plate.flagged ? "text-[#F31260]" : "text-primary"}`}
+                        onClick={() => handleOpenInsights(plate.plate_number)}
+                      >
+                        {plate.plate_number}
+                      </span>
+                      {plate.flagged && (
+                        <Flag className="h-4 w-4 fill-current text-red-500" />
+                      )}
+                    </div>
+
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpenInsights(plate.plate_number)}
+                        className="h-8 w-8"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-4 w-4 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                            className="h-8 w-8"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setActivePlate(plate);
+                              setIsAddKnownPlateOpen(true);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Edit Details
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
                             onClick={() =>
-                              handleRemoveTag(plate.plate_number, tag.name)
+                              handleToggleFlag(
+                                plate.plate_number,
+                                !plate.flagged
+                              )
                             }
                           >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">
-                              Remove {tag.name} tag
-                            </span>
-                          </Button>
-                        </Badge>
-                      ))
-                    ) : (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                        No tags
+                            <Flag
+                              className={`h-4 w-4 mr-2 ${
+                                plate.flagged ? "fill-current text-red-500" : ""
+                              }`}
+                            />
+                            {plate.flagged ? "Remove Flag" : "Add Flag"}
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => {
+                              setActivePlate(plate);
+                              setIsDeleteConfirmOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Record
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="space-y-2 mb-3">
+                    {/* Name & Notes */}
+                    {(plate.name || plate.notes) && (
+                      <div className="bg-secondary/20 rounded-md p-2.5">
+                        {plate.name && (
+                          <div className="font-medium text-base mb-1">
+                            {plate.name}
+                          </div>
+                        )}
+                        {plate.notes && (
+                          <div className="text-sm text-muted-foreground">
+                            {plate.notes}
+                          </div>
+                        )}
                       </div>
                     )}
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div className="border-l-2 border-primary/40 pl-2">
+                        <div className="text-xs text-muted-foreground">
+                          Seen
+                        </div>
+                        <div className="font-medium">
+                          {plate.occurrence_count} times
+                        </div>
+                      </div>
+
+                      <div className="border-l-2 border-primary/40 pl-2">
+                        <div className="text-xs text-muted-foreground">
+                          First Seen
+                        </div>
+                        <div className="font-medium">
+                          {formatFirstSeen(plate.first_seen_at)}
+                        </div>
+                      </div>
+
+                      <div className="border-l-2 border-primary/40 pl-2 col-span-2">
+                        <div className="text-xs text-muted-foreground">
+                          Last Seen
+                        </div>
+                        <div className="font-medium">
+                          {formatLastSeen(plate.last_seen_at)}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="text-xs font-medium text-muted-foreground mr-1">
+                      Tags:
+                    </div>
+
+                    {plate.tags?.length > 0 ? (
+                      <>
+                        {plate.tags.map((tag) => (
+                          <Badge
+                            key={tag.name}
+                            variant="secondary"
+                            className="text-[10px] py-0.5 pl-2 pr-1 flex items-center gap-1"
+                            style={{
+                              backgroundColor: tag.color,
+                              color: "#fff",
+                            }}
+                          >
+                            <span>{tag.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-3 w-3 p-0 hover:bg-red-500 hover:text-white rounded-full"
+                              onClick={() =>
+                                handleRemoveTag(plate.plate_number, tag.name)
+                              }
+                            >
+                              <X className="h-2 w-2" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">
+                        None
+                      </span>
+                    )}
+
+                    {/* Add tag button */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Tag className="h-4 w-4" />
-                          <span className="sr-only">Add tag</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-5 text-[10px] px-1.5 ml-auto"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Tag
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent>
                         {availableTags.map((tag) => (
                           <DropdownMenuItem
                             key={tag.name}
@@ -686,58 +1056,17 @@ export default function PlateTable() {
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setActivePlate(plate);
-                        setIsAddKnownPlateOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="sr-only">Add to known plates</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={
-                        plate.flagged ? "text-red-500 hover:text-red-700" : ""
-                      }
-                      onClick={() =>
-                        handleToggleFlag(plate.plate_number, !plate.flagged)
-                      }
-                    >
-                      <Flag
-                        className={`h-4 w-4 ${
-                          plate.flagged ? "fill-current" : ""
-                        }`}
-                      />
-                      <span className="sr-only">
-                        {plate.flagged ? "Remove flag" : "Add flag"}
-                      </span>
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => {
-                        setActivePlate(plate);
-                        setIsDeleteConfirmOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete record</span>
-                    </Button>
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="flex items-center justify-between ">
-        <div className="text-sm text-muted-foreground">
+
+      {/* Pagination - Mobile & Desktop */}
+      <div className="flex items-center justify-between">
+        <div className="text-xs sm:text-sm text-muted-foreground">
           Showing {(page - 1) * pageSize + 1} to{" "}
           {Math.min(page * pageSize, totalCount)} of {totalCount} results
         </div>
@@ -761,17 +1090,21 @@ export default function PlateTable() {
         </div>
       </div>
 
+      {/* Dialogs */}
       <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add to Known Plates</DialogTitle>
+            <DialogTitle>Edit Known Plate</DialogTitle>
             <DialogDescription>
-              Add details for the plate {activePlate?.plate_number}
+              Update details for the plate {activePlate?.plate_number}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label
+                htmlFor="name"
+                className="text-right sm:text-left col-span-4 sm:col-span-1"
+              >
                 Name
               </Label>
               <Input
@@ -780,11 +1113,14 @@ export default function PlateTable() {
                 onChange={(e) =>
                   setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
                 }
-                className="col-span-3"
+                className="col-span-4 sm:col-span-3"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="notes" className="text-right">
+              <Label
+                htmlFor="notes"
+                className="text-right sm:text-left col-span-4 sm:col-span-1"
+              >
                 Notes
               </Label>
               <Textarea
@@ -793,20 +1129,31 @@ export default function PlateTable() {
                 onChange={(e) =>
                   setNewKnownPlate({ ...newKnownPlate, notes: e.target.value })
                 }
-                className="col-span-3"
+                className="col-span-4 sm:col-span-3"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button type="submit" onClick={handleAddKnownPlate}>
-              Add to Known Plates
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddKnownPlateOpen(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleAddKnownPlate}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
@@ -814,14 +1161,19 @@ export default function PlateTable() {
               undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setIsDeleteConfirmOpen(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteRecord}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRecord}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               Delete
             </Button>
           </DialogFooter>
@@ -831,14 +1183,16 @@ export default function PlateTable() {
       <Sheet open={isInsightsOpen} onOpenChange={setIsInsightsOpen}>
         <SheetContent
           side="right"
-          className="w-[900px] sm:max-w-[900px] lg:max-w-[1200px] overflow-y-auto"
+          className="w-full sm:w-[900px] sm:max-w-[900px] lg:max-w-[1200px] overflow-y-auto"
         >
           <SheetHeader>
             <Link
               href={`/live_feed?search=${plateInsights?.plateNumber}`}
               passHref
             >
-              <SheetTitle>Insights for {plateInsights?.plateNumber}</SheetTitle>
+              <SheetTitle className="text-xl">
+                Insights for {plateInsights?.plateNumber}
+              </SheetTitle>
             </Link>
             <SheetDescription>
               Detailed information about this plate
@@ -847,7 +1201,7 @@ export default function PlateTable() {
           {plateInsights && (
             <ScrollArea className="h-[calc(100vh-120px)] pr-4">
               <div className="mt-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Name
@@ -971,7 +1325,10 @@ export default function PlateTable() {
                   <CardFooter className="flex-col items-start gap-2 text-sm">
                     <div className="flex gap-2 font-medium leading-none">
                       Most active time:{" "}
-                      {formatTimeRange(plateInsights.mostActiveTime)}
+                      {formatTimeRange(
+                        plateInsights.mostActiveTime,
+                        timeFormat
+                      )}
                       <TrendingUp className="h-4 w-4" />
                     </div>
                     <div className="leading-none text-muted-foreground">
@@ -994,40 +1351,77 @@ export default function PlateTable() {
                       </Button>
                     </Link>
                   </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>Vehicle Description</TableHead>
-                        <TableHead>Image</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {plateInsights.recentReads.map((read, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="whitespace-nowrap">
+
+                  {/* Mobile-friendly recent reads display */}
+                  <div className="block sm:hidden space-y-3">
+                    {plateInsights.recentReads.map((read, index) => (
+                      <div
+                        key={index}
+                        className="flex gap-3 border rounded-md p-2"
+                      >
+                        <div className="w-20 h-16 relative flex-shrink-0">
+                          <Image
+                            src={
+                              read.thumbnail_path
+                                ? `/images/${read.thumbnail_path}`
+                                : read.imageData
+                                ? `data:image/jpeg;base64,${read.imageData}`
+                                : "/placeholder.jpg"
+                            }
+                            alt="Vehicle"
+                            className="object-cover rounded"
+                            fill
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs mb-1">
                             {formatTimestamp(read.timestamp, timeFormat)}
-                          </TableCell>
-                          <TableCell>{read.vehicleDescription}</TableCell>
-                          <TableCell>
-                            <Image
-                              src={
-                                read.thumbnail_path
-                                  ? `/images/${read.thumbnail_path}`
-                                  : read.imageData
-                                  ? `data:image/jpeg;base64,${read.imageData}`
-                                  : "/placeholder.jpg"
-                              }
-                              alt="Vehicle"
-                              className="object-cover rounded"
-                              width={80}
-                              height={60}
-                            />
-                          </TableCell>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {read.vehicleDescription || "No description"}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop table for recent reads */}
+                  <div className="hidden sm:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Timestamp</TableHead>
+                          <TableHead>Vehicle Description</TableHead>
+                          <TableHead>Image</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {plateInsights.recentReads.map((read, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="whitespace-nowrap">
+                              {formatTimestamp(read.timestamp, timeFormat)}
+                            </TableCell>
+                            <TableCell>{read.vehicleDescription}</TableCell>
+                            <TableCell>
+                              <Image
+                                src={
+                                  read.thumbnail_path
+                                    ? `/images/${read.thumbnail_path}`
+                                    : read.imageData
+                                    ? `data:image/jpeg;base64,${read.imageData}`
+                                    : "/placeholder.jpg"
+                                }
+                                alt="Vehicle"
+                                className="object-cover rounded"
+                                width={80}
+                                height={60}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             </ScrollArea>

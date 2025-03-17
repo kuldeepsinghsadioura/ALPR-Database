@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTransition, useOptimistic } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff, Settings2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,6 +50,7 @@ const navigation = [
   { title: "Blue Iris", id: "blueiris" },
   { title: "Security", id: "security" },
   { title: "Sharing & Privacy", id: "privacy" },
+  { title: "AI Training", id: "training" },
 ];
 
 export default function SettingsForm({ initialSettings, initialApiKey }) {
@@ -115,6 +116,15 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
           "metricsEnabled",
           formData.get("metricsEnabled") === "on"
         );
+        break;
+      case "training":
+        newFormData.append(
+          "trainingEnabled",
+          formData.get("trainingEnabled") === "on"
+        );
+        if (formData.get("trainingName")) {
+          newFormData.append("trainingName", formData.get("trainingName"));
+        }
         break;
     }
 
@@ -576,6 +586,46 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
     </div>
   );
 
+  const renderTrainingSection = () => (
+    <div key="privacy-section" className="space-y-4">
+      <h3 className="text-lg font-semibold">AI Training</h3>
+      <div className="flex items-center justify-between py-2 gap-4">
+        <div className="space-y-3 w-3/4">
+          <Label htmlFor="trainingEnabled" className="font-semibold text-md">
+            Generate and Share Training Data to Improve the ALPR Model
+          </Label>
+          <p className="text-muted-foreground">
+            Enabling this setting will generate annotated training image sets
+            from your recognitions. This data is collected from deployments to
+            create a more diverse and comprehensive dataset which will improve
+            the accuracy of the ALPR model. Your recognitions do not become
+            public.
+          </p>
+        </div>
+        <Switch
+          id="trainingEnabled"
+          name="trainingEnabled"
+          defaultChecked={initialSettings.training?.enabled}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <h4 className=" font-semibold">Optional Name / Username</h4>
+        <p className="text-muted-foreground mb-2">
+          By default, your training data will be shared anonymously. If you
+          would like to be recognized for your contribution, you can provide a
+          name or username.
+        </p>
+        <Input
+          id="trainingName"
+          name="trainingName"
+          defaultValue={initialSettings.training.name}
+          placeholder="@username"
+          autoComplete="off"
+        />
+      </div>
+    </div>
+  );
+
   const renderBlueirisSection = () => (
     <div key="mqtt-section" className="space-y-4">
       <h3 className="text-lg font-semibold">Blue Iris Configuration</h3>
@@ -616,6 +666,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
             return renderPrivacySection();
           case "blueiris":
             return renderBlueirisSection();
+          case "training":
+            return renderTrainingSection();
           default:
             return null;
         }
@@ -625,81 +677,79 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
 
   return (
     <DashboardLayout>
-      <div className="flex min-h-screen flex-col py-4 px-6">
-        <header className="border-b backdrop-blur">
-          <div className="container flex h-14 items-center">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-medium">System Settings</h1>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-16 items-center justify-between px-4">
+            <div className="flex items-center gap-4">
+              <Settings2 className="h-6 w-6" />
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Settings
+              </h1>
             </div>
           </div>
-          <nav className="container">
-            <div className="flex space-x-6">
-              {navigation.map((item) => (
-                <div key={item.id} className="relative">
-                  <a
+          <div className="container px-4">
+            <nav className="flex overflow-x-auto">
+              <div className="flex space-x-8 pb-4">
+                {navigation.map((item) => (
+                  <button
+                    key={item.id}
                     onClick={() => setActiveSection(item.id)}
-                    className={`flex h-14 items-center text-sm font-medium transition-colors hover:text-primary cursor-pointer ${
-                      item.id === activeSection
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    }`}
+                    className={`relative -mb-px flex items-center whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium transition-colors hover:text-primary
+                      ${
+                        item.id === activeSection
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:border-muted"
+                      }`}
                   >
                     {item.title}
-                  </a>
-                  {item.id === activeSection && (
-                    <div
-                      className="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ease-in-out"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </nav>
+                  </button>
+                ))}
+              </div>
+            </nav>
+          </div>
         </header>
 
-        <div className="flex-1">
-          <div className="py-6">
-            {error && (
-              <div className="mb-4 p-4 text-red-600 bg-red-50 rounded-md">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-4 p-4 text-green-600 bg-green-50 rounded-md">
-                Settings updated successfully!
-              </div>
-            )}
+        <main className="container mx-auto p-4 md:p-8 max-w-6xl">
+          {error && (
+            <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-6 rounded-lg border border-green-500/50 bg-green-500/10 p-4 text-green-600">
+              Settings updated successfully!
+            </div>
+          )}
 
-            {activeSection !== "security" ? (
-              <form action={handleSettingsSubmit}>
-                <Card className="w-full max-w-4xl py-6">
-                  {/* <CardTitle>ALPR Database Settings</CardTitle>
-                    <CardDescription>
-                      Configure your ALPR database application settings
-                    </CardDescription> */}
-
-                  <CardContent>{renderSection()}</CardContent>
-                  <CardFooter>
-                    <Button type="submit" disabled={isPending}>
-                      {isPending ? "Saving..." : "Save Settings"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
-            ) : (
-              <Card className="w-full max-w-4xl">
-                <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
-                  <CardDescription>
-                    Manage your security settings and API keys
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>{renderSection()}</CardContent>
+          {activeSection !== "security" ? (
+            <form action={handleSettingsSubmit}>
+              <Card className="transition-shadow hover:shadow-lg ">
+                <CardContent className="p-6 space-y-8">
+                  {renderSection()}
+                </CardContent>
+                <CardFooter className="flex justify-end gap-4 px-6 py-4 bg-muted/50 dark:bg-[#161618]">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="min-w-[100px]"
+                  >
+                    {isPending ? "Saving..." : "Save Settings"}
+                  </Button>
+                </CardFooter>
               </Card>
-            )}
-          </div>
-        </div>
+            </form>
+          ) : (
+            <Card className="transition-shadow hover:shadow-lg">
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Manage your security settings and API keys
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">{renderSection()}</CardContent>
+            </Card>
+          )}
+        </main>
       </div>
     </DashboardLayout>
   );

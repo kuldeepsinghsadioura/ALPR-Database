@@ -6,7 +6,7 @@ export default function PlateImage({ plate, onClick, className }) {
 
   const getImageUrl = () => {
     if (error || (!plate.image_path && !plate.image_data)) {
-      return "/placeholder-image.jpg";
+      return "/fallback.jpg";
     }
 
     // If we have a thumbnail path
@@ -29,7 +29,7 @@ export default function PlateImage({ plate, onClick, className }) {
       return `data:image/jpeg;base64,${plate.image_data}`;
     }
 
-    return "/placeholder-image.jpg";
+    return "/fallback.jpg";
   };
 
   return (
