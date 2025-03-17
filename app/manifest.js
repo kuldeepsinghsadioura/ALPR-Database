@@ -2,20 +2,17 @@ export default function manifest() {
   return {
     theme_color: "#000000",
     background_color: "#09090b",
-    icons: [
-      {
-        purpose: "maskable",
-        sizes: "512x512",
-        src: "icon512_maskable.png",
-        type: "image/png",
-      },
-      {
-        purpose: "any",
-        sizes: "512x512",
-        src: "icon512_rounded.png",
-        type: "image/png",
-      },
-    ],
+    icons: {
+      icon: [
+        {
+          url: "/1024.png",
+          sizes: "1024x1024",
+          type: "image/png",
+          purpose: "any",
+        },
+      ],
+      apple: [{ url: "/1024.png" }],
+    },
     orientation: "any",
     display: "standalone",
     dir: "auto",

@@ -304,6 +304,11 @@ export default function TPMSDashboard() {
 
   return (
     <DashboardLayout>
+      <h1>
+        If you are on this page, it is because you navigated to it manually.
+        This is just a preview of what the future TPMS functionality may look
+        like.
+      </h1>
       <div className="flex flex-col w-full min-h-screen">
         {/* Top navigation */}
         <div className="bg-background border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10">

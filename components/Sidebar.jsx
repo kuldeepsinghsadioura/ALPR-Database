@@ -39,7 +39,7 @@ const navItems = [
   { icon: BookMarked, label: "Known Plates", href: "/known_plates" },
   { icon: Flag, label: "Watchlist", href: "/flagged" },
   { icon: BellPlus, label: "Notifications", href: "/notifications" },
-  { icon: TPMS, label: "TPMS", href: "/tpms" },
+  // { icon: TPMS, label: "TPMS", href: "/tpms" },
 ];
 
 // Items to show in the mobile bottom navigation

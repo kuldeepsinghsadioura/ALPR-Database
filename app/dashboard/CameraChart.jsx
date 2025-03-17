@@ -72,7 +72,7 @@ export function CameraReadsChart({ data, loading }) {
               <BarChart
                 data={chartData}
                 margin={{
-                  top: 0,
+                  top: 25,
                   right: 25,
                   left: 0,
                   bottom: 25,

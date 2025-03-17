@@ -24,6 +24,10 @@ export async function middleware(request) {
     "/api/check-update",
     "/update",
     "/api/test",
+    "/180.png",
+    "/512.png",
+    "/192.png",
+    "/1024.png",
   ];
 
   // Check for API key in query parameters for iframe embeds (insecure)

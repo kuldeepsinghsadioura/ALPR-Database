@@ -292,8 +292,8 @@ export default function DashboardMetrics() {
   return (
     <div className="space-y-4">
       {/* Header - Made responsive */}
-      <div className="flex flex-col sm:flex-row justify-between pt-4 gap-4">
-        <div className="flex flex-col sm:flex-row sm:gap-8 items-start sm:items-baseline mb-2 sm:mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start pt-4 gap-4">
+        <div className="flex flex-col sm:flex-row sm:gap-8 items-center sm:items-baseline mb-2 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">
             License Plate Dashboard
           </h1>

@@ -3,16 +3,15 @@
   "background_color": "#09090b",
   "icons": [
     {
-      "purpose": "maskable",
-      "sizes": "512x512",
-      "src": "icon512_maskable.png",
+      "src": "/192.png",
+      "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "purpose": "any",
-      "sizes": "512x512",
-      "src": "icon512_rounded.png",
-      "type": "image/png"
+      "src": "/1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "orientation": "any",

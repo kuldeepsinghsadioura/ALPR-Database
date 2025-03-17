@@ -44,6 +44,7 @@ import {
   checkUpdateStatus,
   markUpdateComplete,
   updateTagName,
+  getTrainingRecordCount,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -1102,6 +1103,9 @@ export async function skipImageMigration() {
 
 export async function generateTrainingData() {
   try {
+    const config = await getConfig();
+
+    console.log("Starting training data generation and upload process");
     const tmpDir = path.join(os.tmpdir(), "alpr-training-" + Date.now());
     const generator = new TrainingDataGenerator(tmpDir);
     await generator.generateAndUpload();
@@ -1115,5 +1119,33 @@ export async function generateTrainingData() {
   } catch (error) {
     console.error("Error generating training data:", error);
     throw new Error(error.message || "Failed to generate training data");
+  }
+}
+
+export async function processTrainingData() {
+  try {
+    // Check if training is enabled in settings
+    const config = await getConfig();
+    if (!config?.training?.enabled) {
+      return { success: false, message: "Training not enabled" };
+    }
+
+    // Check if we have enough records
+    const { newRecordsCount } = await getTrainingRecordCount();
+    if (newRecordsCount < 500) {
+      return { success: false, message: "Not enough new records" };
+    }
+
+    // Create temp directory
+    const tempDir = path.join(os.tmpdir(), `alpr-training-${Date.now()}`);
+
+    // Start the generator
+    const generator = new TrainingDataGenerator(tempDir);
+    await generator.generateAndUpload();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error processing training data:", error);
+    return { success: false, error: error.message };
   }
 }

@@ -66,6 +66,7 @@ export default function LoginPage() {
                   name="password"
                   type="password"
                   required
+                  autoComplete="current-password"
                   autoFocus
                   placeholder="Enter your password"
                   className="h-10 sm:h-12 px-4 bg-background/50"

@@ -22,10 +22,17 @@ export const metadata = {
   title: "ALPR Database",
   description: "algertc/alpr-database",
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "196x196", type: "image/png" }],
-    apple: [{ url: "/180.png" }],
+    icon: [
+      {
+        url: "/1024.png",
+        sizes: "1024x1024",
+        type: "image/png",
+        purpose: "any",
+      },
+    ],
+    apple: [{ url: "/1024.png" }],
   },
-  appleTouchIcon: "/180.png",
+  appleTouchIcon: "/1024.png",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -94,11 +101,16 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense fallback={<DashboardSkeleton />}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
