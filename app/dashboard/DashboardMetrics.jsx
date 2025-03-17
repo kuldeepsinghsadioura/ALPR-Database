@@ -59,6 +59,7 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { DummyChart } from "./dummyChart";
 import { FaRoad, FaGithub, FaDocker } from "react-icons/fa";
+import CameraReadsChart from "./CameraChart";
 
 export function formatTimeRange(hour, timeFormat) {
   if (timeFormat === 24) {
@@ -373,9 +374,7 @@ export default function DashboardMetrics() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      interval={
-                        window.innerWidth < 640 ? 3 : "preserveStartEnd"
-                      }
+                      interval="preserveEnd"
                       tick={(props) => {
                         const { x, y, payload } = props;
                         return (
@@ -387,7 +386,7 @@ export default function DashboardMetrics() {
                               textAnchor="end"
                               fill="currentColor"
                               transform="rotate(-45)"
-                              className="text-[10px] sm:text-xs md:text-sm"
+                              className="text-[10px] sm:text-xs md:text-xs"
                             >
                               {payload.value}
                             </text>
@@ -585,7 +584,7 @@ export default function DashboardMetrics() {
       {/* Bottom section - Made responsive */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Metrics Grid */}
-        <div className="xl:col-span-8 space-y-4">
+        <div className="xl:col-span-8 grid grid-rows-auto gap-4">
           <div className="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4">
             <MetricCard
               title="Total Unique Plates"
@@ -616,7 +615,12 @@ export default function DashboardMetrics() {
               loading={loading}
             />
           </div>
-          <DummyChart />
+          <div className="w-full">
+            <CameraReadsChart
+              data={metrics.camera_counts || []}
+              loading={loading}
+            />
+          </div>
         </div>
 
         {/* Tag Distribution Chart */}

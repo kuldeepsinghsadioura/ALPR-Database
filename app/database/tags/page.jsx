@@ -213,8 +213,8 @@ const ElegantTagManagement = () => {
             <div className="flex flex-wrap gap-2 sm:gap-3 pt-2 sm:pt-4">
               {tags?.length === 0 ? (
                 <div className="w-full text-center py-6 text-muted-foreground">
-                  No tags available. Create your first tag with the "Add Tag"
-                  button.
+                  No tags available. Create your first tag with the &ldquo;Add
+                  Tag&rdquo; button.
                 </div>
               ) : (
                 tags?.map((tag) => (

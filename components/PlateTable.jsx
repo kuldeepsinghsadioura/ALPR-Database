@@ -1612,7 +1612,7 @@ export default function PlateTable({
             }
           }}
         >
-          <DialogContent className="max-w-7xl sm:max-w-7xl w-[calc(100vw-32px)] sm:w-auto">
+          <DialogContent className="max-w-7xl sm:max-w-7xl w-[calc(100vw-32px)] sm:w-2/3">
             <DialogHeader>
               <DialogTitle>
                 License Plate Image - {selectedImage?.plateNumber}

@@ -38,33 +38,59 @@ END $$;
 CREATE OR REPLACE FUNCTION update_plate_occurrence_count()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Handle INSERT operation
     IF TG_OP = 'INSERT' THEN
         INSERT INTO plates (plate_number, occurrence_count)
         VALUES (NEW.plate_number, 1)
         ON CONFLICT (plate_number)
         DO UPDATE SET occurrence_count = plates.occurrence_count + 1;
-    ELSIF TG_OP = 'DELETE' THEN
+    
+    -- Handle UPDATE operation (plate number correction)
+    ELSIF TG_OP = 'UPDATE' AND OLD.plate_number != NEW.plate_number THEN
+        -- Increment the new plate number count (or create if not exists)
+        INSERT INTO plates (plate_number, occurrence_count)
+        VALUES (NEW.plate_number, 1)
+        ON CONFLICT (plate_number)
+        DO UPDATE SET occurrence_count = plates.occurrence_count + 1;
+        
+        -- Only decrement the old plate if it still exists
         UPDATE plates 
         SET occurrence_count = occurrence_count - 1
         WHERE plate_number = OLD.plate_number;
         
+        -- Clean up if occurrence count reaches zero
+        DELETE FROM plates
+        WHERE plate_number = OLD.plate_number
+        AND occurrence_count <= 0;
+    
+    -- Handle DELETE operation
+    ELSIF TG_OP = 'DELETE' THEN
+        -- Only attempt to decrement if the plate still exists
+        UPDATE plates 
+        SET occurrence_count = occurrence_count - 1
+        WHERE plate_number = OLD.plate_number;
+        
+        -- Clean up if occurrence count reaches zero
         DELETE FROM plates
         WHERE plate_number = OLD.plate_number
         AND occurrence_count <= 0;
     END IF;
+    
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger if not exists
+-- Update trigger to also handle UPDATE operations
 DO $$ 
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'plate_reads_count_trigger') THEN
-        CREATE TRIGGER plate_reads_count_trigger
-        AFTER INSERT OR DELETE ON plate_reads
-        FOR EACH ROW
-        EXECUTE FUNCTION update_plate_occurrence_count();
-    END IF;
+    -- Drop the existing trigger if it exists
+    DROP TRIGGER IF EXISTS plate_reads_count_trigger ON plate_reads;
+    
+    -- Create the updated trigger
+    CREATE TRIGGER plate_reads_count_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON plate_reads
+    FOR EACH ROW
+    EXECUTE FUNCTION update_plate_occurrence_count();
 END $$;
 
 -- Clerical stuff

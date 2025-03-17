@@ -43,6 +43,7 @@ import {
   verifyImageMigration,
   checkUpdateStatus,
   markUpdateComplete,
+  updateTagName,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -115,9 +116,13 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
     const tagStats = metrics.tag_stats || [];
     const totalTaggedPlates = tagStats.reduce((sum, tag) => sum + tag.count, 0);
 
+    // Process camera stats
+    const cameraData = metrics.camera_counts || [];
+
     return {
       ...metrics,
       time_distribution: timeDistribution,
+      camera_counts: cameraData,
       tag_stats: tagStats.map((tag) => ({
         ...tag,
         percentage: ((tag.count / totalTaggedPlates) * 100).toFixed(1),
@@ -127,6 +132,7 @@ export async function getDashboardMetrics(timeZone, startDate, endDate) {
     console.error("Error fetching dashboard metrics:", error);
     return {
       time_distribution: [],
+      camera_counts: [],
       total_plates_count: 0,
       total_reads: 0,
       unique_plates: 0,

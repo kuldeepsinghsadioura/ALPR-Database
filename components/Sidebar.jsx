@@ -66,6 +66,16 @@ export function Sidebar() {
     setIsSheetOpen(false);
   };
 
+  const isPathActive = (path) => {
+    // Special case for root dashboard to avoid matching everything
+    if (path === "/dashboard") {
+      return pathname === "/dashboard" || pathname === "/";
+    }
+    // For other paths, check if the current path starts with this path
+    // but make sure it's a complete path segment match ("/live_feed" should match "/live_feed/something" but not "/live_feed_something")
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
+
   return (
     <>
       {/* Desktop Sidebar */}
@@ -80,7 +90,7 @@ export function Sidebar() {
                     onClick={() => router.push(item.href)}
                     className={cn(
                       "w-10 h-10 p-0 hover:bg-transparent [&:not(:disabled)]:hover:bg-transparent",
-                      pathname === item.href
+                      isPathActive(item.href)
                         ? "text-blue-500"
                         : "hover:text-blue-500"
                     )}
@@ -103,7 +113,7 @@ export function Sidebar() {
                   onClick={() => router.push("/logs")}
                   className={cn(
                     "w-10 h-10 p-0 hover:bg-transparent [&:not(:disabled)]:hover:bg-transparent",
-                    pathname === "/logs"
+                    isPathActive("/logs")
                       ? "text-blue-500"
                       : "hover:text-blue-500"
                   )}
@@ -123,7 +133,7 @@ export function Sidebar() {
                   onClick={() => router.push("/settings")}
                   className={cn(
                     "w-10 h-10 p-0 hover:bg-transparent [&:not(:disabled)]:hover:bg-transparent",
-                    pathname === "/settings"
+                    isPathActive("/settings")
                       ? "text-blue-500"
                       : "hover:text-blue-500"
                   )}
@@ -140,7 +150,7 @@ export function Sidebar() {
       </TooltipProvider>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t flex justify-around items-center h-16 z-50">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t flex justify-around items-center h-24 z-50 pb-4">
         {mobileNavItems.map((item) => (
           <Button
             key={item.href}
