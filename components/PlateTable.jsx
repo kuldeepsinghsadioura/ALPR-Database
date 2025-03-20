@@ -23,6 +23,8 @@ import {
   ZoomIn,
   MoreHorizontal,
   SlidersHorizontal,
+  CircleCheck,
+  Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,6 +123,7 @@ export default function PlateTable({
   onRemoveTag,
   onAddKnownPlate,
   onDeleteRecord,
+  onValidate,
   availableCameras,
   onCorrectPlate,
   timeFormat = 12,
@@ -247,6 +250,7 @@ export default function PlateTable({
       thumbnail: thumbnailUrl,
       plateNumber: plate.plate_number,
       id: plate.id,
+      validated: plate.validated,
       bi_path: bi_url,
       crop_coordinates: plate.crop_coordinates,
     });
@@ -255,6 +259,19 @@ export default function PlateTable({
     setZoom(1);
     setPosition({ x: 0, y: 0 });
   };
+
+  useEffect(() => {
+    if (selectedImage && data && data.length > 0) {
+      const currentPlate = data.find((plate) => plate.id === selectedImage.id);
+
+      if (currentPlate && currentPlate.validated !== selectedImage.validated) {
+        setSelectedImage((prev) => ({
+          ...prev,
+          validated: currentPlate.validated,
+        }));
+      }
+    }
+  }, [data, selectedImage]);
 
   const handleDownloadImage = async () => {
     if (!selectedImage) return;
@@ -1304,6 +1321,24 @@ export default function PlateTable({
                               <ExternalLink className="h-4 w-4" />
                             </Button>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={
+                              plate?.validated
+                                ? "text-green-500 hover:text-green-700"
+                                : ""
+                            }
+                            onClick={() => {
+                              onValidate(plate.id, !plate.validated);
+                            }}
+                          >
+                            {plate?.validated ? (
+                              <CircleCheck className="h-4 w-4" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                          </Button>
 
                           <Button
                             variant="ghost"
@@ -1692,6 +1727,21 @@ export default function PlateTable({
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={
+                      selectedImage?.validated
+                        ? "text-xs sm:text-sm text-green-500"
+                        : "text-xs sm:text-sm"
+                    }
+                    onClick={() => {
+                      onValidate(selectedImage.id, !selectedImage.validated);
+                    }}
+                  >
+                    <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="whitespace-nowrap">Confirm AI Label</span>
+                  </Button>
                 </div>
                 <div className="flex justify-end space-x-2">
                   {biHost && selectedImage?.bi_path && (

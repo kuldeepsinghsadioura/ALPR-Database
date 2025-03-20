@@ -9,6 +9,7 @@ import {
   deletePlateRead,
   tagPlate,
   untagPlate,
+  validatePlateRecord,
 } from "@/app/actions";
 
 export default function PlateTableWrapper({
@@ -109,6 +110,14 @@ export default function PlateTableWrapper({
     return result;
   };
 
+  const handleValidatePlate = async (id, value) => {
+    const result = await validatePlateRecord(id, value);
+    if (result.success) {
+      router.refresh();
+    }
+    return result;
+  };
+
   const handleSort = (field) => {
     const currentSortField = params.get("sortField") || "";
     const currentSortDirection = params.get("sortDirection") || "desc";
@@ -170,6 +179,7 @@ export default function PlateTableWrapper({
       onAddKnownPlate={handleAddKnownPlate}
       onDeleteRecord={handleDeleteRecord}
       onCorrectPlate={handleCorrectPlate}
+      onValidate={handleValidatePlate}
       onLiveChange={(isLive) => {
         if (isLive) {
           const interval = setInterval(() => {

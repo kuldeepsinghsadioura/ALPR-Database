@@ -79,7 +79,7 @@ export function CameraReadsChart({ data, loading }) {
                 }}
                 barGap={4}
               >
-                <CartesianGrid vertical={false} strokeWidth={0.2} />
+                <CartesianGrid vertical={false} strokeWidth={0.25} />
                 <XAxis
                   dataKey="camera"
                   tickLine={false}
@@ -143,7 +143,7 @@ export function CameraReadsChart({ data, loading }) {
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex-col items-start gap-1 text-xs pt-2 md:pb-0">
+      <CardFooter className="flex-col items-start gap-1 text-xs pt-2">
         <div className="flex gap-2 font-medium leading-none items-center">
           Most Active: {mostActiveCamera}
           <Camera className="h-4 w-4" />
