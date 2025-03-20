@@ -3,8 +3,8 @@
 
 ## [0.1.8] - 03-19-2025
 
-**This is a major update and requires some changes to your Blue Iris configuration and an update to the codeproject.ai ALPR module to take full advantage of the functionality.
-See release notes for more detail: https://github.com/algertc/ALPR-Database/releases**
+**This is a major update. It will require some changes to your Blue Iris configuration and an update to the codeproject.ai ALPR module to take full advantage of the functionality.
+See release notes for more detail on how to update the other systems: https://github.com/algertc/ALPR-Database/releases**
 
 - Automatic AI model training to improve recognition accuracy
 - Full UI/UX redux
