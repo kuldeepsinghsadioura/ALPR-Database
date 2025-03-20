@@ -328,7 +328,7 @@ export default function LiveRecognitionViewer({
           <div className="flex flex-col gap-4">
             {/* Plate number - largest and most prominent */}
             <div className="bg-background dark:bg-[#0e0e10] rounded-lg border p-5 flex-grow-0">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start w-80 2xl:w-[22rem]">
                 <div>
                   <div className="text-4xl font-mono font-bold tracking-wider">
                     {latestPlate.plate_number}
@@ -351,9 +351,9 @@ export default function LiveRecognitionViewer({
                   <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                   {formatTimestamp(latestPlate.timestamp)}
                 </div>
-                <div className="font-medium">
+                {/* <div className="font-medium">
                   Confidence: {formatConfidence(latestPlate.confidence)}
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -363,31 +363,64 @@ export default function LiveRecognitionViewer({
                 <div className="bg-background dark:bg-[#0e0e10] rounded-lg border p-4">
                   <h3 className="text-sm font-medium mb-3">Cropped Plate</h3>
                   <div className="flex items-center justify-center bg-black/5 rounded overflow-hidden p-1">
-                    <div
-                      style={{
-                        position: "relative",
-                        width: `${
-                          latestPlate.crop_coordinates[2] -
-                          latestPlate.crop_coordinates[0]
-                        }px`,
-                        height: `${
-                          latestPlate.crop_coordinates[3] -
-                          latestPlate.crop_coordinates[1]
-                        }px`,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <img
-                        src={getImageSrc(latestPlate)}
-                        alt={`License plate ${latestPlate.plate_number}`}
-                        style={{
-                          position: "absolute",
-                          left: `-${latestPlate.crop_coordinates[0]}px`,
-                          top: `-${latestPlate.crop_coordinates[1]}px`,
-                          maxWidth: "none",
-                        }}
-                      />
-                    </div>
+                    {(() => {
+                      // Original crop dimensions
+                      const cropWidth =
+                        latestPlate.crop_coordinates[2] -
+                        latestPlate.crop_coordinates[0];
+                      const cropHeight =
+                        latestPlate.crop_coordinates[3] -
+                        latestPlate.crop_coordinates[1];
+
+                      // Calculate aspect ratio
+                      const aspectRatio = cropWidth / cropHeight;
+
+                      // Minimum dimensions (as percentages of container width)
+                      const minWidthPercent = 50; // 50% of container width
+                      const containerWidth = 80 * 4 - 32; // w-80 = 20rem = 320px, minus padding
+
+                      // Calculate minimum width in pixels (based on container)
+                      const minWidth = (containerWidth * minWidthPercent) / 100;
+
+                      // Calculate scaling based on minimum width
+                      const scale =
+                        cropWidth < minWidth ? minWidth / cropWidth : 1;
+
+                      // Calculate dimensions respecting aspect ratio
+                      const finalWidth = Math.round(cropWidth * scale);
+                      const finalHeight = Math.round(cropHeight * scale);
+
+                      return (
+                        <div className="relative w-full flex justify-center">
+                          <div
+                            style={{
+                              position: "relative",
+                              width: `${finalWidth}px`,
+                              height: `${finalHeight}px`,
+                              maxWidth: "100%",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <img
+                              src={getImageSrc(latestPlate)}
+                              alt={`License plate ${latestPlate.plate_number}`}
+                              style={{
+                                position: "absolute",
+                                left: `-${
+                                  latestPlate.crop_coordinates[0] * scale
+                                }px`,
+                                top: `-${
+                                  latestPlate.crop_coordinates[1] * scale
+                                }px`,
+                                maxWidth: "none",
+                                transform: `scale(${scale})`,
+                                transformOrigin: "top left",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -461,7 +494,7 @@ export default function LiveRecognitionViewer({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="max-h-[350px] overflow-y-auto pr-2">
+                  <div className="h-full overflow-y-auto pr-2">
                     {plateInsights.recentReads?.length > 0 ? (
                       <div className="space-y-4">
                         {plateInsights.recentReads.map((read, index) => (

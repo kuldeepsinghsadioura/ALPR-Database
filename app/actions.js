@@ -45,6 +45,7 @@ import {
   markUpdateComplete,
   updateTagName,
   getTrainingRecordCount,
+  confirmPlateRecord,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -1147,5 +1148,16 @@ export async function processTrainingData() {
   } catch (error) {
     console.error("Error processing training data:", error);
     return { success: false, error: error.message };
+  }
+}
+
+export async function validatePlateRecord(readId, value) {
+  try {
+    await confirmPlateRecord(readId, value);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error validating plate record:", error);
+    return { success: false, error: "Failed to validate plate record" };
   }
 }

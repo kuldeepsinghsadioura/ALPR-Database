@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle, ExternalLink, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { getVersionInfo } from "@/lib/version";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FaLinux, FaWindows } from "react-icons/fa";
 
 const CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
 const DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
@@ -128,7 +130,7 @@ export default function VersionAlert() {
                 className="mr-2"
                 onClick={() => setIsModalOpen(true)}
               >
-                View Update Instructions
+                Update Instructions
               </Button>
               <Button
                 variant="outline"
@@ -154,29 +156,81 @@ export default function VersionAlert() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Update Instructions</DialogTitle>
+            <DialogTitle>
+              <a
+                href="https://www.alprdatabase.org/docs/updating"
+                className="flex gap-2 items-start"
+                target="_blank"
+              >
+                Update Instructions
+                <ExternalLink size={16} className="text-blue-500" />
+              </a>
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            {/* Option 1: Automatic Update */}
+            {/* Option 1: Automatic Update with OS Tabs */}
             <div className="space-y-4 border rounded-lg p-4">
               <h3 className="text-lg font-semibold">
-                Option 1: Automatic Update (Linux/MacOS only)
+                Option 1: Automatic Update{" "}
+                <span className="text-green-500">(Recommended)</span>
               </h3>
-              <p className="text-sm">
-                In the same directory you originally deployed from, run these
-                commands to download and execute the automatic update script:
+              <p className="mb-4 font-bold">
+                <span className="text-red-500">
+                  In the same directory you originally deployed from,
+                </span>{" "}
+                run these commands to download and execute the automatic update
+                script:
               </p>
-              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
-                curl -O
-                https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.sh
-              </div>
-              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
-                chmod +x update.sh
-              </div>
-              <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
-                ./update.sh
-              </div>
-              <p className="text-sm text-muted-foreground">
+
+              <Tabs defaultValue="windows" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="windows" className="gap-2">
+                    <FaWindows />
+                    Windows
+                  </TabsTrigger>
+                  <TabsTrigger value="linux" className="gap-2">
+                    <FaLinux />
+                    Linux
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="linux" className="space-y-2 mt-2">
+                  <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
+                    <span className="text-orange-500">curl -O </span>
+                    <span className="text-blue-400">
+                      https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.sh
+                    </span>
+                  </div>
+                  <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
+                    <span className="text-orange-500">chmod +x </span>
+                    <span className="text-green-500">update.sh</span>
+                  </div>
+                  <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+                    <span className="text-green-500">./update.sh</span>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="windows" className="space-y-2 mt-2">
+                  <span className="font-bold">
+                    {" "}
+                    Open PowerShell with admin privileges and run:
+                  </span>
+                  <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm mb-2">
+                    <span className="text-orange-500">curl -O </span>
+                    <span className="text-blue-400">
+                      https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/update.ps1
+                    </span>
+                  </div>
+                  <div className="bg-slate-950 dark:bg-neutral-800 text-slate-50 p-3 rounded-md font-mono text-sm">
+                    <span className="text-orange-500">powershell</span>{" "}
+                    <span className="text-green-500">-ExecutionPolicy</span>{" "}
+                    Bypass <span className="text-green-500">-File</span>{" "}
+                    update.ps1
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <p className="text-sm text-muted-foreground mt-4">
                 Follow the on-screen instructions after running the update
                 script.
               </p>
@@ -257,6 +311,15 @@ export default function VersionAlert() {
             <DialogTitle>Changelog</DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[60vh] pr-4">
+            <a
+              href="https://github.com/algertc/ALPR-Database/releases"
+              target="_blank"
+            >
+              <p className="flex items-center gap-2 text-sm text-blue-500 underline">
+                See Release Notes
+                <ExternalLink size={14} />
+              </p>
+            </a>
             {!versionInfo || !versionInfo.changelog ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-muted-foreground">No changelog available</p>
@@ -279,14 +342,32 @@ export default function VersionAlert() {
                       <p className="text-sm text-muted-foreground">
                         {version.date}
                       </p>
-                      <ul className="space-y-1 list-disc list-inside">
+                      <div className="space-y-2">
                         {version.changes &&
-                          version.changes.map((change, index) => (
-                            <li key={index} className="text-sm">
-                              {change}
-                            </li>
-                          ))}
-                      </ul>
+                          version.changes.map((change, index) => {
+                            // Check if this change is a paragraph (first item) or a bullet point
+                            if (index === 0 && change.length > 50) {
+                              return (
+                                <p
+                                  key={index}
+                                  className="text-sm mb-4 border-l-4 border-gray-500 pl-3 py-1 bg-gray-50 dark:bg-red-950 rounded font-bold italic"
+                                >
+                                  {change}
+                                </p>
+                              );
+                            } else {
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex items-baseline"
+                                >
+                                  <span className="mr-2 mt-1">•</span>
+                                  <span className="text-sm">{change}</span>
+                                </div>
+                              );
+                            }
+                          })}
+                      </div>
                     </div>
                   ))}
               </div>
