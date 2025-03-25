@@ -18,7 +18,7 @@
 
 <br>
 
-![App Screens](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/Hero.jpg)
+![App Screens](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/hero2.png)
 
 
 
