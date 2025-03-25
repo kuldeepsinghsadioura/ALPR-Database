@@ -1,7 +1,8 @@
 <div align="center">
-<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.svg" width="350px" style="margin-left: 56em;"/>
 
-# [ALPR Database]("https://alprdatabase.org/")
+[<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.svg" width="350px" style="margin-left: 56em;">](https://alprdatabase.org/),
+
+# [ALPR Database](https://alprdatabase.org/)
 
 <h4 align="center">A Fully-Featured Automated License Plate Recognition Database for Blue Iris + CodeProject AI Server</h4>
 
