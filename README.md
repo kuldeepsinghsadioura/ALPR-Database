@@ -1,6 +1,6 @@
 <div align="center">
 
-[<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.svg" width="350px" style="margin-left: 64em;">](https://alprdatabase.org/),
+[<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.svg" width="350px" style="margin-left: 72em;">](https://alprdatabase.org/),
 
 # [ALPR Database](https://alprdatabase.org/)
 
