@@ -148,11 +148,12 @@ Note: The &PLATE macro will only send one plate number per alert. If you need to
 
 ## :camera: Screenshots
 
-![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/4.png)
-![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/3.png)
-![enter image description here](https://github.com/algertc/ALPR-Database/blob/main/Images/2.png?raw=true)
-![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/1.png)
-![enter image description here](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/5.png)
+![Live Viewer](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/viewer.jpg)
+![Live View](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/liveview.jpg)
+![Dashboard](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/dash.jpg)
+![TPMS](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/tpms.jpg)
+![Plate Database](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/db.jpg)
+![Insights](https://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/insights.jpg)
 
 ## :warning: Disclaimer
 
