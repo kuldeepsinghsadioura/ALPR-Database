@@ -22,11 +22,6 @@
 
 
 
-<h4 align="center">
-<a href="https://alprdatabase.org/gallery" target="_blank"> Click For Additional App Screenshots</a>
-
-</h4>
-
 ## :star2: Overview
 
 I've been using [CodeProject AI](https://github.com/codeproject/CodeProject.AI-Server) with [Mike Lud's](https://github.com/MikeLud) license plate model on [Blue Iris](https://blueirissoftware.com/) for a couple years now, but in this setup, the ALPR doesn't really do a whole lot. Really, you have more of a license plate camera with some OCR as a bonus, and no nice way to take advantage the data other than parsing Blue Iris logs or paying $600+/year for PlateMinder or Rekor ALPR.
