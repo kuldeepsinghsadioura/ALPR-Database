@@ -1,7 +1,5 @@
 <div align="center">
-<p align="center">
-  <img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.png" width="350px"/>
-</p>
+<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.png" width="350px" style="padding-left: 18em;"/>
 
 # ALPR Database
 
