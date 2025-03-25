@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://mswebappcdn.azureedge.net/episerverprod/c48c63f7c47c4544bdc361ebc94ce61e/448551dd03a14b6c86f27f8195830b8f.png" width="350px"/>
+<img src="http://raw.githubusercontent.com/algertc/ALPR-Database/refs/heads/main/Images/app_icon.png" width="350px"/>
 
 # ALPR Database
 
