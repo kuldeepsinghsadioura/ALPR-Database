@@ -53,7 +53,7 @@ This project serves as a complement to a CodeProject Blue Iris setup, giving you
 
 ## 🔧 Installation
 
-![Setup Time](https://img.shields.io/badge/Setup%20Time-%E2%88%BC5%20minutes-0ec423?style=for-the-badge)
+![Setup Time](https://img.shields.io/badge/Setup%20Time-%E2%88%BC25%20minutes-0ec423?style=for-the-badge)
 
 The application is packaged as a Docker image. This is the fastest and most reliable way to deploy. Below is a done-for-you installation script that will create a Docker stack with both the application and a PostgreSQL database. The installation script is recommended and more carefully maintained, but manual installation instructions are also available [here](https://github.com/algertc/ALPR-Database/wiki/Manual-Installation).
 
