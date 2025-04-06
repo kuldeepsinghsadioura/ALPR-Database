@@ -57,7 +57,9 @@ The application is packaged as a Docker image. This is the fastest and most reli
 
 ### Prerequisites
 
-You will need the following installed on your system.
+In order to send data and use the application, you will need **ALREADY WORKING ALPR** within Blue Iris. If you are not getting plate numbers in your alert memos, please configure and ensure your ALPR is working before beginning the setup.
+
+You will also need the following installed on your system.
 
 - Docker
 - Docker Compose
