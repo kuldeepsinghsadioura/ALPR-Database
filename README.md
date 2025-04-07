@@ -152,4 +152,4 @@ We can make use of the built-in macros to dynamically get the alert data and sen
 
 ## :warning: Disclaimer
 
-This is meant to be a helpful hobby project and is still a work-in-progress. There's a good amount of spaghetti code in here and random things left over from the initial release. Not to be relied on for anything critical.
+This is meant to be a helpful hobby project and is still a work-in-progress. There's a good amount of spaghetti vibe coding in here and random things left over from the initial release. Not to be relied on for anything critical.
