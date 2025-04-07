@@ -306,7 +306,7 @@ export default function DashboardMetrics() {
               <FaGithub className="hover:text-blue-500" />
             </Link>
             <Link
-              href="https://hub.docker.com/repository/docker/algertc/alpr-dashboard/general"
+              href="https://hub.docker.com/repository/docker/algertc/alpr-dashboard"
               target="_blank"
               aria-label="Docker"
             >
