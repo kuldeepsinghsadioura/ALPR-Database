@@ -221,9 +221,6 @@ $$;
 ALTER FUNCTION public.update_plate_occurrence_count() OWNER TO postgres;
 
 
-CREATE TRIGGER plate_reads_count_trigger AFTER INSERT OR DELETE ON public.plate_reads FOR EACH ROW EXECUTE FUNCTION public.update_plate_occurrence_count();
-
-
 CREATE INDEX idx_plates_occurrence_count ON public.plates(occurrence_count);
 
 --
