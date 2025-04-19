@@ -198,27 +198,53 @@ CREATE FUNCTION public.update_plate_occurrence_count() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
+    -- Handle INSERT operation
     IF TG_OP = 'INSERT' THEN
-        -- Insert into plates if it doesn't exist, increment if it does
         INSERT INTO plates (plate_number, occurrence_count)
         VALUES (NEW.plate_number, 1)
         ON CONFLICT (plate_number)
         DO UPDATE SET occurrence_count = plates.occurrence_count + 1;
-    ELSIF TG_OP = 'DELETE' THEN
-        -- Decrement count and remove plate if count reaches 0
+    
+    -- Handle UPDATE operation (plate number correction)
+    ELSIF TG_OP = 'UPDATE' AND OLD.plate_number != NEW.plate_number THEN
+        -- Increment the new plate number count (or create if not exists)
+        INSERT INTO plates (plate_number, occurrence_count)
+        VALUES (NEW.plate_number, 1)
+        ON CONFLICT (plate_number)
+        DO UPDATE SET occurrence_count = plates.occurrence_count + 1;
+        
+        -- Only decrement the old plate if it still exists
         UPDATE plates 
         SET occurrence_count = occurrence_count - 1
         WHERE plate_number = OLD.plate_number;
         
+        -- Clean up if occurrence count reaches zero
+        DELETE FROM plates
+        WHERE plate_number = OLD.plate_number
+        AND occurrence_count <= 0;
+    
+    -- Handle DELETE operation
+    ELSIF TG_OP = 'DELETE' THEN
+        -- Only attempt to decrement if the plate still exists
+        UPDATE plates 
+        SET occurrence_count = occurrence_count - 1
+        WHERE plate_number = OLD.plate_number;
+        
+        -- Clean up if occurrence count reaches zero
         DELETE FROM plates
         WHERE plate_number = OLD.plate_number
         AND occurrence_count <= 0;
     END IF;
+    
     RETURN NULL;
 END;
 $$;
 
 ALTER FUNCTION public.update_plate_occurrence_count() OWNER TO postgres;
+
+CREATE TRIGGER plate_reads_count_trigger AFTER INSERT OR UPDATE OR DELETE ON public.plate_reads FOR EACH ROW EXECUTE FUNCTION public.update_plate_occurrence_count();
+
+
 
 
 CREATE INDEX idx_plates_occurrence_count ON public.plates(occurrence_count);
